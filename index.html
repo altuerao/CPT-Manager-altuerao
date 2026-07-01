@@ -3080,7 +3080,7 @@ select option { background: var(--surface); }
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.31</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.32</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3553,7 +3553,7 @@ select option { background: var(--surface); }
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.31</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.32</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3696,6 +3696,25 @@ select option { background: var(--surface); }
   window._cptBridge = { mode: IS_FILE ? 'file' : 'site', connected: false, lastData: 0, version: '', dataFresh: false };
   if (IS_FILE) return;   // file:// → köprü + gate yok, localStorage direkt çalışıyor
 
+  // v12.32 [EĞİTİM KALINTI TEMİZLİĞİ — sadece SİTE modunda, BİR KEZ]:
+  //   Eski sürümler (≤v12.30) gömülü eğitim listesini (seed) sitenin localStorage'ına yazmıştı.
+  //   v12.31'de gömülü liste boşaltıldı ama ESKİ KALINTI localStorage'da kaldı → TROB2'de 115
+  //   kişi görünüyordu. Kullanıcı: "TROB1/TROB3 gibi 0 olsun, tamamen temiz." Bu blok, temizlik
+  //   bayrağı yoksa TÜM cpt_perm_* anahtarlarını siler ve bayrağı koyar. Kullanıcının sonradan
+  //   "Yedek Yükle" ile getirdiği veri korunur (bayrak var → bir daha silinmez).
+  //   file:// modunda ASLA çalışmaz (yukarıdaki return) — lokal veri güvende.
+  try {
+    if (!localStorage.getItem('cpt_perm_site_clean_v1231')) {
+      var _permKeys = [];
+      for (var _i = 0; _i < localStorage.length; _i++) {
+        var _k = localStorage.key(_i);
+        if (_k && _k.indexOf('cpt_perm_') === 0) _permKeys.push(_k);
+      }
+      for (var _j = 0; _j < _permKeys.length; _j++) { try { localStorage.removeItem(_permKeys[_j]); } catch(e) {} }
+      localStorage.setItem('cpt_perm_site_clean_v1231', '1');
+    }
+  } catch(e) {}
+
   var gateDone = false;
 
   // v12.29: 4 VERİ KAYNAĞI — her biri gate'te ayrı satır, kendi tazelik eşiğiyle.
@@ -3824,6 +3843,9 @@ select option { background: var(--surface); }
       var n = 0;
       for (var k in payload) {
         if (payload[k] == null) continue;
+        // v12.32: Eğitim store'u (cpt_perm_*) köprüden ASLA yazılmaz — site herkese açık,
+        //   eğitim verisi sadece kullanıcının kendi "Yedek Yükle"siyle gelir.
+        if (k.indexOf('cpt_perm_') === 0) continue;
         try {
           var v = payload[k];
           localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
@@ -3864,7 +3886,7 @@ select option { background: var(--surface); }
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.31.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.32.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7918,7 +7940,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.31 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.32 · IST2</div>
     </div>`;
 }
 
