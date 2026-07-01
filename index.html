@@ -19,7 +19,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
 <link rel="alternate icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════
    TEMA DEĞİŞKENLERİ — 6 tema
@@ -27,726 +27,331 @@
    ════════════════════════════════════════════════════════ */
 
 /* ─── LIGHT (Beyaz) — default ─── */
+/* ═══ v12.34 AURORA 2.1 — 25 TEMA, tek kaynak, tam değişken seti ═══ */
 :root, :root[data-theme="light"] {
-  --bg:         #f5f6fa;
-  --surface:    #ffffff;
-  --card:       #ffffff;
-  --card-hover: #f0f2f8;
-  --border:     #e2e5f0;
-  --border2:    #c8cde0;
-  --text:  #1a1d2e;
-  --text2: #52597a;
-  --text3: #9098b8;
-  --blue:   #2563eb;
-  --green:  #16a34a;
-  --red:    #dc2626;
-  --amber:  #d97706;
-  --purple: #7c3aed;
-  --cyan:   #0891b2;
-  --blue-bg:  rgba(37,99,235,.07);
-  --green-bg: rgba(22,163,74,.07);
-  --red-bg:   rgba(220,38,38,.07);
-  --amber-bg: rgba(217,119,6,.07);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
-  --shadow:    0 2px 8px rgba(0,0,0,.10);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,.10);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --bg:#eef1f8; --surface:#f7f9fd; --card:#ffffff; --card-hover:#f3f6fd;
+  --border:#e3e8f4; --border2:#cdd6ea;
+  --text:#0e1220; --text2:#4a5273; --text3:#8b93b4;
+  --blue:#4f46e5; --green:#059669; --red:#e11d48; --amber:#d97706; --purple:#7c3aed; --cyan:#0e93b4;
+  --blue-bg:rgba(79,70,229,0.08); --green-bg:rgba(5,150,105,0.08); --red-bg:rgba(225,29,72,0.08); --amber-bg:rgba(217,119,6,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(79,70,229,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(79,70,229,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(79,70,229,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#c026d3 100%);
+  --aurora-1:rgba(79,70,229,0.15); --aurora-2:rgba(192,38,211,0.1); --aurora-3:rgba(124,58,237,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(79,70,229,0.22), 0 8px 40px rgba(79,70,229,0.25);
 }
-
-/* ─── DARK (Siyah) ─── */
 :root[data-theme="dark"], :root.dark {
-  --bg:         #0f1117;
-  --surface:    #16181f;
-  --card:       #1c1e27;
-  --card-hover: #232633;
-  --border:     #2a2d3a;
-  --border2:    #363a4d;
-  --text:  #e8eaf0;
-  --text2: #8b90a8;
-  --text3: #454860;
-  --blue:   #4f8ef7;
-  --green:  #22c55e;
-  --red:    #ef4444;
-  --amber:  #f59e0b;
-  --purple: #a78bfa;
-  --cyan:   #06b6d4;
-  --blue-bg:  rgba(79,142,247,.10);
-  --green-bg: rgba(34,197,94,.10);
-  --red-bg:   rgba(239,68,68,.10);
-  --amber-bg: rgba(245,158,11,.10);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
-  --shadow:    0 2px 8px rgba(0,0,0,.4);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,.5);
-  --accent-grad: linear-gradient(135deg, #4f8ef7 0%, #a78bfa 100%);
+  --bg:#070a14; --surface:#0c101d; --card:#111627; --card-hover:#171d33;
+  --border:#1e2540; --border2:#2b3355;
+  --text:#eef1fb; --text2:#9aa3c7; --text3:#565f85;
+  --blue:#6d7cff; --green:#34d399; --red:#fb5c7e; --amber:#fbbf24; --purple:#a78bfa; --cyan:#38cfe8;
+  --blue-bg:rgba(109,124,255,0.1); --green-bg:rgba(52,211,153,0.09); --red-bg:rgba(251,92,126,0.09); --amber-bg:rgba(251,191,36,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(109,124,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#6d7cff 0%,#a78bfa 50%,#e879f9 100%);
+  --aurora-1:rgba(109,124,255,0.13); --aurora-2:rgba(232,121,249,0.09); --aurora-3:rgba(167,139,250,0.08);
+  --glass:rgba(12,16,29,0.66); --glass-border:rgba(109,124,255,0.16);
+  --glow:0 0 0 1px rgba(109,124,255,0.3), 0 8px 40px rgba(109,124,255,0.28);
 }
-
-/* ─── OCEAN (Okyanus) — derin mavi, deniz tonları ─── */
 :root[data-theme="ocean"] {
-  --bg:         #0a1929;
-  --surface:    #102a43;
-  --card:       #1a3a5c;
-  --card-hover: #234a73;
-  --border:     #2d4a6b;
-  --border2:    #3d5f85;
-  --text:  #e0f2fe;
-  --text2: #94c5e0;
-  --text3: #5a7a96;
-  --blue:   #38bdf8;
-  --green:  #2dd4bf;
-  --red:    #fb7185;
-  --amber:  #fbbf24;
-  --purple: #818cf8;
-  --cyan:   #22d3ee;
-  --blue-bg:  rgba(56,189,248,.12);
-  --green-bg: rgba(45,212,191,.12);
-  --red-bg:   rgba(251,113,133,.12);
-  --amber-bg: rgba(251,191,36,.12);
-  --shadow-sm: 0 1px 3px rgba(0,20,40,.4);
-  --shadow:    0 2px 12px rgba(0,30,60,.5);
-  --shadow-lg: 0 10px 40px rgba(0,40,80,.6);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+  --bg:#051422; --surface:#0a1c2e; --card:#0e2438; --card-hover:#133049;
+  --border:#1b3a55; --border2:#28517a;
+  --text:#e7f3fc; --text2:#8fb4d4; --text3:#4a7396;
+  --blue:#38bdf8; --green:#2dd4bf; --red:#fb7185; --amber:#fbbf24; --purple:#a78bfa; --cyan:#22d3ee;
+  --blue-bg:rgba(56,189,248,0.1); --green-bg:rgba(45,212,191,0.09); --red-bg:rgba(251,113,133,0.09); --amber-bg:rgba(251,191,36,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(56,189,248,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#38bdf8 0%,#22d3ee 50%,#2dd4bf 100%);
+  --aurora-1:rgba(56,189,248,0.13); --aurora-2:rgba(45,212,191,0.09); --aurora-3:rgba(34,211,238,0.08);
+  --glass:rgba(10,28,46,0.66); --glass-border:rgba(56,189,248,0.16);
+  --glow:0 0 0 1px rgba(56,189,248,0.3), 0 8px 40px rgba(56,189,248,0.28);
 }
-
-/* ─── FOREST (Orman) — yeşil & toprak ─── */
 :root[data-theme="forest"] {
-  --bg:         #0f1a13;
-  --surface:    #1a2a1f;
-  --card:       #1f3527;
-  --card-hover: #2a4332;
-  --border:     #2d4536;
-  --border2:    #3d5d48;
-  --text:  #e6f4e6;
-  --text2: #a8c8a8;
-  --text3: #5f7d65;
-  --blue:   #60a5fa;
-  --green:  #4ade80;
-  --red:    #f87171;
-  --amber:  #fb923c;
-  --purple: #c084fc;
-  --cyan:   #67e8f9;
-  --blue-bg:  rgba(96,165,250,.12);
-  --green-bg: rgba(74,222,128,.15);
-  --red-bg:   rgba(248,113,113,.12);
-  --amber-bg: rgba(251,146,60,.12);
-  --shadow-sm: 0 1px 3px rgba(0,30,15,.4);
-  --shadow:    0 2px 12px rgba(0,50,25,.5);
-  --shadow-lg: 0 10px 40px rgba(0,60,30,.5);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #16a34a 0%, #4ade80 100%);
+  --bg:#0a140d; --surface:#101d13; --card:#152619; --card-hover:#1b3020;
+  --border:#23402a; --border2:#33583c;
+  --text:#eaf7ee; --text2:#9cc4a8; --text3:#537a5e;
+  --blue:#4ade80; --green:#34d399; --red:#f87171; --amber:#fbbf24; --purple:#a78bfa; --cyan:#5eead4;
+  --blue-bg:rgba(74,222,128,0.1); --green-bg:rgba(52,211,153,0.09); --red-bg:rgba(248,113,113,0.09); --amber-bg:rgba(251,191,36,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(74,222,128,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#4ade80 0%,#34d399 50%,#5eead4 100%);
+  --aurora-1:rgba(74,222,128,0.13); --aurora-2:rgba(94,234,212,0.09); --aurora-3:rgba(52,211,153,0.08);
+  --glass:rgba(16,29,19,0.66); --glass-border:rgba(74,222,128,0.16);
+  --glow:0 0 0 1px rgba(74,222,128,0.3), 0 8px 40px rgba(74,222,128,0.28);
 }
-
-/* ─── SUNSET (Gün Batımı) — turuncu/pembe gradients ─── */
 :root[data-theme="sunset"] {
-  --bg:         #1a0f1a;
-  --surface:    #2a1a25;
-  --card:       #3a2030;
-  --card-hover: #4a2840;
-  --border:     #4a2a3a;
-  --border2:    #6a3a55;
-  --text:  #fef0e8;
-  --text2: #f5b8a8;
-  --text3: #aa6f7d;
-  --blue:   #f472b6;
-  --green:  #fde047;
-  --red:    #fb7185;
-  --amber:  #fb923c;
-  --purple: #e879f9;
-  --cyan:   #fbbf24;
-  --blue-bg:  rgba(244,114,182,.14);
-  --green-bg: rgba(253,224,71,.12);
-  --red-bg:   rgba(251,113,133,.14);
-  --amber-bg: rgba(251,146,60,.16);
-  --shadow-sm: 0 1px 3px rgba(40,0,30,.4);
-  --shadow:    0 2px 14px rgba(80,20,40,.5);
-  --shadow-lg: 0 10px 40px rgba(100,30,50,.5);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+  --bg:#170b10; --surface:#211018; --card:#2a1420; --card-hover:#351a29;
+  --border:#47223a; --border2:#5f2f4e;
+  --text:#fdeef5; --text2:#d4a2bc; --text3:#8a5a74;
+  --blue:#fb7185; --green:#34d399; --red:#f43f5e; --amber:#fb923c; --purple:#e879f9; --cyan:#38cfe8;
+  --blue-bg:rgba(251,113,133,0.1); --green-bg:rgba(52,211,153,0.09); --red-bg:rgba(244,63,94,0.09); --amber-bg:rgba(251,146,60,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(251,113,133,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#fb923c 0%,#f43f5e 50%,#e879f9 100%);
+  --aurora-1:rgba(251,146,60,0.13); --aurora-2:rgba(232,121,249,0.09); --aurora-3:rgba(244,63,94,0.08);
+  --glass:rgba(33,16,24,0.66); --glass-border:rgba(251,113,133,0.16);
+  --glow:0 0 0 1px rgba(251,113,133,0.3), 0 8px 40px rgba(251,113,133,0.28);
 }
-
-/* ─── CYBER (Mor) — neon morluk, cyberpunk ─── */
 :root[data-theme="cyber"] {
-  --bg:         #0a0612;
-  --surface:    #160c24;
-  --card:       #1f1133;
-  --card-hover: #2a1846;
-  --border:     #3a1f5a;
-  --border2:    #5a2f8a;
-  --text:  #f0e8ff;
-  --text2: #c4a8e6;
-  --text3: #7a5fa0;
-  --blue:   #818cf8;
-  --green:  #34d399;
-  --red:    #f43f5e;
-  --amber:  #fbbf24;
-  --purple: #c084fc;
-  --cyan:   #22d3ee;
-  --blue-bg:  rgba(129,140,248,.14);
-  --green-bg: rgba(52,211,153,.12);
-  --red-bg:   rgba(244,63,94,.14);
-  --amber-bg: rgba(251,191,36,.14);
-  --shadow-sm: 0 1px 4px rgba(50,0,100,.5);
-  --shadow:    0 2px 14px rgba(80,0,160,.5);
-  --shadow-lg: 0 10px 40px rgba(120,0,200,.6);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #a855f7 0%, #22d3ee 100%);
+  --bg:#02060d; --surface:#050c18; --card:#081124; --card-hover:#0c1730;
+  --border:#132347; --border2:#1e3568;
+  --text:#e6f4ff; --text2:#8fb0dd; --text3:#42618f;
+  --blue:#00e5ff; --green:#00ffa3; --red:#ff3d81; --amber:#ffd60a; --purple:#bf5fff; --cyan:#00e5ff;
+  --blue-bg:rgba(0,229,255,0.1); --green-bg:rgba(0,255,163,0.09); --red-bg:rgba(255,61,129,0.09); --amber-bg:rgba(255,214,10,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(0,229,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#00e5ff 0%,#bf5fff 50%,#ff3d81 100%);
+  --aurora-1:rgba(0,229,255,0.13); --aurora-2:rgba(255,61,129,0.09); --aurora-3:rgba(191,95,255,0.08);
+  --glass:rgba(5,12,24,0.66); --glass-border:rgba(0,229,255,0.16);
+  --glow:0 0 0 1px rgba(0,229,255,0.3), 0 8px 40px rgba(0,229,255,0.28);
 }
-
-/* ─── MINT (Sakin) — açık mint, ferah ve nazik ─── */
 :root[data-theme="mint"] {
-  --bg:         #ecfdf5;
-  --surface:    #ffffff;
-  --card:       #ffffff;
-  --card-hover: #d1fae5;
-  --border:     #a7f3d0;
-  --border2:    #6ee7b7;
-  --text:  #064e3b;
-  --text2: #047857;
-  --text3: #6ee7b7;
-  --blue:   #0891b2;
-  --green:  #059669;
-  --red:    #e11d48;
-  --amber:  #c2410c;
-  --purple: #7e22ce;
-  --cyan:   #0e7490;
-  --blue-bg:  rgba(8,145,178,.08);
-  --green-bg: rgba(5,150,105,.10);
-  --red-bg:   rgba(225,29,72,.08);
-  --amber-bg: rgba(194,65,12,.08);
-  --shadow-sm: 0 1px 3px rgba(6,78,59,.06);
-  --shadow:    0 2px 10px rgba(6,78,59,.10);
-  --shadow-lg: 0 10px 30px rgba(6,78,59,.14);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
+  --bg:#e9faf2; --surface:#f3fdf8; --card:#ffffff; --card-hover:#eefaf4;
+  --border:#d5efe2; --border2:#b6dfcd;
+  --text:#0c1f18; --text2:#3f6a5b; --text3:#7fa89a;
+  --blue:#0d9488; --green:#059669; --red:#e11d48; --amber:#d97706; --purple:#7c3aed; --cyan:#06b6d4;
+  --blue-bg:rgba(13,148,136,0.08); --green-bg:rgba(5,150,105,0.08); --red-bg:rgba(225,29,72,0.08); --amber-bg:rgba(217,119,6,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(13,148,136,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(13,148,136,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(13,148,136,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#059669 0%,#06b6d4 50%,#34d399 100%);
+  --aurora-1:rgba(5,150,105,0.15); --aurora-2:rgba(52,211,153,0.1); --aurora-3:rgba(6,182,212,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(13,148,136,0.22), 0 8px 40px rgba(13,148,136,0.25);
 }
-
-/* ─── SEPIA (Klasik) — eski kağıt, kahverengi/krem ─── */
 :root[data-theme="sepia"] {
-  --bg:         #f5ecd6;
-  --surface:    #faf3e0;
-  --card:       #fff7e3;
-  --card-hover: #f0e4c4;
-  --border:     #d4c4a0;
-  --border2:    #b8a880;
-  --text:  #3a2814;
-  --text2: #6b4f30;
-  --text3: #9c7f5a;
-  --blue:   #8b5a2b;
-  --green:  #5c7a3a;
-  --red:    #a04a2a;
-  --amber:  #b8860b;
-  --purple: #7a4a6e;
-  --cyan:   #4a6a6e;
-  --blue-bg:  rgba(139,90,43,.10);
-  --green-bg: rgba(92,122,58,.10);
-  --red-bg:   rgba(160,74,42,.10);
-  --amber-bg: rgba(184,134,11,.10);
-  --shadow-sm: 0 1px 3px rgba(60,40,20,.10);
-  --shadow:    0 2px 10px rgba(60,40,20,.14);
-  --shadow-lg: 0 10px 30px rgba(60,40,20,.18);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #8b5a2b 0%, #b8860b 100%);
+  --bg:#f3ead4; --surface:#f8f1de; --card:#fffaf0; --card-hover:#f4ecd9;
+  --border:#e2d5b5; --border2:#c9b78d;
+  --text:#2b2113; --text2:#6b5a3c; --text3:#a08d68;
+  --blue:#9a6a2f; --green:#5f7d3a; --red:#b0403a; --amber:#b8860b; --purple:#7d5a9e; --cyan:#3f7a8a;
+  --blue-bg:rgba(154,106,47,0.08); --green-bg:rgba(95,125,58,0.08); --red-bg:rgba(176,64,58,0.08); --amber-bg:rgba(184,134,11,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(154,106,47,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(154,106,47,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(154,106,47,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#9a6a2f 0%,#b8860b 50%,#d4a24a 100%);
+  --aurora-1:rgba(154,106,47,0.15); --aurora-2:rgba(212,162,74,0.1); --aurora-3:rgba(184,134,11,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(154,106,47,0.22), 0 8px 40px rgba(154,106,47,0.25);
 }
-
-/* ─── MIDNIGHT — derin lacivert/mor, dramatik ─── */
 :root[data-theme="midnight"] {
-  --bg:         #0b0d1f;
-  --surface:    #131638;
-  --card:       #1a1d44;
-  --card-hover: #232658;
-  --border:     #2d2f5e;
-  --border2:    #3d3f7a;
-  --text:  #e8e9ff;
-  --text2: #a9adef;
-  --text3: #7176c8;
-  --blue:   #818cf8;
-  --green:  #4ade80;
-  --red:    #f87171;
-  --amber:  #fbbf24;
-  --purple: #a78bfa;
-  --cyan:   #67e8f9;
-  --blue-bg:  rgba(129,140,248,.16);
-  --green-bg: rgba(74,222,128,.14);
-  --red-bg:   rgba(248,113,113,.16);
-  --amber-bg: rgba(251,191,36,.14);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-  --shadow:    0 4px 16px rgba(0,0,0,.5);
-  --shadow-lg: 0 16px 40px rgba(0,0,0,.6);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #f472b6 100%);
+  --bg:#080a1c; --surface:#0d1026; --card:#121634; --card-hover:#181d42;
+  --border:#222858; --border2:#333b78;
+  --text:#eceffc; --text2:#9aa2cf; --text3:#565e92;
+  --blue:#818cf8; --green:#34d399; --red:#fb7185; --amber:#fbbf24; --purple:#a78bfa; --cyan:#38cfe8;
+  --blue-bg:rgba(129,140,248,0.1); --green-bg:rgba(52,211,153,0.09); --red-bg:rgba(251,113,133,0.09); --amber-bg:rgba(251,191,36,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(129,140,248,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#818cf8 0%,#a78bfa 50%,#e879f9 100%);
+  --aurora-1:rgba(129,140,248,0.13); --aurora-2:rgba(232,121,249,0.09); --aurora-3:rgba(167,139,250,0.08);
+  --glass:rgba(13,16,38,0.66); --glass-border:rgba(129,140,248,0.16);
+  --glow:0 0 0 1px rgba(129,140,248,0.3), 0 8px 40px rgba(129,140,248,0.28);
 }
-
-/* ─── ROSE — yumuşak pembe pastel, sıcak ─── */
 :root[data-theme="rose"] {
-  --bg:         #fdf2f8;
-  --surface:    #fef5fa;
-  --card:       #ffffff;
-  --card-hover: #fbe7ee;
-  --border:     #f5d1de;
-  --border2:    #e9a4bd;
-  --text:  #4a1d2f;
-  --text2: #884060;
-  --text3: #b87592;
-  --blue:   #c026d3;
-  --green:  #16a34a;
-  --red:    #e11d48;
-  --amber:  #ea580c;
-  --purple: #a21caf;
-  --cyan:   #0e7490;
-  --blue-bg:  rgba(192,38,211,.10);
-  --green-bg: rgba(22,163,74,.10);
-  --red-bg:   rgba(225,29,72,.10);
-  --amber-bg: rgba(234,88,12,.10);
-  --shadow-sm: 0 1px 3px rgba(186,87,140,.10);
-  --shadow:    0 2px 10px rgba(186,87,140,.16);
-  --shadow-lg: 0 10px 30px rgba(186,87,140,.22);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #f472b6 0%, #c026d3 100%);
+  --bg:#fdeff6; --surface:#fef6fa; --card:#ffffff; --card-hover:#fdf1f7;
+  --border:#f4d8e7; --border2:#e6b8d2;
+  --text:#241019; --text2:#7a4260; --text3:#b587a0;
+  --blue:#d0369d; --green:#059669; --red:#e11d48; --amber:#d97706; --purple:#a855f7; --cyan:#0e93b4;
+  --blue-bg:rgba(208,54,157,0.08); --green-bg:rgba(5,150,105,0.08); --red-bg:rgba(225,29,72,0.08); --amber-bg:rgba(217,119,6,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(208,54,157,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(208,54,157,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(208,54,157,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#f472b6 0%,#d0369d 50%,#a855f7 100%);
+  --aurora-1:rgba(244,114,182,0.15); --aurora-2:rgba(168,85,247,0.1); --aurora-3:rgba(208,54,157,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(208,54,157,0.22), 0 8px 40px rgba(208,54,157,0.25);
 }
-
-/* ─── NORDIC — soğuk mavi-gri, profesyonel ─── */
 :root[data-theme="nordic"] {
-  --bg:         #2e3440;
-  --surface:    #3b4252;
-  --card:       #434c5e;
-  --card-hover: #4c566a;
-  --border:     #4c566a;
-  --border2:    #5e6b85;
-  --text:  #eceff4;
-  --text2: #d8dee9;
-  --text3: #99a6b9;
-  --blue:   #88c0d0;
-  --green:  #a3be8c;
-  --red:    #bf616a;
-  --amber:  #ebcb8b;
-  --purple: #b48ead;
-  --cyan:   #8fbcbb;
-  --blue-bg:  rgba(136,192,208,.16);
-  --green-bg: rgba(163,190,140,.14);
-  --red-bg:   rgba(191,97,106,.16);
-  --amber-bg: rgba(235,203,139,.14);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
-  --shadow:    0 2px 10px rgba(0,0,0,.4);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,.5);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #88c0d0 0%, #5e81ac 100%);
+  --bg:#242933; --surface:#2b3140; --card:#323a4c; --card-hover:#3a4358;
+  --border:#434e68; --border2:#556484;
+  --text:#eceff4; --text2:#a8b2c8; --text3:#6b7692;
+  --blue:#88c0d0; --green:#a3be8c; --red:#bf616a; --amber:#ebcb8b; --purple:#b48ead; --cyan:#8fbcbb;
+  --blue-bg:rgba(136,192,208,0.1); --green-bg:rgba(163,190,140,0.09); --red-bg:rgba(191,97,106,0.09); --amber-bg:rgba(235,203,139,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(136,192,208,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#88c0d0 0%,#5e81ac 50%,#b48ead 100%);
+  --aurora-1:rgba(136,192,208,0.13); --aurora-2:rgba(180,142,173,0.09); --aurora-3:rgba(94,129,172,0.08);
+  --glass:rgba(43,49,64,0.66); --glass-border:rgba(136,192,208,0.16);
+  --glow:0 0 0 1px rgba(136,192,208,0.3), 0 8px 40px rgba(136,192,208,0.28);
 }
-
-/* ─── PEACH (Şeftali) — sıcak pastel ─── */
 :root[data-theme="peach"] {
-  --bg:         #fff5ed;
-  --surface:    #fff9f3;
-  --card:       #ffffff;
-  --card-hover: #ffeada;
-  --border:     #fad7be;
-  --border2:    #f0b890;
-  --text:  #4a2c1e;
-  --text2: #7a4d36;
-  --text3: #b88766;
-  --blue:   #e07a3a;
-  --green:  #5a9e4f;
-  --red:    #d04e3a;
-  --amber:  #e89542;
-  --purple: #c25e80;
-  --cyan:   #4a9e9e;
-  --blue-bg:  rgba(224,122,58,.10);
-  --green-bg: rgba(90,158,79,.10);
-  --red-bg:   rgba(208,78,58,.10);
-  --amber-bg: rgba(232,149,66,.10);
-  --shadow-sm: 0 1px 3px rgba(180,90,30,.10);
-  --shadow:    0 2px 10px rgba(180,90,30,.14);
-  --shadow-lg: 0 10px 30px rgba(180,90,30,.16);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #e07a3a 0%, #c25e80 100%);
+  --bg:#fdf1e8; --surface:#fef7f1; --card:#ffffff; --card-hover:#fdf3ec;
+  --border:#f3ddcc; --border2:#e5c3a8;
+  --text:#2a1a10; --text2:#7d543a; --text3:#b58d70;
+  --blue:#e0722f; --green:#4d9e58; --red:#d63b4f; --amber:#d97706; --purple:#b05f9e; --cyan:#2e9aa8;
+  --blue-bg:rgba(224,114,47,0.08); --green-bg:rgba(77,158,88,0.08); --red-bg:rgba(214,59,79,0.08); --amber-bg:rgba(217,119,6,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(224,114,47,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(224,114,47,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(224,114,47,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#e0722f 0%,#e8557f 50%,#c25e80 100%);
+  --aurora-1:rgba(224,114,47,0.15); --aurora-2:rgba(194,94,128,0.1); --aurora-3:rgba(232,85,127,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(224,114,47,0.22), 0 8px 40px rgba(224,114,47,0.25);
 }
-
-/* ─── CACTUS (Kaktüs) — çöl yeşili ─── */
 :root[data-theme="cactus"] {
-  --bg:         #f4f2e8;
-  --surface:    #faf9f3;
-  --card:       #ffffff;
-  --card-hover: #ece8d8;
-  --border:     #d8d2bc;
-  --border2:    #b8b095;
-  --text:  #2c3a1f;
-  --text2: #5a6b48;
-  --text3: #9aa085;
-  --blue:   #5d8c54;
-  --green:  #3f7a3a;
-  --red:    #b85944;
-  --amber:  #c89a3f;
-  --purple: #7b5d8a;
-  --cyan:   #4a8c8c;
-  --blue-bg:  rgba(93,140,84,.10);
-  --green-bg: rgba(63,122,58,.10);
-  --red-bg:   rgba(184,89,68,.10);
-  --amber-bg: rgba(200,154,63,.10);
-  --shadow-sm: 0 1px 3px rgba(70,80,40,.08);
-  --shadow:    0 2px 10px rgba(70,80,40,.12);
-  --shadow-lg: 0 10px 30px rgba(70,80,40,.14);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #5d8c54 0%, #3f7a3a 100%);
+  --bg:#f1efe2; --surface:#f7f5ec; --card:#fdfcf5; --card-hover:#f2f0e3;
+  --border:#dcd8c2; --border2:#bfb996;
+  --text:#1c2416; --text2:#4f6244; --text3:#8a9878;
+  --blue:#4f8146; --green:#3f7a3a; --red:#c04b3a; --amber:#b8860b; --purple:#7d6a9e; --cyan:#3f8a7a;
+  --blue-bg:rgba(79,129,70,0.08); --green-bg:rgba(63,122,58,0.08); --red-bg:rgba(192,75,58,0.08); --amber-bg:rgba(184,134,11,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(79,129,70,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(79,129,70,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(79,129,70,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#5d8c54 0%,#3f7a3a 50%,#8fb060 100%);
+  --aurora-1:rgba(93,140,84,0.15); --aurora-2:rgba(143,176,96,0.1); --aurora-3:rgba(63,122,58,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(79,129,70,0.22), 0 8px 40px rgba(79,129,70,0.25);
 }
-
-/* ─── GALAXY (Galaksi) — uzay siyahı + neon ─── */
 :root[data-theme="galaxy"] {
-  --bg:         #0a0118;
-  --surface:    #14082b;
-  --card:       #1c0e3a;
-  --card-hover: #2a1450;
-  --border:     #3a1f6a;
-  --border2:    #5028a0;
-  --text:  #f0e8ff;
-  --text2: #c8b8e8;
-  --text3: #8878b0;
-  --blue:   #6d9eff;
-  --green:  #4ee0a0;
-  --red:    #ff5d8a;
-  --amber:  #ffb84d;
-  --purple: #c47cff;
-  --cyan:   #4de8e8;
-  --blue-bg:  rgba(109,158,255,.16);
-  --green-bg: rgba(78,224,160,.14);
-  --red-bg:   rgba(255,93,138,.14);
-  --amber-bg: rgba(255,184,77,.14);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-  --shadow:    0 2px 12px rgba(124,77,255,.25);
-  --shadow-lg: 0 10px 40px rgba(124,77,255,.30);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #c47cff 0%, #6d9eff 50%, #4de8e8 100%);
+  --bg:#070113; --surface:#0c031e; --card:#120730; --card-hover:#180b3e;
+  --border:#241454; --border2:#382178;
+  --text:#efe9ff; --text2:#a99cd6; --text3:#5f5490;
+  --blue:#7d9aff; --green:#4ade9e; --red:#ff6b9d; --amber:#ffc94d; --purple:#c47cff; --cyan:#5eead4;
+  --blue-bg:rgba(125,154,255,0.1); --green-bg:rgba(74,222,158,0.09); --red-bg:rgba(255,107,157,0.09); --amber-bg:rgba(255,201,77,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(125,154,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#c47cff 0%,#7d9aff 50%,#4ade9e 100%);
+  --aurora-1:rgba(196,124,255,0.13); --aurora-2:rgba(74,222,158,0.09); --aurora-3:rgba(125,154,255,0.08);
+  --glass:rgba(12,3,30,0.66); --glass-border:rgba(125,154,255,0.16);
+  --glow:0 0 0 1px rgba(125,154,255,0.3), 0 8px 40px rgba(125,154,255,0.28);
 }
-
-/* ─── COFFEE (Kahve) — sıcak kahverengi ─── */
 :root[data-theme="coffee"] {
-  --bg:         #2c1f17;
-  --surface:    #3a2a20;
-  --card:       #43332a;
-  --card-hover: #524034;
-  --border:     #5a4636;
-  --border2:    #7a5e48;
-  --text:  #f5ebdc;
-  --text2: #d9c4a8;
-  --text3: #a08768;
-  --blue:   #d4a070;
-  --green:  #98c168;
-  --red:    #e87a5d;
-  --amber:  #e0b556;
-  --purple: #c89bd8;
-  --cyan:   #88c8c4;
-  --blue-bg:  rgba(212,160,112,.16);
-  --green-bg: rgba(152,193,104,.14);
-  --red-bg:   rgba(232,122,93,.14);
-  --amber-bg: rgba(224,181,86,.14);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.35);
-  --shadow:    0 2px 10px rgba(0,0,0,.40);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,.50);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #d4a070 0%, #a07248 100%);
+  --bg:#211711; --surface:#2a1e16; --card:#33261c; --card-hover:#3d2e22;
+  --border:#4d3b2c; --border2:#66503c;
+  --text:#f4ebe2; --text2:#c4ab92; --text3:#8a725c;
+  --blue:#d4a070; --green:#8fb573; --red:#e06050; --amber:#e0a94d; --purple:#b08aa8; --cyan:#7aa8a0;
+  --blue-bg:rgba(212,160,112,0.1); --green-bg:rgba(143,181,115,0.09); --red-bg:rgba(224,96,80,0.09); --amber-bg:rgba(224,169,77,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(212,160,112,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#d4a070 0%,#a07248 50%,#e0c088 100%);
+  --aurora-1:rgba(212,160,112,0.13); --aurora-2:rgba(224,192,136,0.09); --aurora-3:rgba(160,114,72,0.08);
+  --glass:rgba(42,30,22,0.66); --glass-border:rgba(212,160,112,0.16);
+  --glow:0 0 0 1px rgba(212,160,112,0.3), 0 8px 40px rgba(212,160,112,0.28);
 }
-
-/* ─── LEMON (Limon) — parlak sarı/krem ─── */
 :root[data-theme="lemon"] {
-  --bg:         #fffae8;
-  --surface:    #fffdf2;
-  --card:       #ffffff;
-  --card-hover: #fff5cc;
-  --border:     #f0e2a0;
-  --border2:    #d8c870;
-  --text:  #4a3f0a;
-  --text2: #7a6818;
-  --text3: #b8a548;
-  --blue:   #4a6ed0;
-  --green:  #4a9e2c;
-  --red:    #d04848;
-  --amber:  #d49018;
-  --purple: #9050c8;
-  --cyan:   #2c9090;
-  --blue-bg:  rgba(74,110,208,.10);
-  --green-bg: rgba(74,158,44,.10);
-  --red-bg:   rgba(208,72,72,.10);
-  --amber-bg: rgba(212,144,24,.12);
-  --shadow-sm: 0 1px 3px rgba(180,150,20,.10);
-  --shadow:    0 2px 10px rgba(180,150,20,.14);
-  --shadow-lg: 0 10px 30px rgba(180,150,20,.16);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #f5d048 0%, #d49018 100%);
+  --bg:#fdf8e4; --surface:#fefbef; --card:#fffef8; --card-hover:#fbf6e2;
+  --border:#eee4b8; --border2:#d9c988;
+  --text:#231d08; --text2:#6d5f2c; --text3:#a89860;
+  --blue:#3f62c8; --green:#5f8f2f; --red:#d0483a; --amber:#d49018; --purple:#8a6ac0; --cyan:#2e8a9a;
+  --blue-bg:rgba(63,98,200,0.08); --green-bg:rgba(95,143,47,0.08); --red-bg:rgba(208,72,58,0.08); --amber-bg:rgba(212,144,24,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(63,98,200,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(63,98,200,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(63,98,200,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#f5d048 0%,#e0a018 50%,#d49018 100%);
+  --aurora-1:rgba(245,208,72,0.15); --aurora-2:rgba(212,144,24,0.1); --aurora-3:rgba(224,160,24,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(63,98,200,0.22), 0 8px 40px rgba(63,98,200,0.25);
 }
-
-/* ─── TOKYO NIGHT — popüler dev editör teması ─── */
 :root[data-theme="tokyo"] {
-  --bg:         #1a1b26;
-  --surface:    #1f2030;
-  --card:       #24283b;
-  --card-hover: #2f334d;
-  --border:     #2f334d;
-  --border2:    #414868;
-  --text:  #c0caf5;
-  --text2: #a9b1d6;
-  --text3: #565f89;
-  --blue:   #7aa2f7;
-  --green:  #9ece6a;
-  --red:    #f7768e;
-  --amber:  #e0af68;
-  --purple: #bb9af7;
-  --cyan:   #7dcfff;
-  --blue-bg:  rgba(122,162,247,.14);
-  --green-bg: rgba(158,206,106,.12);
-  --red-bg:   rgba(247,118,142,.14);
-  --amber-bg: rgba(224,175,104,.12);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.35);
-  --shadow:    0 2px 12px rgba(0,0,0,.45);
-  --shadow-lg: 0 10px 40px rgba(0,0,0,.55);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #7aa2f7 0%, #bb9af7 100%);
+  --bg:#16161e; --surface:#1a1b26; --card:#1f2233; --card-hover:#262a40;
+  --border:#33385494; --border2:#414868;
+  --text:#c0caf5; --text2:#8a93bd; --text3:#565f89;
+  --blue:#7aa2f7; --green:#9ece6a; --red:#f7768e; --amber:#e0af68; --purple:#bb9af7; --cyan:#7dcfff;
+  --blue-bg:rgba(122,162,247,0.1); --green-bg:rgba(158,206,106,0.09); --red-bg:rgba(247,118,142,0.09); --amber-bg:rgba(224,175,104,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(122,162,247,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#7aa2f7 0%,#bb9af7 50%,#7dcfff 100%);
+  --aurora-1:rgba(122,162,247,0.13); --aurora-2:rgba(125,207,255,0.09); --aurora-3:rgba(187,154,247,0.08);
+  --glass:rgba(26,27,38,0.66); --glass-border:rgba(122,162,247,0.16);
+  --glow:0 0 0 1px rgba(122,162,247,0.3), 0 8px 40px rgba(122,162,247,0.28);
 }
-
-/* ─── SYNTHWAVE — 80s retro futurist, neon pembe + mor ─── */
 :root[data-theme="synthwave"] {
-  --bg:         #0d0421;
-  --surface:    #1a0a3a;
-  --card:       #241354;
-  --card-hover: #311b6e;
-  --border:     #4a2a8a;
-  --border2:    #6e3eb8;
-  --text:  #ffe6fa;
-  --text2: #e8b0e0;
-  --text3: #9a6bb8;
-  --blue:   #00f0ff;
-  --green:  #5dffaa;
-  --red:    #ff2e8a;
-  --amber:  #ffae00;
-  --purple: #b400ff;
-  --cyan:   #00f0ff;
-  --blue-bg:  rgba(0,240,255,.16);
-  --green-bg: rgba(93,255,170,.14);
-  --red-bg:   rgba(255,46,138,.18);
-  --amber-bg: rgba(255,174,0,.14);
-  --shadow-sm: 0 1px 4px rgba(255,46,138,.25);
-  --shadow:    0 4px 18px rgba(180,0,255,.35);
-  --shadow-lg: 0 15px 50px rgba(180,0,255,.45);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #ff2e8a 0%, #b400ff 50%, #00f0ff 100%);
+  --bg:#0a0219; --surface:#100526; --card:#170a35; --card-hover:#1e0e44;
+  --border:#2c165e; --border2:#421f85;
+  --text:#f5e9ff; --text2:#c39ae0; --text3:#7a5a9e;
+  --blue:#00f0ff; --green:#3ef58f; --red:#ff2e8a; --amber:#ffd23e; --purple:#b400ff; --cyan:#00f0ff;
+  --blue-bg:rgba(0,240,255,0.1); --green-bg:rgba(62,245,143,0.09); --red-bg:rgba(255,46,138,0.09); --amber-bg:rgba(255,210,62,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(0,240,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#ff2e8a 0%,#b400ff 50%,#00f0ff 100%);
+  --aurora-1:rgba(255,46,138,0.13); --aurora-2:rgba(0,240,255,0.09); --aurora-3:rgba(180,0,255,0.08);
+  --glass:rgba(16,5,38,0.66); --glass-border:rgba(0,240,255,0.16);
+  --glow:0 0 0 1px rgba(0,240,255,0.3), 0 8px 40px rgba(0,240,255,0.28);
 }
-
-/* ─── LAVA — koyu kırmızı/turuncu, alev gibi ─── */
 :root[data-theme="lava"] {
-  --bg:         #1a0805;
-  --surface:    #2a0e08;
-  --card:       #3a160d;
-  --card-hover: #4f1f12;
-  --border:     #5a2a18;
-  --border2:    #7f3c20;
-  --text:  #ffe8d8;
-  --text2: #f0c4a4;
-  --text3: #b08570;
-  --blue:   #ff8c42;
-  --green:  #ffc870;
-  --red:    #ff3838;
-  --amber:  #ffaa28;
-  --purple: #ff6b9d;
-  --cyan:   #ffd4a0;
-  --blue-bg:  rgba(255,140,66,.16);
-  --green-bg: rgba(255,200,112,.14);
-  --red-bg:   rgba(255,56,56,.18);
-  --amber-bg: rgba(255,170,40,.14);
-  --shadow-sm: 0 1px 4px rgba(255,80,30,.25);
-  --shadow:    0 4px 18px rgba(255,80,30,.35);
-  --shadow-lg: 0 15px 50px rgba(255,56,56,.45);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #ff3838 0%, #ff8c42 50%, #ffaa28 100%);
+  --bg:#150502; --surface:#1e0a05; --card:#28100a; --card-hover:#331610;
+  --border:#48201a; --border2:#663028;
+  --text:#ffefe8; --text2:#dda590; --text3:#96604c;
+  --blue:#ff8c42; --green:#5fd47a; --red:#ff3838; --amber:#ffb020; --purple:#d070c0; --cyan:#3fbfb0;
+  --blue-bg:rgba(255,140,66,0.1); --green-bg:rgba(95,212,122,0.09); --red-bg:rgba(255,56,56,0.09); --amber-bg:rgba(255,176,32,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(255,140,66,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#ff3838 0%,#ff8c42 50%,#ffd23e 100%);
+  --aurora-1:rgba(255,56,56,0.13); --aurora-2:rgba(255,210,62,0.09); --aurora-3:rgba(255,140,66,0.08);
+  --glass:rgba(30,10,5,0.66); --glass-border:rgba(255,140,66,0.16);
+  --glow:0 0 0 1px rgba(255,140,66,0.3), 0 8px 40px rgba(255,140,66,0.28);
 }
-
-/* ─── AURORA — kuzey ışıkları, yeşil/mor/mavi ─── */
 :root[data-theme="aurora"] {
-  --bg:         #0a1828;
-  --surface:    #112538;
-  --card:       #173049;
-  --card-hover: #1f3d5c;
-  --border:     #25496b;
-  --border2:    #3a6694;
-  --text:  #e0f5ff;
-  --text2: #a8d5e8;
-  --text3: #6890b0;
-  --blue:   #4dccff;
-  --green:  #5eeaa8;
-  --red:    #ff6b9d;
-  --amber:  #ffcb6b;
-  --purple: #c490ff;
-  --cyan:   #5eeaa8;
-  --blue-bg:  rgba(77,204,255,.16);
-  --green-bg: rgba(94,234,168,.16);
-  --red-bg:   rgba(255,107,157,.14);
-  --amber-bg: rgba(255,203,107,.12);
-  --shadow-sm: 0 1px 4px rgba(94,234,168,.20);
-  --shadow:    0 4px 20px rgba(196,144,255,.30);
-  --shadow-lg: 0 15px 50px rgba(77,204,255,.35);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #5eeaa8 0%, #4dccff 50%, #c490ff 100%);
+  --bg:#04121e; --surface:#08192a; --card:#0c2136; --card-hover:#112a44;
+  --border:#1a3a58; --border2:#28557a;
+  --text:#e6f6ff; --text2:#8fbcd4; --text3:#4a7690;
+  --blue:#4dccff; --green:#5eeaa8; --red:#ff7b9d; --amber:#ffd166; --purple:#b088ff; --cyan:#4dccff;
+  --blue-bg:rgba(77,204,255,0.1); --green-bg:rgba(94,234,168,0.09); --red-bg:rgba(255,123,157,0.09); --amber-bg:rgba(255,209,102,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(77,204,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#5eeaa8 0%,#4dccff 50%,#b088ff 100%);
+  --aurora-1:rgba(94,234,168,0.13); --aurora-2:rgba(176,136,255,0.09); --aurora-3:rgba(77,204,255,0.08);
+  --glass:rgba(8,25,42,0.66); --glass-border:rgba(77,204,255,0.16);
+  --glow:0 0 0 1px rgba(77,204,255,0.3), 0 8px 40px rgba(77,204,255,0.28);
 }
-
-/* ─── DEEP SEA — derin okyanus, kobalt + turkuaz ─── */
 :root[data-theme="deepsea"] {
-  --bg:         #051428;
-  --surface:    #0a1e3a;
-  --card:       #112a4a;
-  --card-hover: #18375e;
-  --border:     #1f4470;
-  --border2:    #2c5a93;
-  --text:  #d8ecff;
-  --text2: #98c0e0;
-  --text3: #5878a0;
-  --blue:   #5cb8ff;
-  --green:  #50d8c0;
-  --red:    #ff6090;
-  --amber:  #ffc060;
-  --purple: #9080ff;
-  --cyan:   #20e8d0;
-  --blue-bg:  rgba(92,184,255,.16);
-  --green-bg: rgba(80,216,192,.14);
-  --red-bg:   rgba(255,96,144,.14);
-  --amber-bg: rgba(255,192,96,.12);
-  --shadow-sm: 0 1px 4px rgba(32,232,208,.18);
-  --shadow:    0 4px 20px rgba(0,80,160,.40);
-  --shadow-lg: 0 15px 50px rgba(0,100,200,.50);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #20e8d0 0%, #5cb8ff 50%, #5060ff 100%);
+  --bg:#03101f; --surface:#06182c; --card:#0a203a; --card-hover:#0f2a4a;
+  --border:#173a60; --border2:#245586;
+  --text:#e2f2ff; --text2:#8ab4dd; --text3:#446a96;
+  --blue:#5cb8ff; --green:#20e8d0; --red:#ff7b93; --amber:#ffc94d; --purple:#9d8cff; --cyan:#20e8d0;
+  --blue-bg:rgba(92,184,255,0.1); --green-bg:rgba(32,232,208,0.09); --red-bg:rgba(255,123,147,0.09); --amber-bg:rgba(255,201,77,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(92,184,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#20e8d0 0%,#5cb8ff 50%,#9d8cff 100%);
+  --aurora-1:rgba(32,232,208,0.13); --aurora-2:rgba(157,140,255,0.09); --aurora-3:rgba(92,184,255,0.08);
+  --glass:rgba(6,24,44,0.66); --glass-border:rgba(92,184,255,0.16);
+  --glow:0 0 0 1px rgba(92,184,255,0.3), 0 8px 40px rgba(92,184,255,0.28);
 }
-
-/* ─── CHERRY — koyu kiraz + altın, Asya esinli lüks ─── */
 :root[data-theme="cherry"] {
-  --bg:         #1a0810;
-  --surface:    #2a0e1a;
-  --card:       #3a1424;
-  --card-hover: #4f1b30;
-  --border:     #6a2540;
-  --border2:    #903560;
-  --text:  #ffe8f0;
-  --text2: #e0b8c8;
-  --text3: #a07088;
-  --blue:   #ffb8d0;
-  --green:  #d4ff80;
-  --red:    #ff3868;
-  --amber:  #ffd060;
-  --purple: #d890ff;
-  --cyan:   #80ffe0;
-  --blue-bg:  rgba(255,184,208,.14);
-  --green-bg: rgba(212,255,128,.14);
-  --red-bg:   rgba(255,56,104,.18);
-  --amber-bg: rgba(255,208,96,.16);
-  --shadow-sm: 0 1px 4px rgba(255,56,104,.20);
-  --shadow:    0 4px 20px rgba(180,40,80,.40);
-  --shadow-lg: 0 15px 50px rgba(255,56,104,.40);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #ffd060 0%, #ff3868 100%);
+  --bg:#160610; --surface:#1e0a17; --card:#28101f; --card-hover:#321529;
+  --border:#471f3a; --border2:#642b52;
+  --text:#ffedf4; --text2:#dd9cbb; --text3:#94587a;
+  --blue:#ff5c8a; --green:#4dd4a0; --red:#ff3868; --amber:#ffd060; --purple:#e07bd8; --cyan:#4dcfe0;
+  --blue-bg:rgba(255,92,138,0.1); --green-bg:rgba(77,212,160,0.09); --red-bg:rgba(255,56,104,0.09); --amber-bg:rgba(255,208,96,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(255,92,138,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#ffd060 0%,#ff3868 50%,#e07bd8 100%);
+  --aurora-1:rgba(255,208,96,0.13); --aurora-2:rgba(224,123,216,0.09); --aurora-3:rgba(255,56,104,0.08);
+  --glass:rgba(30,10,23,0.66); --glass-border:rgba(255,92,138,0.16);
+  --glow:0 0 0 1px rgba(255,92,138,0.3), 0 8px 40px rgba(255,92,138,0.28);
 }
-
-/* ─── ELECTRIC — saf siyah + elektrik mavi, yüksek kontrast ─── */
 :root[data-theme="electric"] {
-  --bg:         #000000;
-  --surface:    #0a0a14;
-  --card:       #14141f;
-  --card-hover: #1f1f2e;
-  --border:     #28283a;
-  --border2:    #3a3a52;
-  --text:  #f0f8ff;
-  --text2: #c0d0e0;
-  --text3: #6a7a90;
-  --blue:   #00bfff;
-  --green:  #00ff88;
-  --red:    #ff4060;
-  --amber:  #ffd000;
-  --purple: #b060ff;
-  --cyan:   #00ffe0;
-  --blue-bg:  rgba(0,191,255,.18);
-  --green-bg: rgba(0,255,136,.16);
-  --red-bg:   rgba(255,64,96,.16);
-  --amber-bg: rgba(255,208,0,.14);
-  --shadow-sm: 0 0 6px rgba(0,191,255,.25);
-  --shadow:    0 0 20px rgba(0,191,255,.30);
-  --shadow-lg: 0 0 50px rgba(0,191,255,.40);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #00bfff 0%, #00ffe0 100%);
+  --bg:#000000; --surface:#05070d; --card:#0a0f1c; --card-hover:#101828;
+  --border:#1a2440; --border2:#28386a;
+  --text:#e8faff; --text2:#8ec4dd; --text3:#42688f;
+  --blue:#00bfff; --green:#00ffe0; --red:#ff3d6e; --amber:#ffd60a; --purple:#a855f7; --cyan:#00ffe0;
+  --blue-bg:rgba(0,191,255,0.1); --green-bg:rgba(0,255,224,0.09); --red-bg:rgba(255,61,110,0.09); --amber-bg:rgba(255,214,10,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(0,191,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#00bfff 0%,#00ffe0 50%,#a855f7 100%);
+  --aurora-1:rgba(0,191,255,0.13); --aurora-2:rgba(168,85,247,0.09); --aurora-3:rgba(0,255,224,0.08);
+  --glass:rgba(5,7,13,0.66); --glass-border:rgba(0,191,255,0.16);
+  --glow:0 0 0 1px rgba(0,191,255,0.3), 0 8px 40px rgba(0,191,255,0.28);
 }
-
-/* ─── SAKURA — Japon kiraz çiçeği, pembe + beyaz ─── */
 :root[data-theme="sakura"] {
-  --bg:         #fff0f5;
-  --surface:    #fff5f8;
-  --card:       #ffffff;
-  --card-hover: #ffe0eb;
-  --border:     #ffd0e0;
-  --border2:    #ffa8c8;
-  --text:  #3a1a2a;
-  --text2: #7a3858;
-  --text3: #b878a0;
-  --blue:   #d04880;
-  --green:  #68a850;
-  --red:    #e83868;
-  --amber:  #e8a838;
-  --purple: #a060c8;
-  --cyan:   #50a8a8;
-  --blue-bg:  rgba(208,72,128,.10);
-  --green-bg: rgba(104,168,80,.10);
-  --red-bg:   rgba(232,56,104,.12);
-  --amber-bg: rgba(232,168,56,.10);
-  --shadow-sm: 0 1px 4px rgba(200,80,120,.15);
-  --shadow:    0 4px 16px rgba(200,80,120,.18);
-  --shadow-lg: 0 15px 40px rgba(200,80,120,.22);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #ff9ec0 0%, #d04880 100%);
+  --bg:#fdeef4; --surface:#fef5f9; --card:#ffffff; --card-hover:#fdf0f6;
+  --border:#f6d6e5; --border2:#eab6cf;
+  --text:#26101b; --text2:#8a4a68; --text3:#c08aa4;
+  --blue:#d04880; --green:#3f9e6e; --red:#e11d48; --amber:#d97706; --purple:#a86ad0; --cyan:#2e9aaa;
+  --blue-bg:rgba(208,72,128,0.08); --green-bg:rgba(63,158,110,0.08); --red-bg:rgba(225,29,72,0.08); --amber-bg:rgba(217,119,6,0.08);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 2px 8px rgba(208,72,128,0.05); --shadow:0 2px 6px rgba(15,23,42,.05), 0 10px 28px rgba(208,72,128,0.09); --shadow-lg:0 8px 20px rgba(15,23,42,.08), 0 28px 64px rgba(208,72,128,0.14);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#ff9ec0 0%,#d04880 50%,#a86ad0 100%);
+  --aurora-1:rgba(255,158,192,0.15); --aurora-2:rgba(168,106,208,0.1); --aurora-3:rgba(208,72,128,0.11);
+  --glass:rgba(255,255,255,0.72); --glass-border:rgba(255,255,255,.55);
+  --glow:0 0 0 1px rgba(208,72,128,0.22), 0 8px 40px rgba(208,72,128,0.25);
 }
-
-/* ─── AMETHYST — mor kristal, derin mor + lavanta ─── */
 :root[data-theme="amethyst"] {
-  --bg:         #150825;
-  --surface:    #1f1038;
-  --card:       #2a1850;
-  --card-hover: #38216a;
-  --border:     #4a2d8a;
-  --border2:    #6d44b8;
-  --text:  #f0e8ff;
-  --text2: #d0b8f0;
-  --text3: #8868b0;
-  --blue:   #a070ff;
-  --green:  #80f0c0;
-  --red:    #ff6090;
-  --amber:  #ffc060;
-  --purple: #d090ff;
-  --cyan:   #90c8ff;
-  --blue-bg:  rgba(160,112,255,.18);
-  --green-bg: rgba(128,240,192,.14);
-  --red-bg:   rgba(255,96,144,.14);
-  --amber-bg: rgba(255,192,96,.12);
-  --shadow-sm: 0 1px 4px rgba(160,80,255,.20);
-  --shadow:    0 4px 20px rgba(160,80,255,.35);
-  --shadow-lg: 0 15px 50px rgba(208,144,255,.45);
-  --radius:    10px;
-  --radius-sm: 6px;
-  --accent-grad: linear-gradient(135deg, #d090ff 0%, #a070ff 50%, #6040c8 100%);
+  --bg:#0e0520; --surface:#140a2c; --card:#1b103c; --card-hover:#22154c;
+  --border:#301f66; --border2:#45308c;
+  --text:#f2ebff; --text2:#b8a3e0; --text3:#6d5a9e;
+  --blue:#a070ff; --green:#4dd4a0; --red:#ff6b9d; --amber:#ffc94d; --purple:#d090ff; --cyan:#5eead4;
+  --blue-bg:rgba(160,112,255,0.1); --green-bg:rgba(77,212,160,0.09); --red-bg:rgba(255,107,157,0.09); --amber-bg:rgba(255,201,77,0.09);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.3); --shadow:0 4px 12px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.35); --shadow-lg:0 12px 28px rgba(0,0,0,.5), 0 36px 80px rgba(160,112,255,0.12);
+  --radius:16px; --radius-sm:10px;
+  --accent-grad:linear-gradient(135deg,#d090ff 0%,#a070ff 50%,#7d5aff 100%);
+  --aurora-1:rgba(208,144,255,0.13); --aurora-2:rgba(125,90,255,0.09); --aurora-3:rgba(160,112,255,0.08);
+  --glass:rgba(20,10,44,0.66); --glass-border:rgba(160,112,255,0.16);
+  --glow:0 0 0 1px rgba(160,112,255,0.3), 0 8px 40px rgba(160,112,255,0.28);
 }
 
 /* ════════════════════════════════════════════════════════
@@ -3022,6 +2627,263 @@ select option { background: var(--surface); }
   border: 1px solid rgba(239,68,68,.40);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v12.33 — TASARIM SİSTEMİ 2.0 "AURORA"
+   Son nesil site görünümü: modern paletler, akıcı GPU animasyonları, glass header,
+   canlı kartlar, mikro-etkileşimler. İşlevsel koda DOKUNULMADI — tüm yenileme
+   CSS değişken override'ları + görsel katman. Eski değişken ADLARI korunur
+   (kod onları kullanıyor), değerleri modernize edildi.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 2) TEMEL — arka plan aurora'sı + tipografi ────────────────────────── */
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.011em;
+  background:
+    radial-gradient(1100px 620px at 8% -8%,  var(--aurora-1), transparent 62%),
+    radial-gradient(900px 560px at 96% 4%,   var(--aurora-2), transparent 60%),
+    radial-gradient(1000px 700px at 50% 112%, var(--aurora-3), transparent 62%),
+    var(--bg);
+  background-attachment: fixed;
+}
+h1,h2,h3,.page-title,.page-title-text,.gate-title,.brand,.logo-text {
+  font-family: 'Space Grotesk','Inter',system-ui,sans-serif !important;
+  letter-spacing: -0.02em;
+}
+::selection { background: var(--blue); color: #fff; }
+
+/* ── 3) HAREKET SİSTEMİ — GPU-hızlı, tutarlı easing ────────────────────── */
+:root {
+  --ease-out: cubic-bezier(.22,1,.36,1);
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --dur-1: .16s; --dur-2: .28s; --dur-3: .45s;
+}
+@keyframes fadeUp     { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+@keyframes fadeIn     { from { opacity:0; } to { opacity:1; } }
+@keyframes scaleIn    { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:none; } }
+@keyframes shimmer    { from { background-position:-200% 0; } to { background-position:200% 0; } }
+@keyframes floatY     { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+@keyframes gradShift  { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+@keyframes popIn      { 0% { opacity:0; transform:scale(.6); } 70% { transform:scale(1.06); } 100% { opacity:1; transform:scale(1); } }
+
+.tab-content { animation: fadeUp var(--dur-3) var(--ease-out) both; }
+.tab-content.active { animation: fadeUp var(--dur-3) var(--ease-out) both; }
+
+/* ── 4) GLASS HEADER ───────────────────────────────────────────────────── */
+#topbar, .topbar, header.topbar {
+  position: sticky; top: 0; z-index: 500;
+  background: var(--glass) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: 0 6px 28px rgba(0,0,0,.08);
+}
+#topbar::after, .topbar::after {
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+  background: var(--accent-grad); opacity:.5;
+  background-size: 200% 100%;
+  animation: gradShift 8s ease infinite;
+}
+.logo, .brand-logo, .topbar .emoji-logo { animation: floatY 5s ease-in-out infinite; }
+
+/* ── 5) SEKMELER — hap tasarımı + gradient aktif ──────────────────────── */
+#tab-nav .tab {
+  border-radius: 12px !important;
+  padding: 11px 16px !important;
+  font-weight: 700 !important;
+  width: 100%;
+  text-align: left;
+  display: flex; align-items: center; gap: 10px;
+  transition: color var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out),
+              transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+  position: relative;
+}
+#tab-nav .tab:hover { background: var(--card-hover); transform: translateX(3px); color: var(--text); }
+#tab-nav .tab:active { transform: translateX(3px) scale(.98); }
+#tab-nav .tab.active {
+  background: var(--accent-grad) !important;
+  background-size: 200% 200% !important;
+  animation: gradShift 6s ease infinite;
+  color: #fff !important;
+  box-shadow: var(--glow);
+}
+#tab-nav .tab.active::after { display: none; }
+
+/* ── 6) KARTLAR — kaldırma + gradient üst şerit ───────────────────────── */
+.card, .cpt-card, .floor-card, .stat-card, .panel, .kpi, .metric-card, .analiz-card {
+  transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out),
+              border-color var(--dur-2) var(--ease-out);
+}
+.card:hover, .cpt-card:hover, .floor-card:hover, .stat-card:hover, .panel:hover, .metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border2);
+}
+.cpt-card-header, .tracker-col-header, .done-group-header { position: relative; overflow: hidden; }
+.cpt-card-header::before {
+  content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  background: var(--accent-grad); background-size:200% 100%;
+  animation: gradShift 7s ease infinite; opacity:.85;
+}
+
+/* ── 7) BUTONLAR ───────────────────────────────────────────────────────── */
+button, .btn, [role="button"] {
+  transition: transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out),
+              background var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out),
+              filter var(--dur-2) var(--ease-out);
+}
+button:hover, .btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+button:active, .btn:active { transform: translateY(0) scale(.96); }
+button:focus-visible, .tab:focus-visible, input:focus-visible {
+  outline: 2px solid var(--blue); outline-offset: 2px; border-radius: var(--radius-sm);
+}
+
+/* ── 8) GİRİŞLER ───────────────────────────────────────────────────────── */
+input, select, textarea {
+  transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out),
+              background var(--dur-2) var(--ease-out);
+  border-radius: var(--radius-sm);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue) !important;
+  box-shadow: 0 0 0 4px var(--blue-bg);
+}
+
+/* ── 9) TABLO SATIRLARI ────────────────────────────────────────────────── */
+tbody tr { transition: background var(--dur-1) linear; }
+tbody tr:hover { background: var(--card-hover); }
+tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
+
+/* ── 10) ROZET & ÇİPLER ────────────────────────────────────────────────── */
+.badge, .chip, .pill { transition: transform var(--dur-1) var(--ease-spring), box-shadow var(--dur-2) var(--ease-out); }
+.badge:hover, .chip:hover, .pill:hover { transform: scale(1.08); }
+
+/* ── 11) GATE — sinematik giriş ────────────────────────────────────────── */
+#cpt-gate {
+  background:
+    radial-gradient(900px 600px at 20% 10%, var(--aurora-1), transparent 60%),
+    radial-gradient(800px 560px at 85% 85%, var(--aurora-2), transparent 60%),
+    var(--bg) !important;
+}
+.gate-card {
+  animation: scaleIn .55s var(--ease-spring) both;
+  background: var(--glass) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-lg), var(--glow) !important;
+  border-radius: 22px !important;
+}
+.gate-logo { animation: floatY 4s ease-in-out infinite; font-size: 46px !important; }
+.gate-title {
+  background: var(--accent-grad); background-size: 200% 200%;
+  -webkit-background-clip: text; background-clip: text; color: transparent !important;
+  animation: gradShift 5s ease infinite;
+  font-size: 26px !important;
+}
+.gate-step { animation: fadeUp .5s var(--ease-out) both; }
+.gate-step:nth-child(1){animation-delay:.08s} .gate-step:nth-child(2){animation-delay:.16s}
+.gate-step:nth-child(3){animation-delay:.24s} .gate-step:nth-child(4){animation-delay:.32s}
+.gate-step:nth-child(5){animation-delay:.40s}
+.gate-step.ok { background: var(--green-bg) !important; }
+.gate-step.ok .gate-ic { animation: popIn .4s var(--ease-spring) both; }
+.gate-btn-primary { background: var(--accent-grad) !important; border: none !important; background-size:200% 200%; animation: gradShift 6s ease infinite; }
+
+/* ── 12) SCROLLBAR ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border2); border-radius: 999px;
+  border: 2.5px solid transparent; background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text3); border: 2.5px solid transparent; background-clip: padding-box; }
+* { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+
+/* ── 13) SHIMMER ───────────────────────────────────────────────────────── */
+.skeleton, .loading-bar {
+  background: linear-gradient(90deg, var(--card) 25%, var(--card-hover) 50%, var(--card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* ── 14) MODALLAR ──────────────────────────────────────────────────────── */
+.modal, .overlay-panel { animation: scaleIn var(--dur-3) var(--ease-spring) both; }
+
+
+/* ── 18) v12.34 YENİ DÜZEN — SOL KENAR NAVİGASYON ─────────────────────── */
+@media (min-width: 1101px) {
+  #tab-nav {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 232px;
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 86px 12px 16px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5);
+    border-right: 1px solid var(--glass-border);
+    border-bottom: none !important;
+    z-index: 600; overflow-y: auto;
+    box-shadow: 8px 0 32px rgba(0,0,0,.06);
+  }
+  #tab-nav::after {
+    content:""; position:absolute; top:0; right:-1px; bottom:0; width:1px;
+    background: linear-gradient(180deg, transparent, var(--accent-grad), transparent);
+    opacity:.35;
+  }
+  /* Marka — sidebar üstü (logo topbar'dan buraya sabitlenir) */
+  #topbar-logo {
+    position: fixed; left: 0; top: 0; width: 232px; height: 72px;
+    display: flex; align-items: center; padding: 0 18px;
+    z-index: 610; border-bottom: 1px solid var(--glass-border);
+    background: transparent;
+  }
+  /* Topbar sidebar'ın sağından başlar */
+  #topbar { left: 232px; padding-left: 18px !important; }
+  /* İçerik sağa kayar */
+  body { padding-left: 232px; }
+  /* Tam ekran overlay'ler viewport'u kaplasın (fixed zaten viewport bazlı) */
+  #cpt-gate { z-index: 99999; }
+}
+@media (max-width: 1100px) {
+  /* Dar ekran: klasik üst yatay sekmeler korunur */
+  #tab-nav { display: flex; overflow-x: auto; }
+}
+
+/* ── 19) TEMA GEÇİŞ ANİMASYONU ─────────────────────────────────────────── */
+@keyframes themeReveal {
+  from { clip-path: circle(0% at var(--tx,85%) var(--ty,6%)); }
+  to   { clip-path: circle(140% at var(--tx,85%) var(--ty,6%)); }
+}
+::view-transition-old(root) { animation: none; }
+::view-transition-new(root) { animation: themeReveal .55s cubic-bezier(.22,1,.36,1); }
+html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+  transition: background-color .5s ease, background .5s ease, color .5s ease,
+              border-color .5s ease, box-shadow .5s ease, fill .5s ease !important;
+}
+
+/* ── 20) HERO SAYFA BAŞLIKLARI ─────────────────────────────────────────── */
+.page-title {
+  font-size: 30px !important;
+}
+.page-title-text {
+  background: var(--accent-grad); background-size: 200% 200%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: gradShift 7s ease infinite;
+}
+.page-title-emoji { filter: drop-shadow(0 4px 12px var(--aurora-1)); }
+
+/* İçerik bölümleri kademeli giriş */
+.tab-content > * { animation: fadeUp .5s var(--ease-out) both; }
+.tab-content > *:nth-child(1){animation-delay:.02s} .tab-content > *:nth-child(2){animation-delay:.06s}
+.tab-content > *:nth-child(3){animation-delay:.10s} .tab-content > *:nth-child(4){animation-delay:.14s}
+.tab-content > *:nth-child(5){animation-delay:.18s} .tab-content > *:nth-child(6){animation-delay:.22s}
+
+/* ── 15) ERİŞİLEBİLİRLİK — hareket azaltma ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  html { scroll-behavior: auto; }
+}
+
 </style>
 </head>
 <body>
@@ -3080,7 +2942,7 @@ select option { background: var(--surface); }
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.32</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.34</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3553,7 +3415,7 @@ select option { background: var(--surface); }
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.32</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.34</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3886,7 +3748,7 @@ select option { background: var(--surface); }
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.32.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.34.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7940,7 +7802,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.32 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.34 · IST2</div>
     </div>`;
 }
 
@@ -17627,5 +17489,38 @@ if (_azCptEl) _azCptEl.onchange = () => {
 })();
 </script>
 
+<script>
+/* v12.34 [TEMA GEÇİŞ ANİMASYONU] — setTheme sarmalanır: View Transition API varsa
+   dairesel açılma (tema butonundan yayılan), yoksa 500ms yumuşak renk geçişi. */
+(function(){
+  var tries = 0;
+  function wrap(){
+    if (typeof window.setTheme !== 'function') { if (++tries < 40) setTimeout(wrap, 250); return; }
+    var orig = window.setTheme;
+    if (orig.__wrapped) return;
+    function themed(code){
+      var h = document.documentElement;
+      try {
+        var btn = document.getElementById('btn-theme');
+        if (btn) {
+          var r = btn.getBoundingClientRect();
+          h.style.setProperty('--tx', ((r.left + r.width/2) / innerWidth * 100) + '%');
+          h.style.setProperty('--ty', ((r.top + r.height/2) / innerHeight * 100) + '%');
+        }
+      } catch(e) {}
+      if (document.startViewTransition) {
+        document.startViewTransition(function(){ orig(code); });
+      } else {
+        h.classList.add('theme-anim');
+        orig(code);
+        setTimeout(function(){ h.classList.remove('theme-anim'); }, 600);
+      }
+    }
+    themed.__wrapped = true;
+    window.setTheme = themed;
+  }
+  wrap();
+})();
+</script>
 </body>
 </html>
