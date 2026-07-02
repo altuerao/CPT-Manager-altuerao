@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.45
+// @version      12.46
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -407,9 +407,9 @@ try {
                 });
                 L.push('');
                 L.push('Kurulum bayrakları:');
-                L.push('  wf: ' + localStorage.getItem('cpt_pc_setup_wf_v3'));
-                L.push('  pa: ' + localStorage.getItem('cpt_pc_setup_pa_v3'));
-                L.push('  sc: ' + localStorage.getItem('cpt_pc_setup_sc_v3'));
+                L.push('  wf: ' + localStorage.getItem('cpt_pc_setup_wf_v4'));
+                L.push('  pa: ' + localStorage.getItem('cpt_pc_setup_pa_v4'));
+                L.push('  sc: ' + localStorage.getItem('cpt_pc_setup_sc_v4'));
                 var out = L.join('\n');
                 console.log(out);
                 var w = window.open('', '_blank');
@@ -422,10 +422,10 @@ try {
             try {
                 var pg = _PC_PATH_WF?'wf':(_PC_PATH_PA?'pa':(_PC_PATH_SC?'sc':null));
                 if (!pg) { alert('Bu bir Picking Console ayar sayfası değil.\nworkforce / pick-areas / scorecard sayfasında çalıştır.'); return; }
-                localStorage.removeItem('cpt_pc_setup_'+pg+'_v3');
+                localStorage.removeItem('cpt_pc_setup_'+pg+'_v4');
                 if (typeof _pcApplySettings === 'function') {
                     _pcApplySettings(document, pg, function(ok){
-                        if (ok) { try { localStorage.setItem('cpt_pc_setup_'+pg+'_v3','done'); } catch(e){} }
+                        if (ok) { try { localStorage.setItem('cpt_pc_setup_'+pg+'_v4','done'); } catch(e){} }
                         alert(ok ? ('✓ '+pg+' ayarları uygulandı.') : ('⚠️ '+pg+' ayarları uygulanamadı — "🔧 PC ayar teşhis" ile dişli/panel yapısına bak, bana ilet.'));
                     });
                 } else alert('_pcApplySettings yok.');
@@ -435,7 +435,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.45] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.46] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -524,7 +524,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.45';
+    const BRIDGE_VERSION = '12.46';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -539,6 +539,7 @@ if (IS_CPT_SITE) {
                 'cpt_debug_logs','cpt_tote_msgs_sent','cpt_auto_refresh_flag'];
     }
     let _bridgeLastSent = '';
+    const _bridgeListenerKeys = new Set();   // v12.46: hangi anahtarlara listener kuruldu (yenileri eklemek için)
     function _bridgeSendAll(reason) {
         try {
             const payload = {};
@@ -570,10 +571,22 @@ if (IS_CPT_SITE) {
     try {
         if (typeof GM_addValueChangeListener === 'function') {
             for (const k of _bridgeKeys()) {
-                try { GM_addValueChangeListener(k, _bridgeScheduleSend); } catch(e) {}
+                try { GM_addValueChangeListener(k, _bridgeScheduleSend); _bridgeListenerKeys.add(k); } catch(e) {}
             }
-            // Yeni anahtarlar sonradan oluşabilir — 30sn'de bir listener listesi tazele + gönder
-            setInterval(() => { _bridgeSendAll('interval'); }, 30000);
+            // v12.46: Heartbeat anahtarları (cpt_hb_*) köprü kurulurken henüz GM'de OLMAYABİLİR
+            //   (Amazon sekmesi ilk beat'i atmamış). O yüzden listener'a takılmazlar. Çözüm:
+            //   (a) 5sn'de bir _bridgeSendAll — yeni heartbeat'leri hızla yakalar (dedup zaten var),
+            //   (b) 20sn'de bir listener listesini tazele (yeni cpt_hb_* anahtarlarına da bağlan).
+            setInterval(() => { _bridgeSendAll('interval'); }, 5000);
+            setInterval(() => {
+                try {
+                    for (const k of _bridgeKeys()) {
+                        if (!_bridgeListenerKeys.has(k)) {
+                            try { GM_addValueChangeListener(k, _bridgeScheduleSend); _bridgeListenerKeys.add(k); } catch(e) {}
+                        }
+                    }
+                } catch(e) {}
+            }, 20000);
         } else {
             // Listener yok → polling fallback (2sn'de bir değişiklik kontrolü — _bridgeLastSent dedup'lar)
             setInterval(() => { _bridgeSendAll('poll'); }, 2000);
@@ -1426,7 +1439,13 @@ function _pcApplySettings(doc, page, done){
         for(var i=0;i<labels.length;i++){ var t=(labels[i].textContent||'').trim();
             if(/^all$/i.test(t)||/\btümü\b/i.test(t)||/\bhepsi\b/i.test(t)){allL=labels[i];break;}
             var m=t.match(/^(\d{2,4})$/); if(m){var n=parseInt(m[1]); if(n>maxN){maxN=n;maxL=labels[i];}} }
-        var tgt=allL||maxL; if(tgt){var inp=tgt.querySelector('input')||tgt; try{inp.click();}catch(e){} return true;} return false;
+        var tgt=allL||maxL;
+        if(tgt){ var inp=tgt.querySelector('input')||tgt;
+            var wasChecked = (inp.checked===true) || (tgt.getAttribute && tgt.getAttribute('aria-checked')==='true');
+            if(!wasChecked){ try{inp.click();}catch(e){} return true; }   // sadece değiştirdiysek true
+            return 'already';   // zaten All — değişiklik yok ama hata da yok
+        }
+        return false;
     }
     function applyColumns(scope){
         var root=scope||doc; var sw=root.querySelectorAll('[role="switch"],input[type="checkbox"]'); var ch=0;
@@ -1470,8 +1489,11 @@ function _pcApplySettings(doc, page, done){
                     var nOn=0; EXTRA_TOGGLES.forEach(function(t){ if(setToggleByText(t,true)) nOn++; });
                     // panel-dışı KAPATılacaklar (Use UTC / Auto Refresh = KAPAT)
                     var nOff=0; OFF_BODY_TOGGLES.forEach(function(t){ if(setToggleByText(t,false)) nOff++; });
-                    var okAny = okSize||nCol>0||confd||nOn>0||nOff>0;
-                    dlog('✅ PC ['+page+'] size='+okSize+' kolon='+nCol+' onay='+confd+' aç='+nOn+' kapat='+nOff);
+                    // Başarı: gerçek değişiklik yapıldı VEYA "zaten doğru ayarlı" (already + panel açıldı).
+                    var didChange = (okSize===true)||nCol>0||confd||nOn>0||nOff>0;
+                    var alreadyOk = (okSize==='already');   // panel açıldı, All zaten seçili
+                    var okAny = didChange || alreadyOk;
+                    dlog('✅ PC ['+page+'] size='+okSize+' kolon='+nCol+' onay='+confd+' aç='+nOn+' kapat='+nOff+' → '+(okAny?'OK':'BAŞARISIZ'));
                     done && done(okAny);
                 },500);
             },400);
@@ -1498,7 +1520,7 @@ function _pcSetupViaIframe(url, page, cb){
                 // iframe içindeki instance bayrağı koyduysa başarı say
                 var ok=false;
                 try { ok = (f.contentWindow && f.contentWindow.localStorage &&
-                            f.contentWindow.localStorage.getItem('cpt_pc_setup_'+page+'_v3')==='done'); } catch(e){}
+                            f.contentWindow.localStorage.getItem('cpt_pc_setup_'+page+'_v4')==='done'); } catch(e){}
                 clearTimeout(killer); fin(ok);
             }, 14000);   // iframe içi ayar ~12sn sürer, 14sn sonra kapat
         });
@@ -1514,7 +1536,7 @@ function _pcSetupViaIframe(url, page, cb){
     if (IS_IFRAME) {
         var pg = _PC_PATH_PA ? 'pa' : (_PC_PATH_SC ? 'sc' : (_PC_PATH_WF ? 'wf' : null));
         if (!pg) return;
-        var fl = 'cpt_pc_setup_'+pg+'_v3';
+        var fl = 'cpt_pc_setup_'+pg+'_v4';
         try { if (localStorage.getItem(fl)==='done') return; } catch(e){ return; }
         _pcApplySettings(document, pg, function(ok){ if(ok){ try{ localStorage.setItem(fl,'done'); }catch(e){} } });
         return;
@@ -1524,24 +1546,24 @@ function _pcSetupViaIframe(url, page, cb){
     if (!IS_WORKFORCE) return;
     // Zaten hepsi kurulduysa hiç uğraşma
     try {
-        if (localStorage.getItem('cpt_pc_setup_wf_v3')==='done'
-         && localStorage.getItem('cpt_pc_setup_pa_v3')==='done'
-         && localStorage.getItem('cpt_pc_setup_sc_v3')==='done') return;
+        if (localStorage.getItem('cpt_pc_setup_wf_v4')==='done'
+         && localStorage.getItem('cpt_pc_setup_pa_v4')==='done'
+         && localStorage.getItem('cpt_pc_setup_sc_v4')==='done') return;
     } catch(e){ return; }
 
     // 2a) Workforce kendi ayarı
     _pcApplySettings(document, 'wf', function(ok){
-        if(ok){ try{ localStorage.setItem('cpt_pc_setup_wf_v3','done'); }catch(e){} }
+        if(ok){ try{ localStorage.setItem('cpt_pc_setup_wf_v4','done'); }catch(e){} }
 
         // 2b) Areas C4 (gerekiyorsa) → sonra Scorecard (gerekiyorsa) → sıralı
         function doPA(next){
-            var paDone=false; try{ paDone = localStorage.getItem('cpt_pc_setup_pa_v3')==='done'; }catch(e){}
+            var paDone=false; try{ paDone = localStorage.getItem('cpt_pc_setup_pa_v4')==='done'; }catch(e){}
             if(paDone) return next();
             dlog('➡️ PC oto: Areas C4 iframe açılıyor…');
             _pcSetupViaIframe(URLS.pa, 'pa', function(){ next(); });
         }
         function doSC(next){
-            var scDone=false; try{ scDone = localStorage.getItem('cpt_pc_setup_sc_v3')==='done'; }catch(e){}
+            var scDone=false; try{ scDone = localStorage.getItem('cpt_pc_setup_sc_v4')==='done'; }catch(e){}
             if(scDone) return next();
             dlog('➡️ PC oto: Scorecard iframe açılıyor…');
             _pcSetupViaIframe(URLS.sc, 'sc', function(){ next(); });
