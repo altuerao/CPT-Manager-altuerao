@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.43
+// @version      12.44
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -72,11 +72,17 @@ const IS_PICKING   = H.includes('picking-console');
 const IS_RODEO     = H.includes('rodeo-dub');
 const IS_SORTATION = H.includes('flow-sortation');                          // v10.22
 const IS_ELIG      = H.includes('fc-eligibility');                          // v10.86 — Pickers Dashboard (yetki sayısı)
-const IS_WORKFORCE = IS_PICKING && P.includes('pick-workforce');
-const IS_SCANNER   = IS_PICKING && P.includes('all-in-scanner');
-const IS_SCORECARD = IS_PICKING && P.includes('current-scorecard');
-const IS_INDV_SC   = IS_PICKING && P.includes('individual-scorecard/picker/');
-const IS_PICK_AREAS= IS_PICKING && P.includes('pick-areas');
+// v12.44: iframe içindeyken (oto-kurulum gezinmesi) hangi PC sayfasındayız — location'dan bağımsız ayar için
+const _PC_PATH_WF = IS_PICKING && P.includes('pick-workforce');
+const _PC_PATH_SC = IS_PICKING && P.includes('current-scorecard');
+const _PC_PATH_PA = IS_PICKING && P.includes('pick-areas');
+// v12.44: iframe'deyken VERİ/RELOAD blokları ÇALIŞMAZ (sonsuz reload/çift-çekim önlenir).
+//   Ayar orkestratörü _PC_PATH_* + IS_IFRAME kullanır; veri blokları IS_* kullanır (iframe'de false).
+const IS_WORKFORCE = _PC_PATH_WF && !IS_IFRAME;
+const IS_SCANNER   = IS_PICKING && P.includes('all-in-scanner') && !IS_IFRAME;
+const IS_SCORECARD = _PC_PATH_SC && !IS_IFRAME;
+const IS_INDV_SC   = IS_PICKING && P.includes('individual-scorecard/picker/') && !IS_IFRAME;
+const IS_PICK_AREAS= _PC_PATH_PA && !IS_IFRAME;
 const IS_EXSD      = IS_RODEO   && P.includes('ExSD');
 // v10.48: Bu sayfa Fracs Rodeo mu? (?fracs=FRACS query parametresi)
 // Tek cache (cpt_transit_batches_v9) kullanıyoruz, sadece tote'lara isFracs=true flag koyuyoruz.
@@ -375,7 +381,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.43] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.44] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -464,7 +470,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.43';
+    const BRIDGE_VERSION = '12.44';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -1277,158 +1283,170 @@ if (IS_PICKING && !IS_IFRAME) {
 // ════════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════════
-//  v12.43 — PICKING CONSOLE OTOMATİK KURULUM (TEK SEFERLİK, SAYFAYA ÖZEL)
-//  Kullanıcının elle yaptığı KESIN ayarları script bir kez otomatik yapar.
-//  Her sayfanın kendi kolon reçetesi var (ekran görüntülerinden birebir):
-//    • workforce: Page=All, KAPALI={Station ID, Workcell Type}, gerisi AÇIK
-//    • pick-areas: Page=All, TÜM kolonlar AÇIK + "Show Batch ID" + "Show Process Path" AÇIK
-//    • scorecard:  Page=All, TÜM kolonlar AÇIK
-//  KENDİNİ DOĞRULAR: başarıda bayrak koyar, bir daha dokunmaz. Panel/öğe bulamazsa
-//  SESSİZCE vazgeçer (hiçbir şeyi bozmaz) → gate manuel talimat gösterir.
-//  Sürekli otomasyon YOK — sadece ilk kurulumda çalışır.
+//  v12.44 — PICKING CONSOLE OTOMATİK KURULUM + GEZİNME (iframe)
+//  Kullanıcı isteği: workforce'a girince, script kendisi (mouse ile yapar gibi)
+//  Areas C4 ve Scorecard sayfalarına GEÇER, ayarları yapar, kapatır — kullanıcı
+//  o sayfalara hiç girmeden. Gezinme görünmez iframe ile (Picking Console same-origin,
+//  script iframe'de tekrar çalışır → kendi ayarını yapar).
+//
+//  Ayar reçeteleri (ekran görüntülerinden birebir):
+//    • workforce: Page=All · KAPALI={Station ID, Workcell Type, Use UTC, Auto Refresh} · gerisi AÇIK
+//    • pick-areas: Page=All · TÜM kolonlar AÇIK · +{Show Batch ID, Show Process Path} AÇIK
+//    • scorecard:  Page=All · TÜM kolonlar AÇIK
+//
+//  TEK SEFERLİK: her sayfa bir kez ayarlanınca bayrak (cpt_pc_setup_{page}_v3) konur.
+//    (Kullanıcı: "tekrar bozulursa kontrol et'e gerek yok" — self-heal YOK.)
+//  Panel/öğe bulunamazsa SESSİZCE vazgeçer (hiçbir şeyi bozmaz).
 // ════════════════════════════════════════════════════════
-(function _pcAutoSetup(){
-    if (!(IS_WORKFORCE || IS_PICK_AREAS || IS_SCORECARD)) return;
-    var PAGE = IS_WORKFORCE ? 'wf' : (IS_PICK_AREAS ? 'pa' : 'sc');
-    var FLAG = 'cpt_pc_setup_' + PAGE + '_v2';   // v2: sayfaya özel reçete
-    try { if (localStorage.getItem(FLAG) === 'done') return; } catch(e) { return; }
 
-    // Sayfaya özel: KAPALI kalması gereken kolonlar (küçük harf, normalize). Boş = hepsi açık.
-    var OFF_COLUMNS = {
-        wf: ['station id', 'workcell type'],
-        pa: [],
-        sc: []
-    }[PAGE];
-    // Sayfaya özel: panel DIŞINDA açılacak ekstra toggle'lar (metin eşleşmesi)
-    var EXTRA_TOGGLES = {
-        wf: [],
-        pa: ['show batch id', 'show process path'],
-        sc: []
-    }[PAGE];
+// ── Ortak ayar uygulayıcı: verilen document (ana sayfa VEYA iframe) içinde çalışır ──
+function _pcApplySettings(doc, page, done){
+    // page: 'wf' | 'pa' | 'sc'
+    var OFF_COLUMNS = { wf: ['station id','workcell type'], pa: [], sc: [] }[page];
+    var EXTRA_TOGGLES = { wf: [], pa: ['show batch id','show process path'], sc: [] }[page];
+    // Panel dışı, sayfa gövdesindeki KAPALI yapılacak toggle'lar (metin → kapat)
+    var OFF_BODY_TOGGLES = { wf: ['use utc','auto refresh'], pa: [], sc: [] }[page];
 
-    var tries = 0, MAX_TRIES = 40;
-
+    var tries = 0, MAX = 40;
     function norm(s){ return (s||'').replace(/\s+/g,' ').trim().toLowerCase(); }
-    function findByText(selector, rx){
-        var els = document.querySelectorAll(selector);
-        for (var i=0;i<els.length;i++){ if (rx.test((els[i].textContent||'').trim())) return els[i]; }
-        return null;
-    }
-    function clickable(el){ return el && (el.offsetParent !== null); }
-
+    function q(sel){ return doc.querySelectorAll(sel); }
+    function findByText(sel, rx){ var e=q(sel); for(var i=0;i<e.length;i++){ if(rx.test((e[i].textContent||'').trim())) return e[i]; } return null; }
+    function vis(el){ return el && el.offsetParent !== null; }
     function findGear(){
-        return document.querySelector('button[aria-label*="preferences" i]')
-            || document.querySelector('button[aria-label*="settings" i]')
-            || document.querySelector('button[aria-label*="ayar" i]')
+        return doc.querySelector('button[aria-label*="preferences" i]')
+            || doc.querySelector('button[aria-label*="settings" i]')
+            || doc.querySelector('button[aria-label*="ayar" i]')
             || findByText('button', /^\s*(preferences|settings|ayarlar)\s*$/i);
     }
-
-    // "Page size = All" radyosunu seç
     function setPageSizeAll(scope){
-        var root = scope || document;
-        var labels = root.querySelectorAll('label, .awsui-radio-button, [class*="radio"]');
-        var allLabel = null, maxNum = -1, maxLabel = null;
-        for (var i=0;i<labels.length;i++){
-            var t = (labels[i].textContent||'').trim();
-            if (/^all$/i.test(t) || /\btümü\b/i.test(t) || /\bhepsi\b/i.test(t)) { allLabel = labels[i]; break; }
-            var m = t.match(/^(\d{2,4})$/); if (m){ var n=parseInt(m[1]); if (n>maxNum){maxNum=n; maxLabel=labels[i];} }
-        }
-        var target = allLabel || maxLabel;
-        if (target){ var inp = target.querySelector('input') || target; try{ inp.click(); }catch(e){} return true; }
-        return false;
+        var root=scope||doc; var labels=root.querySelectorAll('label,.awsui-radio-button,[class*="radio"]');
+        var allL=null,maxN=-1,maxL=null;
+        for(var i=0;i<labels.length;i++){ var t=(labels[i].textContent||'').trim();
+            if(/^all$/i.test(t)||/\btümü\b/i.test(t)||/\bhepsi\b/i.test(t)){allL=labels[i];break;}
+            var m=t.match(/^(\d{2,4})$/); if(m){var n=parseInt(m[1]); if(n>maxN){maxN=n;maxL=labels[i];}} }
+        var tgt=allL||maxL; if(tgt){var inp=tgt.querySelector('input')||tgt; try{inp.click();}catch(e){} return true;} return false;
     }
-
-    // Kolon toggle'ı: metnine göre bul, İSTENEN duruma getir (aç/kapa).
-    //   awsui'de her kolon satırı bir label/row + içinde switch(checkbox). "Select visible columns"
-    //   bölümündeki satırları gezip OFF_COLUMNS'takileri KAPAT, gerisini AÇ.
     function applyColumns(scope){
-        var root = scope || document;
-        // kolon satırları: switch/checkbox içeren ve yanında metin olan bloklar
-        var switches = root.querySelectorAll('[role="switch"], input[type="checkbox"]');
-        var changed = 0;
-        for (var i=0;i<switches.length;i++){
-            var sw = switches[i];
-            if (!clickable(sw)) continue;
-            // bu switch'in etiketini bul: en yakın satır/label'ın metni
-            var row = sw.closest('label, li, tr, [class*="row"], [class*="option"], div');
-            var labelTxt = '';
-            // satırın kendi metninden switch'in kendi metnini çıkararak etiket tahmini
-            if (row) labelTxt = norm(row.textContent);
-            // Bu bir "page size / wrap / sticky / property / description" satırı olabilir — onları atla:
-            if (/wrap lines|sticky header|property key|column description|page size|^\d+$|^all$/.test(labelTxt)) continue;
-
-            var isOn = sw.checked || sw.getAttribute('aria-checked') === 'true';
-            // KAPALI olması gereken kolon mu?
-            var shouldBeOff = OFF_COLUMNS.some(function(off){ return labelTxt.indexOf(off) === 0 || labelTxt === off; });
-            if (shouldBeOff && isOn) { try { sw.click(); changed++; } catch(e){} }
-            else if (!shouldBeOff && !isOn) { try { sw.click(); changed++; } catch(e){} }
-        }
-        return changed;
+        var root=scope||doc; var sw=root.querySelectorAll('[role="switch"],input[type="checkbox"]'); var ch=0;
+        for(var i=0;i<sw.length;i++){ var s=sw[i]; if(!vis(s)) continue;
+            var row=s.closest('label,li,tr,[class*="row"],[class*="option"],div'); var lt=row?norm(row.textContent):'';
+            if(/wrap lines|sticky header|property key|column description|page size|^\d+$|^all$/.test(lt)) continue;
+            var on=s.checked||s.getAttribute('aria-checked')==='true';
+            var off=OFF_COLUMNS.some(function(o){return lt.indexOf(o)===0||lt===o;});
+            if(off&&on){try{s.click();ch++;}catch(e){}} else if(!off&&!on){try{s.click();ch++;}catch(e){}} }
+        return ch;
     }
-
-    // Panel DIŞINDAKI ekstra toggle'lar (ör. "Show Batch ID", "Show Process Path")
-    function applyExtraToggles(){
-        var n = 0;
-        EXTRA_TOGGLES.forEach(function(txt){
-            // metni içeren en yakın toggle'ı bul
-            var all = document.querySelectorAll('[role="switch"], input[type="checkbox"], label, span, div');
-            for (var i=0;i<all.length;i++){
-                if (norm(all[i].textContent) === txt || norm(all[i].textContent).indexOf(txt) === 0){
-                    // bu elemanın içindeki/yanındaki switch'i bul
-                    var sw = all[i].querySelector('[role="switch"], input[type="checkbox"]')
-                          || (all[i].closest('label, div, li') && all[i].closest('label, div, li').querySelector('[role="switch"], input[type="checkbox"]'));
-                    if (sw && clickable(sw)){
-                        var isOn = sw.checked || sw.getAttribute('aria-checked') === 'true';
-                        if (!isOn) { try { sw.click(); n++; } catch(e){} }
-                        break;
-                    }
-                }
-            }
-        });
-        return n;
-    }
-
-    function confirmPanel(scope){
-        var root = scope || document;
-        var btn = findByText('button', /^\s*(confirm|apply|save|onayla|uygula|kaydet)\s*$/i);
-        if (btn && clickable(btn)) { try { btn.click(); return true; } catch(e){} }
+    function confirmPanel(scope){ var b=findByText('button',/^\s*(confirm|apply|save|onayla|uygula|kaydet)\s*$/i); if(b&&vis(b)){try{b.click();return true;}catch(e){}} return false; }
+    // metin → toggle'ı İSTENEN duruma getir (wantOn true=aç, false=kapat)
+    function setToggleByText(txt, wantOn){
+        var all=q('[role="switch"],input[type="checkbox"],label,span,div');
+        for(var i=0;i<all.length;i++){ var nt=norm(all[i].textContent);
+            if(nt===txt||nt.indexOf(txt)===0){
+                var s=all[i].querySelector('[role="switch"],input[type="checkbox"]')
+                    ||(all[i].closest('label,div,li')&&all[i].closest('label,div,li').querySelector('[role="switch"],input[type="checkbox"]'));
+                if(s&&vis(s)){ var on=s.checked||s.getAttribute('aria-checked')==='true';
+                    if(wantOn&&!on){try{s.click();}catch(e){}return true;}
+                    if(!wantOn&&on){try{s.click();}catch(e){}return true;} }
+                break; } }
         return false;
     }
 
     function attempt(){
         tries++;
-        var ready = document.querySelector('tr.awsui-table-row, table tbody tr, thead th[data-awsui-column-id]');
-        if (!ready) { if (tries < MAX_TRIES) return setTimeout(attempt, 500); return; }
-
-        var gear = findGear();
-        if (!clickable(gear)) {
-            if (tries < MAX_TRIES) return setTimeout(attempt, 500);
-            dlog('⚙️ PC oto-kurulum: ayar paneli bulunamadı, manuel gerekiyor (' + FLAG + ')');
-            return;
-        }
-
-        try { gear.click(); } catch(e) {}
+        var ready = doc.querySelector('tr.awsui-table-row, table tbody tr, thead th[data-awsui-column-id]');
+        if(!ready){ if(tries<MAX) return setTimeout(attempt,500); return done && done(false); }
+        var gear=findGear();
+        if(!vis(gear)){ if(tries<MAX) return setTimeout(attempt,500); dlog('⚙️ PC ['+page+'] panel yok, atlandı'); return done && done(false); }
+        try{gear.click();}catch(e){}
         setTimeout(function(){
-            var panel = document.querySelector('[class*="modal"], [role="dialog"], [class*="preferences"]') || document;
-            var okSize = setPageSizeAll(panel);
-            var nCol = applyColumns(panel);
+            var panel=doc.querySelector('[class*="modal"],[role="dialog"],[class*="preferences"]')||doc;
+            var okSize=setPageSizeAll(panel); var nCol=applyColumns(panel);
             setTimeout(function(){
-                var confirmed = confirmPanel(panel);
-                // panel kapandıktan sonra ekstra toggle'lar (sayfa gövdesinde)
+                var confd=confirmPanel(panel);
                 setTimeout(function(){
-                    var nExtra = applyExtraToggles();
-                    if (okSize || nCol > 0 || confirmed || nExtra > 0) {
-                        try { localStorage.setItem(FLAG, 'done'); } catch(e){}
-                        dlog('✅ PC oto-kurulum tamam (' + FLAG + '): size=' + okSize + ' kolon=' + nCol + ' onay=' + confirmed + ' ekstra=' + nExtra);
-                    } else if (tries < MAX_TRIES) {
-                        setTimeout(attempt, 800);
-                    }
-                }, 500);
-            }, 400);
-        }, 500);
+                    // panel-dışı toggle'lar (Show Batch ID / Show Process Path = AÇ)
+                    var nOn=0; EXTRA_TOGGLES.forEach(function(t){ if(setToggleByText(t,true)) nOn++; });
+                    // panel-dışı KAPATılacaklar (Use UTC / Auto Refresh = KAPAT)
+                    var nOff=0; OFF_BODY_TOGGLES.forEach(function(t){ if(setToggleByText(t,false)) nOff++; });
+                    var okAny = okSize||nCol>0||confd||nOn>0||nOff>0;
+                    dlog('✅ PC ['+page+'] size='+okSize+' kolon='+nCol+' onay='+confd+' aç='+nOn+' kapat='+nOff);
+                    done && done(okAny);
+                },500);
+            },400);
+        },500);
+    }
+    setTimeout(attempt, 1200);
+}
+
+// ── iframe'de görünmez sayfa açıp ayarını yaptır ──
+function _pcSetupViaIframe(url, page, cb){
+    try {
+        var f = document.createElement('iframe');
+        f.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1400px;height:900px;border:0;opacity:0;pointer-events:none;visibility:hidden';
+        f.src = url;
+        document.body.appendChild(f);
+        var doneOnce=false;
+        function fin(ok){ if(doneOnce) return; doneOnce=true; try{f.remove();}catch(e){} cb && cb(ok); }
+        var killer=setTimeout(function(){ dlog('⏱ PC ['+page+'] iframe timeout'); fin(false); }, 25000);
+        f.addEventListener('load', function(){
+            // iframe içindeki userscript instance'ı KENDİ ayarını yapar (IS_PICK_AREAS/IS_SCORECARD).
+            // Ama emin olmak için ana sekmeden de iframe.doc üzerinde uygulayıcıyı çağırabiliriz.
+            // Cross-instance karışmasın diye: iframe içindeki instance'a bırak, biz sadece bekle+kapat.
+            setTimeout(function(){
+                // iframe içindeki instance bayrağı koyduysa başarı say
+                var ok=false;
+                try { ok = (f.contentWindow && f.contentWindow.localStorage &&
+                            f.contentWindow.localStorage.getItem('cpt_pc_setup_'+page+'_v3')==='done'); } catch(e){}
+                clearTimeout(killer); fin(ok);
+            }, 14000);   // iframe içi ayar ~12sn sürer, 14sn sonra kapat
+        });
+    } catch(e){ cb && cb(false); }
+}
+
+// ── ANA AKIŞ ──
+(function _pcAutoOrchestrate(){
+    var PC_BASE = 'https://picking-console.eu.picking.aft.a2z.com/fc/IST2';
+    var URLS = { pa: PC_BASE + '/pick-areas-c4', sc: PC_BASE + '/reports/current-scorecard' };
+
+    // 1) iframe İÇİNDEYSEK: sadece kendi sayfamızın ayarını yap, bayrak koy, dur.
+    if (IS_IFRAME) {
+        var pg = _PC_PATH_PA ? 'pa' : (_PC_PATH_SC ? 'sc' : (_PC_PATH_WF ? 'wf' : null));
+        if (!pg) return;
+        var fl = 'cpt_pc_setup_'+pg+'_v3';
+        try { if (localStorage.getItem(fl)==='done') return; } catch(e){ return; }
+        _pcApplySettings(document, pg, function(ok){ if(ok){ try{ localStorage.setItem(fl,'done'); }catch(e){} } });
+        return;
     }
 
-    setTimeout(attempt, 1500);
+    // 2) ANA SEKME + WORKFORCE: kendi ayarını yap, sonra diğer 2 sayfayı iframe'de gez.
+    if (!IS_WORKFORCE) return;
+    // Zaten hepsi kurulduysa hiç uğraşma
+    try {
+        if (localStorage.getItem('cpt_pc_setup_wf_v3')==='done'
+         && localStorage.getItem('cpt_pc_setup_pa_v3')==='done'
+         && localStorage.getItem('cpt_pc_setup_sc_v3')==='done') return;
+    } catch(e){ return; }
+
+    // 2a) Workforce kendi ayarı
+    _pcApplySettings(document, 'wf', function(ok){
+        if(ok){ try{ localStorage.setItem('cpt_pc_setup_wf_v3','done'); }catch(e){} }
+
+        // 2b) Areas C4 (gerekiyorsa) → sonra Scorecard (gerekiyorsa) → sıralı
+        function doPA(next){
+            var paDone=false; try{ paDone = localStorage.getItem('cpt_pc_setup_pa_v3')==='done'; }catch(e){}
+            if(paDone) return next();
+            dlog('➡️ PC oto: Areas C4 iframe açılıyor…');
+            _pcSetupViaIframe(URLS.pa, 'pa', function(){ next(); });
+        }
+        function doSC(next){
+            var scDone=false; try{ scDone = localStorage.getItem('cpt_pc_setup_sc_v3')==='done'; }catch(e){}
+            if(scDone) return next();
+            dlog('➡️ PC oto: Scorecard iframe açılıyor…');
+            _pcSetupViaIframe(URLS.sc, 'sc', function(){ next(); });
+        }
+        // Sıralı çalıştır (aynı anda iki iframe açma — kaynak/oturum çakışmasın)
+        doPA(function(){ doSC(function(){ dlog('🏁 PC oto-kurulum bitti — workforce aktif kalıyor'); }); });
+    });
 })();
 
 if (IS_WORKFORCE) {
