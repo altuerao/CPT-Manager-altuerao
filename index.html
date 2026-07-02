@@ -2693,7 +2693,7 @@ h1,h2,h3,.page-title,.page-title-text,.gate-title,.brand,.logo-text {
 }
 #topbar::after, .topbar::after {
   content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
-  background: var(--accent-grad); opacity:.5;
+  background: var(--accent-grad); opacity:.35;
   background-size: 200% 100%;
   animation: gradShift 8s ease infinite;
 }
@@ -2837,7 +2837,7 @@ tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
   }
   #tab-nav::after {
     content:""; position:absolute; top:0; right:-1px; bottom:0; width:1px;
-    background: linear-gradient(180deg, transparent, var(--accent-grad), transparent);
+    background: linear-gradient(180deg, var(--accent-grad), transparent);
     opacity:.35;
   }
   /* v12.35: Logo topbar'dan GİZLENİR (çakışma fixi) — marka sidebar üstünde ::before */
@@ -2917,11 +2917,24 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   #sb-toggle:active { transform: scale(.94); }
   #sb-toggle span { display: block; transition: transform .34s var(--ease-out); pointer-events: none; }
 
-  html.sb-min #sb-toggle { left: 52px; }
+  html.sb-min #sb-toggle { left: 52px; top: 12px; }
   html.sb-min #sb-toggle span { transform: rotate(180deg); }
   html.sb-min #tab-nav { width: 68px; padding-left: 8px; padding-right: 8px; }
   html.sb-min body { padding-left: 68px; }
-  html.sb-min #topbar { left: 68px; }
+  /* v12.42: Kapalıyken TOPBAR da yukarı gizlenir — 🔄 rozetinden "crafted by"a kadar
+     tüm üst bar öğeleri yukarı kayıp kaybolur, içerik yukarı çıkıp yer kazanır.
+     Toggle butonu görünür kalır (tek geri-açma yolu). */
+  #topbar { transition: left .34s var(--ease-out), transform .34s var(--ease-out), opacity .30s var(--ease-out); }
+  html.sb-min #topbar {
+    position: fixed; top: 0; left: 68px; right: 0;
+    transform: translateY(-100%);
+    opacity: 0; pointer-events: none;
+  }
+  /* topbar akıştan çıkınca (fixed) bıraktığı 56px boşluğu içerik yukarı çıkarak kapatır */
+  html.sb-min body > *:not(#tab-nav):not(#sb-toggle):not(#cpt-gate):not(#welcome-modal):not(#topbar) {
+    /* içerik zaten body akışında; topbar fixed olunca doğal olarak yukarı gelir */
+  }
+  html.sb-min #sb-toggle { z-index: 720; }   /* topbar gizliyken de en üstte, tıklanabilir */
   html.sb-min #tab-nav::before {
     content: "\1F4E6";
     justify-content: center; padding: 0; font-size: 22px;
@@ -3001,7 +3014,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.41</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.42</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3474,7 +3487,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.41</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.42</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3808,7 +3821,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.41.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.42.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7882,7 +7895,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.41 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.42 · IST2</div>
     </div>`;
 }
 
