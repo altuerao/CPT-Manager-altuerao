@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.39
+// @version      12.41
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -375,7 +375,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.39] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.41] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -441,7 +441,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.39';
+    const BRIDGE_VERSION = '12.41';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -1252,6 +1252,112 @@ if (IS_PICKING && !IS_IFRAME) {
 // ════════════════════════════════════════════════════════
 //  WORKFORCE — ana veri merkezi
 // ════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════
+//  v12.41 — PICKING CONSOLE OTOMATİK KURULUM (TEK SEFERLİK)
+//  Amaç: kullanıcının elle yaptığı ayarları (Page size=All, kolonlar, toggle'lar)
+//  script BİR KEZ otomatik yapsın. Cloudscape/awsui tercihleri localStorage'da
+//  tutulur; UI'daki ⚙️ paneli açıp seçenekleri işaretleyerek ayarları uygularız.
+//  KENDİNİ DOĞRULAR: başarılıysa bayrak koyar bir daha dokunmaz; öğe bulamazsa
+//  SESSİZCE vazgeçer (hiçbir şeyi bozmaz), gate eski manuel talimatı gösterir.
+//  Sürekli otomasyon YOK — sadece ilk kurulumda çalışır.
+// ════════════════════════════════════════════════════════
+(function _pcAutoSetup(){
+    if (!(IS_WORKFORCE || IS_PICK_AREAS)) return;
+    var FLAG = IS_WORKFORCE ? 'cpt_pc_setup_wf_v1' : 'cpt_pc_setup_pa_v1';
+    try { if (localStorage.getItem(FLAG) === 'done') return; } catch(e) { return; }
+
+    var tries = 0, MAX_TRIES = 40;   // ~20sn boyunca sayfanın oturmasını bekle
+
+    function findByText(selector, rx){
+        var els = document.querySelectorAll(selector);
+        for (var i=0;i<els.length;i++){ if (rx.test((els[i].textContent||'').trim())) return els[i]; }
+        return null;
+    }
+    function clickable(el){ return el && (el.offsetParent !== null); }
+
+    // awsui ayar (settings/preferences) dişli butonunu bul
+    function findGear(){
+        return document.querySelector('button[aria-label*="preferences" i]')
+            || document.querySelector('button[aria-label*="settings" i]')
+            || document.querySelector('button[aria-label*="ayar" i]')
+            || findByText('button', /^\s*(preferences|settings|ayarlar)\s*$/i);
+    }
+
+    // Panel içindeki "page size = All" radyosunu seç
+    function setPageSizeAll(scope){
+        var root = scope || document;
+        // awsui radio: label metni "All" veya en büyük sayı
+        var labels = root.querySelectorAll('label, .awsui-radio-button, [class*="radio"]');
+        var allLabel = null, maxNum = -1, maxLabel = null;
+        for (var i=0;i<labels.length;i++){
+            var t = (labels[i].textContent||'').trim();
+            if (/^all$/i.test(t) || /\btümü\b/i.test(t) || /\bhepsi\b/i.test(t)) { allLabel = labels[i]; break; }
+            var m = t.match(/^(\d{2,4})$/); if (m){ var n=parseInt(m[1]); if (n>maxNum){maxNum=n; maxLabel=labels[i];} }
+        }
+        var target = allLabel || maxLabel;
+        if (target){ var inp = target.querySelector('input') || target; try{ (inp).click(); }catch(e){} return true; }
+        return false;
+    }
+
+    // Panel içindeki tüm KAPALI kolon/görünürlük toggle'larını AÇ (checkbox/switch)
+    function enableAllToggles(scope){
+        var root = scope || document;
+        var boxes = root.querySelectorAll('input[type="checkbox"], [role="switch"], [role="checkbox"]');
+        var n = 0;
+        for (var i=0;i<boxes.length;i++){
+            var b = boxes[i];
+            var checked = b.checked || b.getAttribute('aria-checked') === 'true';
+            if (!checked && clickable(b)) { try { b.click(); n++; } catch(e){} }
+        }
+        return n;
+    }
+
+    // Paneldeki "Confirm/Apply/Onayla" butonuna bas
+    function confirmPanel(scope){
+        var root = scope || document;
+        var btn = findByText('button', /^\s*(confirm|apply|save|onayla|uygula|kaydet)\s*$/i);
+        if (btn && clickable(btn)) { try { btn.click(); return true; } catch(e){} }
+        return false;
+    }
+
+    function attempt(){
+        tries++;
+        // Tablo yüklendi mi? (awsui satırı görünene kadar bekle)
+        var ready = document.querySelector('tr.awsui-table-row, table tbody tr, thead th[data-awsui-column-id]');
+        if (!ready) { if (tries < MAX_TRIES) return setTimeout(attempt, 500); return; }
+
+        var gear = findGear();
+        if (!clickable(gear)) {
+            // Dişli yok/erişilemiyor → SESSİZCE VAZGEÇ (hiçbir şeyi bozma). Gate manuel talimat gösterir.
+            if (tries < MAX_TRIES) return setTimeout(attempt, 500);
+            dlog('⚙️ PC oto-kurulum: ayar paneli bulunamadı, manuel gerekiyor (' + FLAG + ')');
+            return;
+        }
+
+        try { gear.click(); } catch(e) {}
+        // Panel açılsın
+        setTimeout(function(){
+            var panel = document.querySelector('[class*="modal"], [role="dialog"], [class*="preferences"]') || document;
+            var okSize = setPageSizeAll(panel);
+            var nTog = enableAllToggles(panel);
+            setTimeout(function(){
+                var confirmed = confirmPanel(panel);
+                // Başarı kriteri: ya sayfa boyutu ayarlandı ya da en az bir toggle açıldı
+                if (okSize || nTog > 0 || confirmed) {
+                    try { localStorage.setItem(FLAG, 'done'); } catch(e){}
+                    dlog('✅ PC oto-kurulum tamam (' + FLAG + '): pageSize=' + okSize + ' toggles=' + nTog + ' confirm=' + confirmed);
+                } else if (tries < MAX_TRIES) {
+                    setTimeout(attempt, 800);
+                }
+            }, 400);
+        }, 500);
+    }
+
+    // Sayfa oturması için ilk denemeyi geciktir
+    setTimeout(attempt, 1500);
+})();
+
 if (IS_WORKFORCE) {
     const MONTHS_TR = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
 

@@ -2195,6 +2195,16 @@ select option { background: var(--surface); }
   background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
   padding: 10px 14px; font-size: 13px;
 }
+.gate-tx { flex: 1 1 auto; min-width: 0; }
+.gate-open {
+  flex: none; font-size: 11px; font-weight: 700; text-decoration: none;
+  padding: 4px 10px; border-radius: 7px; white-space: nowrap;
+  background: var(--card); color: var(--blue); border: 1px solid var(--border2);
+  transition: background .18s var(--ease-out,ease), color .18s, border-color .18s, transform .12s;
+}
+.gate-open:hover { background: var(--accent-grad); color: #fff; border-color: transparent; transform: translateY(-1px); }
+.gate-open:active { transform: translateY(0) scale(.96); }
+#gate-dl-us { background: var(--accent-grad); color: #fff; border-color: transparent; box-shadow: var(--glow); }
 .gate-ic { width: 20px; text-align: center; font-size: 14px; flex: none; }
 .gate-step.ok   { border-color: rgba(34,197,94,.4); }
 .gate-step.ok   .gate-ic { color: #22c55e; }
@@ -2835,8 +2845,8 @@ tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
   #tab-nav::before {
     content: "📦  CPT Manager";
     display: flex; align-items: center; flex: none;
-    height: 66px; margin: 0 -12px 10px; padding: 0 20px;
-    font: 700 17px/1 'Space Grotesk','Inter',sans-serif; letter-spacing: -.02em;
+    height: 56px; margin: 0 -12px 8px; padding: 0 18px;
+    font: 700 16px/1 'Space Grotesk','Inter',sans-serif; letter-spacing: -.02em;
     background: var(--accent-grad); background-size: 200% 200%;
     -webkit-background-clip: text; background-clip: text; color: transparent;
     animation: gradShift 7s ease infinite;
@@ -2894,7 +2904,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   #topbar-logo { transition: none; }
 
   #sb-toggle {
-    position: fixed; z-index: 700; top: 84px; left: 216px;
+    position: fixed; z-index: 700; top: 12px; left: 216px;
     width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     background: var(--card); color: var(--blue);
@@ -2944,22 +2954,27 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       <div class="gate-step" id="gate-step-us">
         <span class="gate-ic" id="gate-ic-us">⏳</span>
         <span class="gate-tx" id="gate-tx-us">Userscript bağlantısı bekleniyor…</span>
+        <a class="gate-open" id="gate-dl-us" href="https://github.com/altuerao/CPT-Manager-altuerao/raw/main/CPT-Manager.user.js" target="_blank" rel="noopener" title="Script'i indir / güncelle (Tampermonkey açılır)">⬇️ Script indir</a>
       </div>
       <div class="gate-step" id="gate-step-transit">
         <span class="gate-ic" id="gate-ic-transit">·</span>
         <span class="gate-tx" id="gate-tx-transit">Rodeo (transit)</span>
+        <a class="gate-open" href="https://rodeo-dub.amazon.com/IST2/ExSD" target="_blank" rel="noopener" title="Rodeo ExSD sayfasını aç">Aç ↗</a>
       </div>
       <div class="gate-step" id="gate-step-workforce">
         <span class="gate-ic" id="gate-ic-workforce">·</span>
         <span class="gate-tx" id="gate-tx-workforce">Picking Console (workforce)</span>
+        <a class="gate-open" href="https://picking-console.eu.picking.aft.a2z.com/fc/IST2/pick-workforce" target="_blank" rel="noopener" title="Pick Workforce sayfasını aç">Aç ↗</a>
       </div>
       <div class="gate-step" id="gate-step-elig">
         <span class="gate-ic" id="gate-ic-elig">·</span>
         <span class="gate-tx" id="gate-tx-elig">FC Eligibility (yetkiler)</span>
+        <a class="gate-open" href="https://fc-eligibility-website-dub.aka.amazon.com/#/dashboard/IST2" target="_blank" rel="noopener" title="FC Eligibility Dashboard'u aç">Aç ↗</a>
       </div>
       <div class="gate-step" id="gate-step-sortation">
         <span class="gate-ic" id="gate-ic-sortation">·</span>
         <span class="gate-tx" id="gate-tx-sortation">Sortation (buffer)</span>
+        <a class="gate-open" href="https://flow-sortation-eu.amazon.com/IST2/batch-buffer/current-status" target="_blank" rel="noopener" title="Buffer Status sayfasını aç">Aç ↗</a>
       </div>
     </div>
     <div class="gate-help" id="gate-help" style="display:none"></div>
@@ -2986,7 +3001,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.38</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.41</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3459,7 +3474,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.38</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.41</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3776,6 +3791,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       window._cptBridge.connected = true;
       window._cptBridge.version = String(e.detail || '');
       _step('us', 'ok', '✓', 'Userscript bağlı · v' + window._cptBridge.version);
+      try { var _dl = document.getElementById('gate-dl-us'); if (_dl) _dl.style.display = 'none'; } catch(e) {}
       for (var i = 0; i < SOURCES.length; i++) _step(SOURCES[i].id, '', '⏳', SOURCES[i].label + ' — kontrol ediliyor…');
       _chip('ok', '✓ Bağlı v' + window._cptBridge.version);
       try { document.dispatchEvent(new CustomEvent('cpt:requestData')); } catch(err) {}
@@ -3792,7 +3808,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.38.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.41.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7866,7 +7882,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.38 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.41 · IST2</div>
     </div>`;
 }
 
