@@ -507,7 +507,7 @@ html, body, * {
               border-color 260ms cubic-bezier(.4,0,.2,1);
 }
 #transit-cpt-cards > div:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
@@ -2669,15 +2669,14 @@ h1,h2,h3,.page-title,.page-title-text,.gate-title,.brand,.logo-text {
 @keyframes gradShift  { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
 @keyframes popIn      { 0% { opacity:0; transform:scale(.6); } 70% { transform:scale(1.06); } 100% { opacity:1; transform:scale(1); } }
 
-.tab-content { animation: fadeUp var(--dur-3) var(--ease-out) both; }
-.tab-content.active { animation: fadeUp var(--dur-3) var(--ease-out) both; }
+.tab-content { animation: fadeIn .20s ease both; }
 
 /* ── 4) GLASS HEADER ───────────────────────────────────────────────────── */
 #topbar, .topbar, header.topbar {
   position: sticky; top: 0; z-index: 500;
   background: var(--glass) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
   border-bottom: 1px solid var(--glass-border) !important;
   box-shadow: 0 6px 28px rgba(0,0,0,.08);
 }
@@ -2701,7 +2700,7 @@ h1,h2,h3,.page-title,.page-title-text,.gate-title,.brand,.logo-text {
               transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
   position: relative;
 }
-#tab-nav .tab:hover { background: var(--card-hover); transform: translateX(3px); color: var(--text); }
+#tab-nav .tab:hover { background: var(--card-hover); transform: translateX(2px); color: var(--text); }
 #tab-nav .tab:active { transform: translateX(3px) scale(.98); }
 #tab-nav .tab.active {
   background: var(--accent-grad) !important;
@@ -2718,7 +2717,7 @@ h1,h2,h3,.page-title,.page-title-text,.gate-title,.brand,.logo-text {
               border-color var(--dur-2) var(--ease-out);
 }
 .card:hover, .cpt-card:hover, .floor-card:hover, .stat-card:hover, .panel:hover, .metric-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
   border-color: var(--border2);
 }
@@ -2735,7 +2734,7 @@ button, .btn, [role="button"] {
               background var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out),
               filter var(--dur-2) var(--ease-out);
 }
-button:hover, .btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+button:hover, .btn:hover { transform: translateY(-1px); }
 button:active, .btn:active { transform: translateY(0) scale(.96); }
 button:focus-visible, .tab:focus-visible, input:focus-visible {
   outline: 2px solid var(--blue); outline-offset: 2px; border-radius: var(--radius-sm);
@@ -2771,7 +2770,7 @@ tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
 .gate-card {
   animation: scaleIn .55s var(--ease-spring) both;
   background: var(--glass) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
   border: 1px solid var(--glass-border) !important;
   box-shadow: var(--shadow-lg), var(--glow) !important;
   border-radius: 22px !important;
@@ -2817,9 +2816,9 @@ tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
   #tab-nav {
     position: fixed; left: 0; top: 0; bottom: 0; width: 232px;
     display: flex; flex-direction: column; gap: 5px;
-    padding: 86px 12px 16px;
+    padding: 0 12px 16px;
     background: var(--glass);
-    -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
     border-right: 1px solid var(--glass-border);
     border-bottom: none !important;
     z-index: 600; overflow-y: auto;
@@ -2830,12 +2829,17 @@ tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
     background: linear-gradient(180deg, transparent, var(--accent-grad), transparent);
     opacity:.35;
   }
-  /* Marka — sidebar üstü (logo topbar'dan buraya sabitlenir) */
-  #topbar-logo {
-    position: fixed; left: 0; top: 0; width: 232px; height: 72px;
-    display: flex; align-items: center; padding: 0 18px;
-    z-index: 610; border-bottom: 1px solid var(--glass-border);
-    background: transparent;
+  /* v12.35: Logo topbar'dan GİZLENİR (çakışma fixi) — marka sidebar üstünde ::before */
+  #topbar-logo { display: none; }
+  #tab-nav::before {
+    content: "📦  CPT Manager";
+    display: flex; align-items: center; flex: none;
+    height: 66px; margin: 0 -12px 10px; padding: 0 20px;
+    font: 700 17px/1 'Space Grotesk','Inter',sans-serif; letter-spacing: -.02em;
+    background: var(--accent-grad); background-size: 200% 200%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: gradShift 7s ease infinite;
+    border-bottom: 1px solid var(--glass-border);
   }
   /* Topbar sidebar'ın sağından başlar */
   #topbar { left: 232px; padding-left: 18px !important; }
@@ -2850,12 +2854,10 @@ tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
 }
 
 /* ── 19) TEMA GEÇİŞ ANİMASYONU ─────────────────────────────────────────── */
-@keyframes themeReveal {
-  from { clip-path: circle(0% at var(--tx,85%) var(--ty,6%)); }
-  to   { clip-path: circle(140% at var(--tx,85%) var(--ty,6%)); }
-}
-::view-transition-old(root) { animation: none; }
-::view-transition-new(root) { animation: themeReveal .55s cubic-bezier(.22,1,.36,1); }
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn  { from { opacity: 0; transform: scale(.992); } to { opacity: 1; transform: none; } }
+::view-transition-old(root) { animation: vtOut .26s cubic-bezier(.4,0,.2,1) both; }
+::view-transition-new(root) { animation: vtIn  .40s cubic-bezier(.22,1,.36,1) both; }
 html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
   transition: background-color .5s ease, background .5s ease, color .5s ease,
               border-color .5s ease, box-shadow .5s ease, fill .5s ease !important;
@@ -2872,11 +2874,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 }
 .page-title-emoji { filter: drop-shadow(0 4px 12px var(--aurora-1)); }
 
-/* İçerik bölümleri kademeli giriş */
-.tab-content > * { animation: fadeUp .5s var(--ease-out) both; }
-.tab-content > *:nth-child(1){animation-delay:.02s} .tab-content > *:nth-child(2){animation-delay:.06s}
-.tab-content > *:nth-child(3){animation-delay:.10s} .tab-content > *:nth-child(4){animation-delay:.14s}
-.tab-content > *:nth-child(5){animation-delay:.18s} .tab-content > *:nth-child(6){animation-delay:.22s}
+/* v12.35: stagger kaldırıldı — sekme geçişi anında, iOS hissi */
 
 /* ── 15) ERİŞİLEBİLİRLİK — hareket azaltma ─────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
@@ -2942,7 +2940,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.34</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.35</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3415,7 +3413,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.34</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.35</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3748,7 +3746,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.34.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.35.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7035,6 +7033,24 @@ const _PHOTO_PX = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAE
 // v10.95: PDF NameTag'ten çıkarılan rozet fotoğrafları (login→80x80 JPEG base64).
 // Gömülü → CDN'e gerek yok, her zaman/anında/titremesiz görünür. Yoksa CDN/FC Research fallback.
 const _PDF_PHOTOS = {};   // v12.31: gömülü çalışan fotoğrafları KALDIRILDI (kişisel veri, global sitede olmaz). Fallback: _photoURL(login) çalışır.
+// ═══ v12.35 FOTO STORE — kullanıcının kendi yüklediği fotoğraflar (login → dataURL) ═══
+//   Gömülü fotoğraflar kişisel veri olduğu için silindi; artık fotoğraflar da eğitim
+//   yedeği gibi KULLANICIDAN gelir: "📷 Foto Yükle" (json: {login: dataURL}) →
+//   localStorage 'cpt_perm_photos_v1'. Tüm foto gösterim noktaları önce buraya bakar,
+//   yoksa badge URL'e düşer. cpt_perm_ öneki sayesinde köprüden ASLA geçmez.
+let _permPhotos = null;
+function permPhotosLoad(){
+  if(_permPhotos) return _permPhotos;
+  try{ _permPhotos = JSON.parse(localStorage.getItem('cpt_perm_photos_v1')||'{}')||{}; }
+  catch(e){ _permPhotos = {}; }
+  return _permPhotos;
+}
+function permPhotosSave(){ try{ localStorage.setItem('cpt_perm_photos_v1', JSON.stringify(_permPhotos||{})); }catch(e){} }
+function _storedPhoto(login){
+  const p = permPhotosLoad();
+  const k = String(login||'').toLowerCase();
+  return (k && p[k]) || null;
+}
 // v10.97: PDF NameTag barkod numaraları (login→batch id). Code128 olarak çizilir.
 const _PDF_BARCODE = {};   // v12.31: gömülü personel barkodları KALDIRILDI (kişisel veri). Kullanıcının girdiği bc alanı store'da, yedekte korunur.
 const _bcCache = {};
@@ -7058,6 +7074,7 @@ function _preloadPhoto(safe){
     const im = new Image();
     im.referrerPolicy = 'no-referrer';
     im.decoding = 'sync';
+    const _sp0 = (typeof _storedPhoto==='function') && _storedPhoto(safe); if(_sp0) return;   // v12.35: foto store'da varsa preload gereksiz
     im.src = 'https://internal-cdn.amazon.com/badgephotos.amazon.com/?uid=' + encodeURIComponent(safe);
     _photoImgCache.set(safe, im);   // ref'i sakla → resim bellekte kalır, yeniden çekilmez
   }catch(e){}
@@ -7073,7 +7090,8 @@ function pickerPhotoTag(login, size) {
     return `<img src="${emb}" alt="" decoding="sync" style="${_st}">`;
   }
   _preloadPhoto(safe);
-  return `<img src="https://internal-cdn.amazon.com/badgephotos.amazon.com/?uid=${encodeURIComponent(safe)}" alt="" decoding="sync" loading="eager" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${_PHOTO_PX}'" style="${_st}">`;
+  const _sp1 = (typeof _storedPhoto==='function') && _storedPhoto(safe);   // v12.35: önce kullanıcı foto store'u
+  return `<img src="${_sp1 || ('https://internal-cdn.amazon.com/badgephotos.amazon.com/?uid='+encodeURIComponent(safe))}" alt="" decoding="sync" loading="eager" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${_PHOTO_PX}'" style="${_st}">`;
 }
 
 // v11.74: Tote process path kısaltma rozeti (Kat Dwell / Transit)
@@ -7166,7 +7184,7 @@ function pickerPhotoWithName(login, photoSize) {
   const emb = (typeof _PDF_PHOTOS!=='undefined') ? _PDF_PHOTOS[safe] : null;
   const imgTag = emb
     ? `<img src="${emb}" alt="" decoding="async" style="${_st}">`
-    : (_preloadPhoto(safe), `<img src="https://internal-cdn.amazon.com/badgephotos.amazon.com/?uid=${encodeURIComponent(safe)}" alt="" decoding="async" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${_PHOTO_PX}'" style="${_st}">`);
+    : (_preloadPhoto(safe), `<img src="${((typeof _storedPhoto==='function')&&_storedPhoto(safe)) || ('https://internal-cdn.amazon.com/badgephotos.amazon.com/?uid='+encodeURIComponent(safe))}" alt="" decoding="async" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${_PHOTO_PX}'" style="${_st}">`);
   const disp = _pickerDisplayName(safe);
   const nameLine = disp
     ? `<div style="font-size:9.5px;color:var(--text3);font-weight:600;line-height:1.1;margin-top:1px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${disp}">${disp}</div>`
@@ -7802,7 +7820,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.34 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.35 · IST2</div>
     </div>`;
 }
 
@@ -8554,6 +8572,47 @@ function permExportData(){
     if(typeof toast==='function') toast('\u2705 '+t('Yedek indirildi')+' (.json)');
   }catch(e){ alert((typeof t==='function'?t('Yedek alınamadı'):'Yedek alinamadi')+': '+e); }
 }
+// ═══ v12.35: FOTO yedeği içe/dışa aktar — {login: dataURL} json ═══
+function permPhotosImport(input){
+  const f = input && input.files && input.files[0];
+  if(input) input.value='';
+  if(!f) return;
+  const rd = new FileReader();
+  rd.onload = function(){
+    try{
+      const obj = JSON.parse(rd.result);
+      if(!obj || typeof obj!=='object' || Array.isArray(obj)) throw new Error('format');
+      permPhotosLoad();
+      let n=0, skip=0;
+      Object.entries(obj).forEach(function(kv){
+        const lg = String(kv[0]||'').toLowerCase().trim();
+        const du = String(kv[1]||'');
+        if(lg && du.indexOf('data:image')===0){ _permPhotos[lg]=du; n++; } else skip++;
+      });
+      if(n===0) throw new Error('bos');
+      permPhotosSave();
+      if(typeof renderTraining==='function') renderTraining();
+      if(typeof toast==='function') toast('\ud83d\udcf7 '+n+' '+t('foto yüklendi')+(skip?(' · '+skip+' '+t('atlandı')):''));
+    }catch(e){ alert(t('Foto yedeği okunamadı')+': '+e.message); }
+  };
+  rd.readAsText(f);
+}
+function permPhotosExport(){
+  try{
+    permPhotosLoad();
+    const n = Object.keys(_permPhotos||{}).length;
+    if(!n){ alert(t('Henüz yüklü foto yok')); return; }
+    const blob = new Blob([JSON.stringify(_permPhotos)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const dt = new Date();
+    const stamp = dt.getFullYear()+('0'+(dt.getMonth()+1)).slice(-2)+('0'+dt.getDate()).slice(-2);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'cpt_foto_yedek_'+stamp+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 200);
+    if(typeof toast==='function') toast('\u2705 '+n+' '+t('foto indirildi'));
+  }catch(e){ alert(t('Foto yedeği alınamadı')+': '+e); }
+}
 function permImportData(input){
   const f = input && input.files && input.files[0];
   if(input) input.value='';
@@ -8910,6 +8969,8 @@ function renderTraining() {
         <button onclick="permClearShift()" title="${t('Bu vardiyayı temizle')}" style="cursor:pointer;font-size:13px;padding:7px 10px;border-radius:8px;background:var(--card-hover);color:var(--text3);border:1px solid var(--border)">🗑️</button>
         <button onclick="permExportData()" title="${t('Yapılandırmayı .json olarak indir (barkodlar dahil)')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:#22c55e;border:1px solid var(--border);white-space:nowrap">⬇️ ${t('Yedek al')}</button>
         <label title="${t('.json yedeğini yükle (başka bilgisayarda geri yükle)')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:var(--blue);border:1px solid var(--border);white-space:nowrap">⬆️ ${t('Yedek yükle')}<input type="file" accept=".json,application/json" onchange="permImportData(this)" style="display:none"></label>
+        <label title="${t('Foto yedeği yükle (.json: {login: dataURL})')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:var(--purple);border:1px solid var(--border);white-space:nowrap">📷 ${t('Foto yükle')}<input type="file" accept=".json,application/json" onchange="permPhotosImport(this)" style="display:none"></label>
+        <button onclick="permPhotosExport()" title="${t('Yüklü fotoğrafları .json olarak indir')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:var(--purple);border:1px solid var(--border);white-space:nowrap">📷 ${t('Foto yedeği al')}</button>
         <span id="perm-upload-status" style="font-size:11px;color:var(--text3);width:100%"></span>
       </div>`;
   }
@@ -17101,7 +17162,7 @@ if (_azCptEl) _azCptEl.onchange = () => {
     const _nmEsc = _nm.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     tooltipLabel.innerHTML = '<span>' + login + '</span>' +
       (_nmEsc ? '<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:10px;font-weight:600;color:var(--text3);margin-top:1px;max-width:130px;line-height:1.2;white-space:normal;word-break:break-word">' + _nmEsc + '</div>' : '');
-    const url = (typeof _PDF_PHOTOS!=='undefined' && _PDF_PHOTOS[login]) ? _PDF_PHOTOS[login] : _photoURL(login);  // v10.95: gömülü foto önce
+    const url = ((typeof _storedPhoto==='function') && _storedPhoto(login)) || ((typeof _PDF_PHOTOS!=='undefined' && _PDF_PHOTOS[login]) ? _PDF_PHOTOS[login] : _photoURL(login));  // v12.35: foto store önce
     tooltipImg.onload  = () => { if (currentLogin === login) reveal(login); };
     tooltipImg.onerror = () => { if (currentLogin === login) { tooltip.classList.remove('visible'); shownLogin = ''; } };
     if (tooltipImg.getAttribute('src') === url) {
