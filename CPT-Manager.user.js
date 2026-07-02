@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.44
+// @version      12.45
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -377,11 +377,65 @@ try {
                 alert('Hata: ' + (e.message || e));
             }
         });
+
+        // ═══ v12.45: PC AYAR TEŞHİS — canlı sayfada dişli/panel/toggle yapısını göster ═══
+        GM_registerMenuCommand('🔧 PC ayar teşhis', function() {
+            try {
+                var L = [];
+                L.push('═══ PC AYAR TEŞHİS ═══');
+                L.push('URL: ' + location.pathname);
+                L.push('Sayfa: ' + (_PC_PATH_WF?'workforce':(_PC_PATH_PA?'pick-areas':(_PC_PATH_SC?'scorecard':'?'))));
+                L.push('');
+                // dişli aday butonları
+                var btns = [...document.querySelectorAll('button')].filter(function(b){ return b.offsetParent!==null; });
+                L.push('Görünür buton sayısı: ' + btns.length);
+                var gearCands = btns.filter(function(b){
+                    var al=(b.getAttribute('aria-label')||'')+' '+(b.getAttribute('title')||'')+' '+(b.className||'');
+                    return /pref|setting|gear|cog|ayar/i.test(al) || b.querySelector('svg');
+                });
+                L.push('Dişli/ikon aday buton: ' + gearCands.length);
+                gearCands.slice(0,8).forEach(function(b,i){
+                    L.push('  ['+i+'] aria="'+(b.getAttribute('aria-label')||'')+'" title="'+(b.getAttribute('title')||'')+'" class="'+String(b.className).slice(0,40)+'" svg='+(!!b.querySelector('svg')));
+                });
+                L.push('');
+                // toggle/switch yapısı
+                var sw = document.querySelectorAll('[role="switch"], input[type="checkbox"]');
+                L.push('Switch/checkbox sayısı: ' + sw.length);
+                [...sw].slice(0,6).forEach(function(s,i){
+                    var row=s.closest('label,li,tr,[class*="row"],[class*="option"],div');
+                    L.push('  ['+i+'] tag='+s.tagName+' type='+(s.type||'')+' role='+(s.getAttribute('role')||'')+' checked='+(s.checked||s.getAttribute('aria-checked'))+' metin="'+(row?row.textContent.replace(/\s+/g,' ').trim().slice(0,30):'')+'"');
+                });
+                L.push('');
+                L.push('Kurulum bayrakları:');
+                L.push('  wf: ' + localStorage.getItem('cpt_pc_setup_wf_v3'));
+                L.push('  pa: ' + localStorage.getItem('cpt_pc_setup_pa_v3'));
+                L.push('  sc: ' + localStorage.getItem('cpt_pc_setup_sc_v3'));
+                var out = L.join('\n');
+                console.log(out);
+                var w = window.open('', '_blank');
+                w.document.write('<pre style="font:13px monospace;padding:20px;white-space:pre-wrap">'+out.replace(/</g,'&lt;')+'</pre>');
+            } catch(e){ alert('Teşhis hatası: '+e); }
+        });
+
+        // ═══ v12.45: PC ayarlarını ŞİMDİ yap — bayrakları sıfırla + otomasyonu anında tetikle ═══
+        GM_registerMenuCommand('🔧 PC ayarlarını şimdi yap (bu sayfa)', function() {
+            try {
+                var pg = _PC_PATH_WF?'wf':(_PC_PATH_PA?'pa':(_PC_PATH_SC?'sc':null));
+                if (!pg) { alert('Bu bir Picking Console ayar sayfası değil.\nworkforce / pick-areas / scorecard sayfasında çalıştır.'); return; }
+                localStorage.removeItem('cpt_pc_setup_'+pg+'_v3');
+                if (typeof _pcApplySettings === 'function') {
+                    _pcApplySettings(document, pg, function(ok){
+                        if (ok) { try { localStorage.setItem('cpt_pc_setup_'+pg+'_v3','done'); } catch(e){} }
+                        alert(ok ? ('✓ '+pg+' ayarları uygulandı.') : ('⚠️ '+pg+' ayarları uygulanamadı — "🔧 PC ayar teşhis" ile dişli/panel yapısına bak, bana ilet.'));
+                    });
+                } else alert('_pcApplySettings yok.');
+            } catch(e){ alert('Hata: '+e); }
+        });
     }
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.44] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.45] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -470,7 +524,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.44';
+    const BRIDGE_VERSION = '12.45';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -1309,14 +1363,62 @@ function _pcApplySettings(doc, page, done){
 
     var tries = 0, MAX = 40;
     function norm(s){ return (s||'').replace(/\s+/g,' ').trim().toLowerCase(); }
+    // awsui switch/checkbox tıklama: TEK toggle garantisi. Bir yöntem dener, durum
+    //   değiştiyse durur; değişmediyse sıradaki yöntemi dener (çift-tetik yok).
+    function _swState(s){ return s.checked || s.getAttribute('aria-checked')==='true'; }
+    function _clickSwitch(s){
+        var before = _swState(s);
+        // 1) doğrudan tıkla
+        try { s.click(); } catch(e){}
+        if (_swState(s) !== before) return true;
+        // 2) görsel wrapper'a tıkla (gizli input durumunda)
+        try {
+            var w = s.closest('label') || s.closest('[class*="toggle"]') || s.closest('[class*="switch"]') || s.parentElement;
+            if (w && w !== s) { w.click(); if (_swState(s) !== before) return true; }
+        } catch(e){}
+        // 3) native input event (ng/react two-way bind)
+        try {
+            if (s.tagName === 'INPUT') { s.checked = !before; s.dispatchEvent(new Event('change', {bubbles:true})); if (_swState(s) !== before) return true; }
+        } catch(e){}
+        // 4) pointer/mouse event dizisi (bazı awsui switch'leri click yerine bunu dinler)
+        try {
+            ['pointerdown','mousedown','mouseup','click'].forEach(function(t){ s.dispatchEvent(new MouseEvent(t, {bubbles:true, cancelable:true, view:window})); });
+        } catch(e){}
+        return _swState(s) !== before;
+    }
     function q(sel){ return doc.querySelectorAll(sel); }
     function findByText(sel, rx){ var e=q(sel); for(var i=0;i<e.length;i++){ if(rx.test((e[i].textContent||'').trim())) return e[i]; } return null; }
     function vis(el){ return el && el.offsetParent !== null; }
     function findGear(){
-        return doc.querySelector('button[aria-label*="preferences" i]')
-            || doc.querySelector('button[aria-label*="settings" i]')
-            || doc.querySelector('button[aria-label*="ayar" i]')
-            || findByText('button', /^\s*(preferences|settings|ayarlar)\s*$/i);
+        // 1) aria-label ile
+        var g = doc.querySelector('button[aria-label*="preferences" i]')
+             || doc.querySelector('button[aria-label*="settings" i]')
+             || doc.querySelector('button[aria-label*="ayar" i]')
+             || doc.querySelector('button[title*="preferences" i]')
+             || doc.querySelector('button[title*="settings" i]');
+        if (g) return g;
+        // 2) awsui collection-preferences trigger (Cloudscape'in standart sınıfı)
+        g = doc.querySelector('[class*="collection-preferences"] button')
+         || doc.querySelector('button[class*="preferences"]')
+         || doc.querySelector('.awsui-table-tools button:last-child, [class*="table-tools"] button:last-child');
+        if (g && vis(g)) return g;
+        // 3) İçinde dişli (gear/cog/settings) SVG olan buton — awsui ikon butonları aria-label'sız olabilir
+        var btns = doc.querySelectorAll('button');
+        for (var i=0;i<btns.length;i++){
+            var b = btns[i];
+            if (!vis(b)) continue;
+            var svg = b.querySelector('svg');
+            if (!svg) continue;
+            var al = (b.getAttribute('aria-label')||'') + ' ' + (b.getAttribute('title')||'') + ' ' + (svg.getAttribute('aria-label')||'');
+            if (/pref|setting|gear|cog|ayar/i.test(al)) return b;
+            // ikon içeriği "settings" path'i mi (awsui settings ikonu)
+            var use = svg.querySelector('use');
+            if (use && /settings|gear|cog|preference/i.test(use.getAttribute('href')||use.getAttribute('xlink:href')||'')) return b;
+        }
+        // 4) tablonun sağ üstündeki son ikon-buton (genelde preferences orada)
+        var toolbar = doc.querySelector('[class*="table-tools"], [class*="header-tools"], [class*="awsui_tools"]');
+        if (toolbar){ var tb = toolbar.querySelectorAll('button'); if (tb.length){ var last=tb[tb.length-1]; if(vis(last)) return last; } }
+        return null;
     }
     function setPageSizeAll(scope){
         var root=scope||doc; var labels=root.querySelectorAll('label,.awsui-radio-button,[class*="radio"]');
@@ -1333,7 +1435,7 @@ function _pcApplySettings(doc, page, done){
             if(/wrap lines|sticky header|property key|column description|page size|^\d+$|^all$/.test(lt)) continue;
             var on=s.checked||s.getAttribute('aria-checked')==='true';
             var off=OFF_COLUMNS.some(function(o){return lt.indexOf(o)===0||lt===o;});
-            if(off&&on){try{s.click();ch++;}catch(e){}} else if(!off&&!on){try{s.click();ch++;}catch(e){}} }
+            if(off&&on){ _clickSwitch(s); ch++; } else if(!off&&!on){ _clickSwitch(s); ch++; } }
         return ch;
     }
     function confirmPanel(scope){ var b=findByText('button',/^\s*(confirm|apply|save|onayla|uygula|kaydet)\s*$/i); if(b&&vis(b)){try{b.click();return true;}catch(e){}} return false; }
@@ -1345,8 +1447,8 @@ function _pcApplySettings(doc, page, done){
                 var s=all[i].querySelector('[role="switch"],input[type="checkbox"]')
                     ||(all[i].closest('label,div,li')&&all[i].closest('label,div,li').querySelector('[role="switch"],input[type="checkbox"]'));
                 if(s&&vis(s)){ var on=s.checked||s.getAttribute('aria-checked')==='true';
-                    if(wantOn&&!on){try{s.click();}catch(e){}return true;}
-                    if(!wantOn&&on){try{s.click();}catch(e){}return true;} }
+                    if(wantOn&&!on){ _clickSwitch(s); return true; }
+                    if(!wantOn&&on){ _clickSwitch(s); return true; } }
                 break; } }
         return false;
     }
