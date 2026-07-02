@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.46
+// @version      12.47
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -76,13 +76,15 @@ const IS_ELIG      = H.includes('fc-eligibility');                          // v
 const _PC_PATH_WF = IS_PICKING && P.includes('pick-workforce');
 const _PC_PATH_SC = IS_PICKING && P.includes('current-scorecard');
 const _PC_PATH_PA = IS_PICKING && P.includes('pick-areas');
-// v12.44: iframe'deyken VERİ/RELOAD blokları ÇALIŞMAZ (sonsuz reload/çift-çekim önlenir).
-//   Ayar orkestratörü _PC_PATH_* + IS_IFRAME kullanır; veri blokları IS_* kullanır (iframe'de false).
-const IS_WORKFORCE = _PC_PATH_WF && !IS_IFRAME;
-const IS_SCANNER   = IS_PICKING && P.includes('all-in-scanner') && !IS_IFRAME;
-const IS_SCORECARD = _PC_PATH_SC && !IS_IFRAME;
-const IS_INDV_SC   = IS_PICKING && P.includes('individual-scorecard/picker/') && !IS_IFRAME;
-const IS_PICK_AREAS= _PC_PATH_PA && !IS_IFRAME;
+// v12.47 HOTFIX: Bayraklar ESKİ HALİNE döndü (yalın path tespiti). Önceki "&& !IS_IFRAME"
+//   ÖLÜMCÜLDÜ: IS_IFRAME satır 100'de tanımlı ama burası satır 81 → const TDZ ReferenceError
+//   → tüm script Picking Console'da çöküyordu (veri çekmiyor, ayar yapmıyordu). iframe koruması
+//   artık veri bloklarının KENDİ başında (aşağıda IS_IFRAME tanımından SONRA) yapılıyor.
+const IS_WORKFORCE = _PC_PATH_WF;
+const IS_SCANNER   = IS_PICKING && P.includes('all-in-scanner');
+const IS_SCORECARD = _PC_PATH_SC;
+const IS_INDV_SC   = IS_PICKING && P.includes('individual-scorecard/picker/');
+const IS_PICK_AREAS= _PC_PATH_PA;
 const IS_EXSD      = IS_RODEO   && P.includes('ExSD');
 // v10.48: Bu sayfa Fracs Rodeo mu? (?fracs=FRACS query parametresi)
 // Tek cache (cpt_transit_batches_v9) kullanıyoruz, sadece tote'lara isFracs=true flag koyuyoruz.
@@ -435,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.46] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.47] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -524,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.46';
+    const BRIDGE_VERSION = '12.47';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -1573,7 +1575,7 @@ function _pcSetupViaIframe(url, page, cb){
     });
 })();
 
-if (IS_WORKFORCE) {
+if (IS_WORKFORCE && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (sonsuz reload/çift-çekim önlenir; ayar orkestratöre bırakılır)
     const MONTHS_TR = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
 
     // v10.23: EMPTY-NEVER POLICY
@@ -4622,7 +4624,7 @@ if(!IS_PICKING && !IS_RODEO) return;
 // ════════════════════════════════════════════════════════
 //  SCORECARD — günlük rate verisi
 // ════════════════════════════════════════════════════════
-if (IS_SCORECARD) {
+if (IS_SCORECARD && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (sonsuz reload/çift-çekim önlenir; ayar orkestratöre bırakılır)
     let _searched = false;
     let _lastShiftKey = '';
 
@@ -5668,7 +5670,7 @@ if (IS_INDV_SC) {
 // ════════════════════════════════════════════════════════
 //  PICK-AREAS — sadece veri oku, sayfaya dokunma
 // ════════════════════════════════════════════════════════
-if (IS_PICK_AREAS) {
+if (IS_PICK_AREAS && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (sonsuz reload/çift-çekim önlenir; ayar orkestratöre bırakılır)
     // v10.20: Time-based empty guard (DOM observer geçici 0 area gösterebilir)
     let _lastGoodAreasDom = Date.now();
     const AREAS_DOM_THRESHOLD = 45000;  // 45sn boş ise temizle
