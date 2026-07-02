@@ -2659,7 +2659,7 @@ h1,h2,h3,.page-title,.page-title-text,.gate-title,.brand,.logo-text {
 :root {
   --ease-out: cubic-bezier(.22,1,.36,1);
   --ease-spring: cubic-bezier(.34,1.56,.64,1);
-  --dur-1: .16s; --dur-2: .28s; --dur-3: .45s;
+  --dur-1: .20s; --dur-2: .34s; --dur-3: .50s;   /* v12.36: daha yumuşak */
 }
 @keyframes fadeUp     { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
 @keyframes fadeIn     { from { opacity:0; } to { opacity:1; } }
@@ -2669,7 +2669,8 @@ h1,h2,h3,.page-title,.page-title-text,.gate-title,.brand,.logo-text {
 @keyframes gradShift  { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
 @keyframes popIn      { 0% { opacity:0; transform:scale(.6); } 70% { transform:scale(1.06); } 100% { opacity:1; transform:scale(1); } }
 
-.tab-content { animation: fadeIn .20s ease both; }
+@keyframes fadeSoft { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.tab-content { animation: fadeSoft .30s var(--ease-out) both; }   /* v12.36: yumuşak tek geçiş */
 
 /* ── 4) GLASS HEADER ───────────────────────────────────────────────────── */
 #topbar, .topbar, header.topbar {
@@ -2849,8 +2850,10 @@ tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
   #cpt-gate { z-index: 99999; }
 }
 @media (max-width: 1100px) {
-  /* Dar ekran: klasik üst yatay sekmeler korunur */
+  /* Dar ekran: klasik üst yatay sekmeler + topbar logosu geri gelir (çakışmasız) */
   #tab-nav { display: flex; overflow-x: auto; }
+  #tab-nav::before { display: none !important; }   /* sidebar markası gizli */
+  #topbar-logo { display: flex !important; }        /* topbar logosu geri */
 }
 
 /* ── 19) TEMA GEÇİŞ ANİMASYONU ─────────────────────────────────────────── */
@@ -2875,6 +2878,47 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 .page-title-emoji { filter: drop-shadow(0 4px 12px var(--aurora-1)); }
 
 /* v12.35: stagger kaldırıldı — sekme geçişi anında, iOS hissi */
+
+
+/* ── 21) TOPBAR GÜVENCE (v12.36) — elemanlar asla üst üste binmez ─────── */
+#topbar { flex-wrap: nowrap !important; min-height: 56px; }
+#btn-autorefresh, #btn-help { flex-shrink: 0; position: relative; }
+#topbar-logo { flex-shrink: 0; }
+
+/* ── 22) SIDEBAR AÇ/KAPA (v12.36) — Transit/Barkod'a tam genişlik ─────── */
+@media (min-width: 1101px) {
+  #tab-nav { overflow-x: hidden; transition: width .34s var(--ease-out), padding .34s var(--ease-out); }
+  body { transition: padding-left .34s var(--ease-out); }
+  #topbar { transition: left .34s var(--ease-out); }
+  #topbar-logo { transition: none; }
+
+  #sb-toggle {
+    position: fixed; z-index: 660; top: 78px; left: 219px;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--card); color: var(--text2);
+    border: 1px solid var(--border2);
+    box-shadow: var(--shadow); cursor: pointer;
+    font-size: 14px; font-weight: 800; line-height: 1; padding: 0;
+    transition: left .34s var(--ease-out), background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
+  }
+  #sb-toggle:hover { background: var(--accent-grad); color: #fff; border-color: transparent; transform: none; }
+  #sb-toggle span { display: block; transition: transform .34s var(--ease-out); }
+
+  html.sb-min #sb-toggle { left: 55px; }
+  html.sb-min #sb-toggle span { transform: rotate(180deg); }
+  html.sb-min #tab-nav { width: 68px; padding-left: 8px; padding-right: 8px; }
+  html.sb-min body { padding-left: 68px; }
+  html.sb-min #topbar { left: 68px; }
+  html.sb-min #tab-nav::before {
+    content: "\1F4E6";
+    justify-content: center; padding: 0; font-size: 22px;
+    background: none; -webkit-text-fill-color: unset; color: var(--text);
+  }
+  html.sb-min #tab-nav .tab { justify-content: center; padding: 11px 0 !important; }
+  html.sb-min #tab-nav .tab span { display: none; }
+}
+@media (max-width: 1100px) { #sb-toggle { display: none; } }
 
 /* ── 15) ERİŞİLEBİLİRLİK — hareket azaltma ─────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
@@ -2940,7 +2984,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.35</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.37</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3413,7 +3457,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.35</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.37</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3746,7 +3790,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.35.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.37.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7820,7 +7864,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.35 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.37 · IST2</div>
     </div>`;
 }
 
@@ -17581,6 +17625,27 @@ if (_azCptEl) _azCptEl.onchange = () => {
     window.setTheme = themed;
   }
   wrap();
+})();
+/* v12.36 [SIDEBAR AÇ/KAPA] — buton enjekte, durum localStorage'da kalıcı */
+(function(){
+  var KEY = 'cpt_sidebar_min';
+  function init(){
+    var nav = document.getElementById('tab-nav');
+    if (!nav) { setTimeout(init, 300); return; }
+    if (document.getElementById('sb-toggle')) return;
+    try { if (localStorage.getItem(KEY) === '1') document.documentElement.classList.add('sb-min'); } catch(e) {}
+    var b = document.createElement('button');
+    b.id = 'sb-toggle'; b.type = 'button';
+    b.title = 'Menüyü daralt / genişlet';
+    b.setAttribute('aria-label', 'Menüyü daralt veya genişlet');
+    b.innerHTML = '<span>\u2039</span>';
+    b.onclick = function(){
+      var min = document.documentElement.classList.toggle('sb-min');
+      try { localStorage.setItem(KEY, min ? '1' : '0'); } catch(e) {}
+    };
+    document.body.appendChild(b);
+  }
+  init();
 })();
 </script>
 </body>
