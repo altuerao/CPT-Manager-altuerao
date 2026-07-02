@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.42
+// @version      12.43
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -375,7 +375,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.42] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.43] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -429,6 +429,29 @@ function read(key) {
     } catch(e) { return null; }
 }
 
+// ═══ v12.43 CANLI SAYFA NABZI (HEARTBEAT) ═══
+// Sorun: gate verinin YAŞINA bakıyordu (freshMs). Bir sayfa kapatılsa bile veri hâlâ
+//   pencere içindeyse "açık" sanılıp giriş geçiyordu. Çözüm: her AKTİF kaynak sekmesi
+//   GM'e 8sn'de bir "ben açığım" damgası yazar (cpt_hb_{source} = {ts}). Site tarafı bu
+//   damganın ÇOK TAZE (≤30sn) olup olmadığına bakar → sayfa kapanınca 30sn içinde düşer,
+//   gate o kaynağı "kapalı" gösterir ve giriş (Atla hariç) sağlanmaz.
+(function _cptHeartbeat(){
+    if (IS_CPT_SITE || IS_FILE || IS_IFRAME) return;   // sadece gerçek Amazon kaynak sekmeleri
+    var hbKey = null;
+    if (IS_EXSD)      hbKey = 'cpt_hb_transit';
+    else if (IS_WORKFORCE) hbKey = 'cpt_hb_workforce';
+    else if (IS_ELIG)      hbKey = 'cpt_hb_elig';
+    else if (IS_BUFFER)    hbKey = 'cpt_hb_sortation';
+    if (!hbKey) return;
+    function beat(){
+        try { GM_setValue(hbKey, { ts: Date.now() }); } catch(e) {}
+        try { localStorage.setItem(hbKey, JSON.stringify({ ts: Date.now() })); } catch(e) {}
+    }
+    beat();
+    setInterval(beat, 8000);   // 8sn'de bir taze damga
+})();
+
+
 // ═══════════════════════════════════════════════════════════════════════════
 // v12.27 [SİTE KÖPRÜSÜ] — ATLAS modeli. Site (https://KULLANICI.github.io/cpt-manager)
 //   açıkken bu userscript instance'ı KÖPRÜ olur: Amazon sekmelerindeki instance'ların
@@ -441,7 +464,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.42';
+    const BRIDGE_VERSION = '12.43';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -1254,21 +1277,38 @@ if (IS_PICKING && !IS_IFRAME) {
 // ════════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════════
-//  v12.41 — PICKING CONSOLE OTOMATİK KURULUM (TEK SEFERLİK)
-//  Amaç: kullanıcının elle yaptığı ayarları (Page size=All, kolonlar, toggle'lar)
-//  script BİR KEZ otomatik yapsın. Cloudscape/awsui tercihleri localStorage'da
-//  tutulur; UI'daki ⚙️ paneli açıp seçenekleri işaretleyerek ayarları uygularız.
-//  KENDİNİ DOĞRULAR: başarılıysa bayrak koyar bir daha dokunmaz; öğe bulamazsa
-//  SESSİZCE vazgeçer (hiçbir şeyi bozmaz), gate eski manuel talimatı gösterir.
+//  v12.43 — PICKING CONSOLE OTOMATİK KURULUM (TEK SEFERLİK, SAYFAYA ÖZEL)
+//  Kullanıcının elle yaptığı KESIN ayarları script bir kez otomatik yapar.
+//  Her sayfanın kendi kolon reçetesi var (ekran görüntülerinden birebir):
+//    • workforce: Page=All, KAPALI={Station ID, Workcell Type}, gerisi AÇIK
+//    • pick-areas: Page=All, TÜM kolonlar AÇIK + "Show Batch ID" + "Show Process Path" AÇIK
+//    • scorecard:  Page=All, TÜM kolonlar AÇIK
+//  KENDİNİ DOĞRULAR: başarıda bayrak koyar, bir daha dokunmaz. Panel/öğe bulamazsa
+//  SESSİZCE vazgeçer (hiçbir şeyi bozmaz) → gate manuel talimat gösterir.
 //  Sürekli otomasyon YOK — sadece ilk kurulumda çalışır.
 // ════════════════════════════════════════════════════════
 (function _pcAutoSetup(){
-    if (!(IS_WORKFORCE || IS_PICK_AREAS)) return;
-    var FLAG = IS_WORKFORCE ? 'cpt_pc_setup_wf_v1' : 'cpt_pc_setup_pa_v1';
+    if (!(IS_WORKFORCE || IS_PICK_AREAS || IS_SCORECARD)) return;
+    var PAGE = IS_WORKFORCE ? 'wf' : (IS_PICK_AREAS ? 'pa' : 'sc');
+    var FLAG = 'cpt_pc_setup_' + PAGE + '_v2';   // v2: sayfaya özel reçete
     try { if (localStorage.getItem(FLAG) === 'done') return; } catch(e) { return; }
 
-    var tries = 0, MAX_TRIES = 40;   // ~20sn boyunca sayfanın oturmasını bekle
+    // Sayfaya özel: KAPALI kalması gereken kolonlar (küçük harf, normalize). Boş = hepsi açık.
+    var OFF_COLUMNS = {
+        wf: ['station id', 'workcell type'],
+        pa: [],
+        sc: []
+    }[PAGE];
+    // Sayfaya özel: panel DIŞINDA açılacak ekstra toggle'lar (metin eşleşmesi)
+    var EXTRA_TOGGLES = {
+        wf: [],
+        pa: ['show batch id', 'show process path'],
+        sc: []
+    }[PAGE];
 
+    var tries = 0, MAX_TRIES = 40;
+
+    function norm(s){ return (s||'').replace(/\s+/g,' ').trim().toLowerCase(); }
     function findByText(selector, rx){
         var els = document.querySelectorAll(selector);
         for (var i=0;i<els.length;i++){ if (rx.test((els[i].textContent||'').trim())) return els[i]; }
@@ -1276,7 +1316,6 @@ if (IS_PICKING && !IS_IFRAME) {
     }
     function clickable(el){ return el && (el.offsetParent !== null); }
 
-    // awsui ayar (settings/preferences) dişli butonunu bul
     function findGear(){
         return document.querySelector('button[aria-label*="preferences" i]')
             || document.querySelector('button[aria-label*="settings" i]')
@@ -1284,10 +1323,9 @@ if (IS_PICKING && !IS_IFRAME) {
             || findByText('button', /^\s*(preferences|settings|ayarlar)\s*$/i);
     }
 
-    // Panel içindeki "page size = All" radyosunu seç
+    // "Page size = All" radyosunu seç
     function setPageSizeAll(scope){
         var root = scope || document;
-        // awsui radio: label metni "All" veya en büyük sayı
         var labels = root.querySelectorAll('label, .awsui-radio-button, [class*="radio"]');
         var allLabel = null, maxNum = -1, maxLabel = null;
         for (var i=0;i<labels.length;i++){
@@ -1296,24 +1334,60 @@ if (IS_PICKING && !IS_IFRAME) {
             var m = t.match(/^(\d{2,4})$/); if (m){ var n=parseInt(m[1]); if (n>maxNum){maxNum=n; maxLabel=labels[i];} }
         }
         var target = allLabel || maxLabel;
-        if (target){ var inp = target.querySelector('input') || target; try{ (inp).click(); }catch(e){} return true; }
+        if (target){ var inp = target.querySelector('input') || target; try{ inp.click(); }catch(e){} return true; }
         return false;
     }
 
-    // Panel içindeki tüm KAPALI kolon/görünürlük toggle'larını AÇ (checkbox/switch)
-    function enableAllToggles(scope){
+    // Kolon toggle'ı: metnine göre bul, İSTENEN duruma getir (aç/kapa).
+    //   awsui'de her kolon satırı bir label/row + içinde switch(checkbox). "Select visible columns"
+    //   bölümündeki satırları gezip OFF_COLUMNS'takileri KAPAT, gerisini AÇ.
+    function applyColumns(scope){
         var root = scope || document;
-        var boxes = root.querySelectorAll('input[type="checkbox"], [role="switch"], [role="checkbox"]');
-        var n = 0;
-        for (var i=0;i<boxes.length;i++){
-            var b = boxes[i];
-            var checked = b.checked || b.getAttribute('aria-checked') === 'true';
-            if (!checked && clickable(b)) { try { b.click(); n++; } catch(e){} }
+        // kolon satırları: switch/checkbox içeren ve yanında metin olan bloklar
+        var switches = root.querySelectorAll('[role="switch"], input[type="checkbox"]');
+        var changed = 0;
+        for (var i=0;i<switches.length;i++){
+            var sw = switches[i];
+            if (!clickable(sw)) continue;
+            // bu switch'in etiketini bul: en yakın satır/label'ın metni
+            var row = sw.closest('label, li, tr, [class*="row"], [class*="option"], div');
+            var labelTxt = '';
+            // satırın kendi metninden switch'in kendi metnini çıkararak etiket tahmini
+            if (row) labelTxt = norm(row.textContent);
+            // Bu bir "page size / wrap / sticky / property / description" satırı olabilir — onları atla:
+            if (/wrap lines|sticky header|property key|column description|page size|^\d+$|^all$/.test(labelTxt)) continue;
+
+            var isOn = sw.checked || sw.getAttribute('aria-checked') === 'true';
+            // KAPALI olması gereken kolon mu?
+            var shouldBeOff = OFF_COLUMNS.some(function(off){ return labelTxt.indexOf(off) === 0 || labelTxt === off; });
+            if (shouldBeOff && isOn) { try { sw.click(); changed++; } catch(e){} }
+            else if (!shouldBeOff && !isOn) { try { sw.click(); changed++; } catch(e){} }
         }
+        return changed;
+    }
+
+    // Panel DIŞINDAKI ekstra toggle'lar (ör. "Show Batch ID", "Show Process Path")
+    function applyExtraToggles(){
+        var n = 0;
+        EXTRA_TOGGLES.forEach(function(txt){
+            // metni içeren en yakın toggle'ı bul
+            var all = document.querySelectorAll('[role="switch"], input[type="checkbox"], label, span, div');
+            for (var i=0;i<all.length;i++){
+                if (norm(all[i].textContent) === txt || norm(all[i].textContent).indexOf(txt) === 0){
+                    // bu elemanın içindeki/yanındaki switch'i bul
+                    var sw = all[i].querySelector('[role="switch"], input[type="checkbox"]')
+                          || (all[i].closest('label, div, li') && all[i].closest('label, div, li').querySelector('[role="switch"], input[type="checkbox"]'));
+                    if (sw && clickable(sw)){
+                        var isOn = sw.checked || sw.getAttribute('aria-checked') === 'true';
+                        if (!isOn) { try { sw.click(); n++; } catch(e){} }
+                        break;
+                    }
+                }
+            }
+        });
         return n;
     }
 
-    // Paneldeki "Confirm/Apply/Onayla" butonuna bas
     function confirmPanel(scope){
         var root = scope || document;
         var btn = findByText('button', /^\s*(confirm|apply|save|onayla|uygula|kaydet)\s*$/i);
@@ -1323,38 +1397,37 @@ if (IS_PICKING && !IS_IFRAME) {
 
     function attempt(){
         tries++;
-        // Tablo yüklendi mi? (awsui satırı görünene kadar bekle)
         var ready = document.querySelector('tr.awsui-table-row, table tbody tr, thead th[data-awsui-column-id]');
         if (!ready) { if (tries < MAX_TRIES) return setTimeout(attempt, 500); return; }
 
         var gear = findGear();
         if (!clickable(gear)) {
-            // Dişli yok/erişilemiyor → SESSİZCE VAZGEÇ (hiçbir şeyi bozma). Gate manuel talimat gösterir.
             if (tries < MAX_TRIES) return setTimeout(attempt, 500);
             dlog('⚙️ PC oto-kurulum: ayar paneli bulunamadı, manuel gerekiyor (' + FLAG + ')');
             return;
         }
 
         try { gear.click(); } catch(e) {}
-        // Panel açılsın
         setTimeout(function(){
             var panel = document.querySelector('[class*="modal"], [role="dialog"], [class*="preferences"]') || document;
             var okSize = setPageSizeAll(panel);
-            var nTog = enableAllToggles(panel);
+            var nCol = applyColumns(panel);
             setTimeout(function(){
                 var confirmed = confirmPanel(panel);
-                // Başarı kriteri: ya sayfa boyutu ayarlandı ya da en az bir toggle açıldı
-                if (okSize || nTog > 0 || confirmed) {
-                    try { localStorage.setItem(FLAG, 'done'); } catch(e){}
-                    dlog('✅ PC oto-kurulum tamam (' + FLAG + '): pageSize=' + okSize + ' toggles=' + nTog + ' confirm=' + confirmed);
-                } else if (tries < MAX_TRIES) {
-                    setTimeout(attempt, 800);
-                }
+                // panel kapandıktan sonra ekstra toggle'lar (sayfa gövdesinde)
+                setTimeout(function(){
+                    var nExtra = applyExtraToggles();
+                    if (okSize || nCol > 0 || confirmed || nExtra > 0) {
+                        try { localStorage.setItem(FLAG, 'done'); } catch(e){}
+                        dlog('✅ PC oto-kurulum tamam (' + FLAG + '): size=' + okSize + ' kolon=' + nCol + ' onay=' + confirmed + ' ekstra=' + nExtra);
+                    } else if (tries < MAX_TRIES) {
+                        setTimeout(attempt, 800);
+                    }
+                }, 500);
             }, 400);
         }, 500);
     }
 
-    // Sayfa oturması için ilk denemeyi geciktir
     setTimeout(attempt, 1500);
 })();
 
