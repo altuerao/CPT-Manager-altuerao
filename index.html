@@ -3014,7 +3014,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.47</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.49</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3487,7 +3487,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.47</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.49</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3840,7 +3840,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.47.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.49.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7914,7 +7914,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.47 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.49 · IST2</div>
     </div>`;
 }
 
@@ -8707,6 +8707,103 @@ function permPhotosExport(){
     if(typeof toast==='function') toast('\u2705 '+n+' '+t('foto indirildi'));
   }catch(e){ alert(t('Foto yedeği alınamadı')+': '+e); }
 }
+// ═══ v12.49 BARKOD KURTARMA ═══
+// v12.31 temizliğinde gömülü _PDF_BARCODE silinmişti (kişisel veri, herkese açık sitede olmaz).
+// Store'a hiç girmemiş kişilerin numaraları bu yüzden yedeklerde de YOK. Tek kaynak:
+// v12.31 ÖNCESİ herhangi bir HTML/user.js kopyası (PC'deki eski dosya veya GitHub commit
+// geçmişindeki eski index.html) YA DA elle hazırlanmış "login barkod" listesi.
+// Bu araç dosyadan login→barkod çiftlerini çıkarır, TÜM vardiyalarda login'i eşleşen ve
+// bc alanı BOŞ olan kayıtlara yazar (dolu bc'ye dokunmaz). cpt_perm_ köprüden geçmez.
+function _extractBarcodePairs(text){
+  const map = {};
+  const addPair = (login, bc) => {
+    login = String(login||'').toLowerCase().trim();
+    bc = String(bc||'').trim();
+    if(login && /^[a-z0-9_]{3,}$/.test(login) && /^\d{4,12}$/.test(bc)) map[login] = bc;
+  };
+  // 1) Gömülü _PDF_BARCODE bloğu (eski HTML / user.js) — brace-match ile çıkar
+  const m = text.match(/_PDF_BARCODE\s*=\s*\{/);
+  if(m){
+    let i = text.indexOf('{', m.index), d = 0, end = -1;
+    for(; i < text.length; i++){
+      const c = text[i];
+      if(c === '{') d++;
+      else if(c === '}'){ d--; if(!d){ end = i; break; } }
+    }
+    if(end > 0){
+      const blob = text.slice(text.indexOf('{', m.index), end + 1);
+      let done = false;
+      try{ const o = JSON.parse(blob); Object.keys(o).forEach(k => addPair(k, o[k])); done = true; }catch(e){}
+      if(!done){
+        const re = /['"]?([a-z0-9_]{3,})['"]?\s*:\s*['"](\d{4,12})['"]/gi;
+        let mm; while((mm = re.exec(blob))) addPair(mm[1], mm[2]);
+      }
+      if(Object.keys(map).length) return map;
+    }
+  }
+  // 2) Yedek JSON (trob* yapısı → entry.login + entry.bc) veya düz {login: barkod} sözlüğü
+  try{
+    const o = JSON.parse(text);
+    if(o && typeof o === 'object'){
+      const shifts = ['trob1','trob2','trob3'].filter(k => o[k] && typeof o[k] === 'object');
+      if(shifts.length){
+        shifts.forEach(sh => Object.keys(o[sh]).forEach(k => {
+          const v = o[sh][k];
+          if(v && v.bc) addPair(v.login || k, v.bc);
+        }));
+        if(Object.keys(map).length) return map;
+      }
+      Object.keys(o).forEach(k => { const v = o[k]; if(typeof v === 'string' || typeof v === 'number') addPair(k, v); });
+      if(Object.keys(map).length) return map;
+    }
+  }catch(e){}
+  // 3) Düz metin satırları: "login 1234567" / "login,1234567" / "login;1234567" / "login\t1234567"
+  const re2 = /^\s*([a-z0-9_]{3,})[\s,;:\t]+(\d{4,12})\s*$/gim;
+  let mm2; while((mm2 = re2.exec(text))) addPair(mm2[1], mm2[2]);
+  return map;
+}
+function _mergeBarcodePairs(map){
+  permLoadStore();
+  const addedSet = new Set(), hadSet = new Set(), matchedSet = new Set();
+  ['trob1','trob2','trob3'].forEach(sh => {
+    const d = _permStore[sh] || {};
+    Object.keys(d).forEach(k => {
+      const v = d[k]; if(!v) return;
+      const lg = String(v.login || '').toLowerCase();
+      if(lg && Object.prototype.hasOwnProperty.call(map, lg)){
+        matchedSet.add(lg);
+        if(v.bc) hadSet.add(lg);
+        else { v.bc = map[lg]; addedSet.add(lg); }
+      }
+    });
+  });
+  if(addedSet.size) permSaveStore();
+  return { found: Object.keys(map).length, matched: matchedSet.size, added: addedSet.size, had: hadSet.size };
+}
+function permBarcodesRecover(input){
+  const f = input && input.files && input.files[0];
+  if(input) input.value = '';
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = function(){
+    try{
+      const map = _extractBarcodePairs(String(r.result || ''));
+      if(!Object.keys(map).length){
+        alert(t('Dosyada login-barkod çifti bulunamadı. Kaynak: v12.31 öncesi HTML/user.js, yedek json veya login+numara satırları.'));
+        return;
+      }
+      const res = _mergeBarcodePairs(map);
+      renderTraining();
+      alert('🔢 ' + t('Barkod kurtarma') + ':\n' +
+        '• ' + t('Dosyada bulunan') + ': ' + res.found + '\n' +
+        '• ' + t('Eklendi') + ': ' + res.added + '\n' +
+        '• ' + t('Zaten vardı, dokunulmadı') + ': ' + res.had + '\n' +
+        '• ' + t('Listede eşleşmeyen') + ': ' + (res.found - res.matched) + '\n\n' +
+        t('Kalıcı olması için yeni bir Yedek al yapmayı unutma.'));
+    }catch(e){ alert(t('Barkod kurtarma hatası') + ': ' + e.message); }
+  };
+  r.readAsText(f);
+}
 function permImportData(input){
   const f = input && input.files && input.files[0];
   if(input) input.value='';
@@ -9065,6 +9162,7 @@ function renderTraining() {
         <label title="${t('.json yedeğini yükle (başka bilgisayarda geri yükle)')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:var(--blue);border:1px solid var(--border);white-space:nowrap">⬆️ ${t('Yedek yükle')}<input type="file" accept=".json,application/json" onchange="permImportData(this)" style="display:none"></label>
         <label title="${t('Foto yedeği yükle (.json: {login: dataURL})')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:var(--purple);border:1px solid var(--border);white-space:nowrap">📷 ${t('Foto yükle')}<input type="file" accept=".json,application/json" onchange="permPhotosImport(this)" style="display:none"></label>
         <button onclick="permPhotosExport()" title="${t('Yüklü fotoğrafları .json olarak indir')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:var(--purple);border:1px solid var(--border);white-space:nowrap">📷 ${t('Foto yedeği al')}</button>
+        <label title="${t('Kayıp barkodları geri getir — eski HTML/user.js kopyası, yedek json veya login+numara listesi ver')}" style="cursor:pointer;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;background:var(--card-hover);color:#f59e0b;border:1px solid var(--border);white-space:nowrap">🔢 ${t('Barkod kurtar')}<input type="file" accept=".html,.htm,.js,.json,.txt,.csv" onchange="permBarcodesRecover(this)" style="display:none"></label>
         <span id="perm-upload-status" style="font-size:11px;color:var(--text3);width:100%"></span>
       </div>`;
   }

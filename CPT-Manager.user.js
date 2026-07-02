@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.47
+// @version      12.49
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.47] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.49] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.47';
+    const BRIDGE_VERSION = '12.49';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -597,6 +597,135 @@ if (IS_CPT_SITE) {
     // Açılışta pong hazır bekle + siteye erken veri ver
     setTimeout(() => _bridgeSendAll('init'), 800);
     try { console.log('[CPT BRIDGE] köprü aktif — site modu, v' + BRIDGE_VERSION); } catch(e) {}
+
+    // ═══ v12.48 TERS KÖPRÜ: site localStorage → GM ═══
+    // KÖK SEBEP: HTML→userscript sinyalleri (vardiya, yenile, force-fetch, atama, akış)
+    //   yalnızca IS_FILE bloğundaki forwarder'larla GM'e taşınıyordu. Site modunda bu
+    //   forwarder'lar YOKTU → sitede vardiya butonuna basınca cpt_shift_request sitenin
+    //   kendi localStorage'ında ölü kalıyor, Amazon sekmeleri isteği hiç görmüyordu
+    //   ("Scorecard yenileniyor..." → 60sn sonra "Veri gelmedi").
+    // Aşağısı IS_FILE'daki forwarder'ların birebir karşılığıdır (+ 7. madde:
+    //   cpt_scorecard_url_request — sendScorecardUrlSignal'ın GM ayağı).
+
+    // 1) Yenile sinyali + oto-yenileme bayrağı (1sn)
+    let _revSig = '';
+    setInterval(() => {
+        try {
+            const s = localStorage.getItem('cpt_refresh_workforce')||'';
+            if(s && s!==_revSig) { _revSig=s; GM_setValue('cpt_refresh_signal',s); }
+            const f = localStorage.getItem('cpt_auto_refresh_flag');
+            if(f!==null) GM_setValue('cpt_auto_refresh_flag',f);
+        } catch(e) {}
+    }, 1000);
+
+    // 2) Vardiya isteği → GM + cevabı GM → site localStorage (250ms)
+    let _revShiftTs = 0, _revShiftRespTs = 0;
+    setInterval(() => {
+        try {
+            const req = localStorage.getItem('cpt_shift_request');
+            if(req) {
+                const obj = JSON.parse(req);
+                if(obj.ts && obj.ts !== _revShiftTs) {
+                    _revShiftTs = obj.ts;
+                    GM_setValue('cpt_shift_request_gm', obj);
+                }
+            }
+            const resp = GM_getValue('cpt_shift_scorecard_gm', null);
+            if(resp) {
+                const respObj = typeof resp==='string' ? JSON.parse(resp) : resp;
+                if(respObj.ts && respObj.ts !== _revShiftRespTs) {
+                    _revShiftRespTs = respObj.ts;
+                    localStorage.setItem('cpt_shift_scorecard', JSON.stringify(respObj));
+                    window.dispatchEvent(new Event('cpt_data_updated'));
+                }
+            }
+        } catch(e) {}
+    }, 250);
+
+    // 3) Vardiya seçimi (cpt_shift_saved) → GM (500ms)
+    let _revSavedShift = '';
+    setInterval(() => {
+        try {
+            const saved = localStorage.getItem('cpt_shift_saved') || '';
+            if(saved !== _revSavedShift) {
+                _revSavedShift = saved;
+                if(saved) GM_setValue('cpt_shift_saved_gm', saved);
+                else if(typeof GM_deleteValue==='function') GM_deleteValue('cpt_shift_saved_gm');
+            }
+        } catch(e) {}
+    }, 500);
+
+    // 4) Force-fetch sinyali → GM (250ms)
+    let _revForceTs = 0;
+    setInterval(() => {
+        try {
+            const raw = localStorage.getItem('cpt_force_fetch');
+            if (!raw) return;
+            const obj = JSON.parse(raw);
+            if (obj?.ts && obj.ts !== _revForceTs) {
+                _revForceTs = obj.ts;
+                GM_setValue('cpt_force_fetch_gm', obj);
+            }
+        } catch(e) {}
+    }, 250);
+
+    // 5) Picker atama kuyruğu ↔ GM (çift yönlü, 300ms)
+    let _revAsgLocal = '', _revAsgGM = '';
+    setInterval(() => {
+        try {
+            const local = localStorage.getItem('cpt_assign_moves_v1') || '';
+            const gmRaw = GM_getValue('cpt_assign_moves_v1', null);
+            const gm = gmRaw == null ? '' : (typeof gmRaw === 'string' ? gmRaw : JSON.stringify(gmRaw));
+            if (local !== _revAsgLocal) {
+                _revAsgLocal = local;
+                if (local) GM_setValue('cpt_assign_moves_v1', local);
+                else if (typeof GM_deleteValue === 'function') { try { GM_deleteValue('cpt_assign_moves_v1'); } catch(e){} GM_setValue('cpt_assign_moves_v1', ''); }
+                else GM_setValue('cpt_assign_moves_v1', '');
+                _revAsgGM = local;
+            } else if (gm !== _revAsgGM) {
+                _revAsgGM = gm;
+                if (gm && gm !== local) {
+                    localStorage.setItem('cpt_assign_moves_v1', gm);
+                    _revAsgLocal = gm;
+                    window.dispatchEvent(new Event('cpt_data_updated'));
+                } else if (!gm && local) {
+                    localStorage.removeItem('cpt_assign_moves_v1');
+                    _revAsgLocal = '';
+                    window.dispatchEvent(new Event('cpt_data_updated'));
+                }
+            }
+        } catch(e) {}
+    }, 300);
+
+    // 6) "Atamayı Başlat" akış sinyali → GM (250ms)
+    let _revFlowTs = 0;
+    setInterval(() => {
+        try {
+            const raw = localStorage.getItem('cpt_elig_flow_start');
+            if (!raw) return;
+            const obj = JSON.parse(raw);
+            if (obj?.ts && obj.ts !== _revFlowTs) {
+                _revFlowTs = obj.ts;
+                GM_setValue('cpt_elig_flow_start', obj);
+            }
+        } catch(e) {}
+    }, 250);
+
+    // 7) Scorecard filtre isteği (sendScorecardUrlSignal) → GM (250ms)
+    let _revUrlReqTs = 0;
+    setInterval(() => {
+        try {
+            const raw = localStorage.getItem('cpt_scorecard_url_request');
+            if (!raw) return;
+            const obj = JSON.parse(raw);
+            if (obj?.ts && obj.ts !== _revUrlReqTs) {
+                _revUrlReqTs = obj.ts;
+                GM_setValue('cpt_scorecard_url_request_gm', obj);
+            }
+        } catch(e) {}
+    }, 250);
+
+    try { console.log('[CPT BRIDGE] ters köprü aktif (site→GM: vardiya/yenile/atama sinyalleri)'); } catch(e) {}
 }
 
 // Oto yenileme açık mı
