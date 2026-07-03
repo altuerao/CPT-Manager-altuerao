@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.51
+// @version      12.52
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.51] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.52] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.51';
+    const BRIDGE_VERSION = '12.52';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -5996,7 +5996,10 @@ if (IS_EXSD) {
         } catch (e) {}
 
         const TR_MAX_PAGES        = 200;    // v11.56: derin sayfalama
-        const TR_FC_CONCURRENCY   = 70;     // v12.24: 60→70 — "Bilinmeyen lokasyon"daki tote'lar daha
+        const TR_FC_CONCURRENCY   = 100;    // v12.52: 70→100 — dwell öncelikli kuyrukla birlikte
+                                            //   'Bilinmeyen' daha hızlı boşalsın (FC ayrı host, 5sn timeout
+                                            //   hasarı sınırlar; 40→60→70 artışlarının hepsi sorunsuz oldu).
+                                            //   v12.24: 60→70 — "Bilinmeyen lokasyon"daki tote'lar daha
                                             //   hızlı dolsun (yeni tote'lar öncelikli çekiliyor + daha çok
                                             //   paralel). v12.10: 40→60 — 300+ tote enrichment 60sn refresh içinde
                                             //   BİTMİYORDU (40sn+ sürüp yeni taramaya çarpıyordu, 100+ tote
@@ -7199,7 +7202,10 @@ if (IS_EXSD) {
                 //   neg cache 120sn tutuyor → o süre tekrar denenmiyor → tote "Bilinmeyen"de kalıyor.
                 //   ÇÖZÜM: Yeni tote'ların (dwell < 15dk) neg cache'ini ÇOK KISA (15sn) say → her taramada
                 //   tekrar dene. FC'ye kayıt düşer düşmez (genelde birkaç dk) anında yakalanır, katına geçer.
-                const FRESH_TOTE_DWELL = 15;        // dk — bundan yeni tote FC'de henüz olmayabilir
+                const FRESH_TOTE_DWELL = 30;        // dk — bundan yeni tote FC'de henüz olmayabilir
+                //   v12.52: 15→30 — kullanıcı ekranında 17-21dk dwell'li tote'lar 'Bilinmeyen'de takılıydı:
+                //   15dk eşiğini aştıkları için boş FC yanıtı 120sn neg-cache'leniyor, 2dk retry edilmiyordu.
+                //   30dk'ya kadar kısa (15sn) neg TTL uygulanır → bu bant da hızlı retry alır, katına geçer.
                 const FRESH_NEG_TTL    = 15000;     // ms — yeni tote boş dönerse 15sn sonra tekrar dene
 
                 const toFetch = [];      // yeni/eksik tote — ÖNCELİKLİ (Bilinmeyen hızlı dolsun)
@@ -7235,6 +7241,12 @@ if (IS_EXSD) {
                 }
                 // v12.24: ÖNCE yeni tote'lar (Bilinmeyen lokasyon hızlansın), SONRA hybrid recheck'ler.
                 //   Böylece "Diğer"deki tote'lar önce katına yerleşir, recheck'ler arkadan gelir.
+                // v12.52: DWELL ÖNCELİĞİ (kullanıcı talebi) — her iki liste kendi içinde EN YÜKSEK
+                //   dwell'den en düşüğe sıralanır: en uzun bekleyen tote'un lokasyonu/pickeri İLK çekilir.
+                //   En kritik tote'lar (dwell yüksek = CPT riski) panoda ilk yerine oturanlar olur.
+                const _byDwellDesc = (a, b) => (_dwellByTote[b] || 0) - (_dwellByTote[a] || 0);
+                toFetch.sort(_byDwellDesc);
+                toRecheck.sort(_byDwellDesc);
                 const _fetchOrder = toFetch.concat(toRecheck);
                 dlog('👤 Enrichment: pre-seed ' + seedHits + ' · cache ' + cacheHits + ' · YENİ fetch ' + toFetch.length + (toRecheck.length ? ' · hybrid-recheck ' + toRecheck.length : '') + (_fetchOrder.length === 0 ? ' ✓ (hepsi cache\'ten)' : ''));
 
@@ -7257,7 +7269,7 @@ if (IS_EXSD) {
                     //   katlarına geçsin (her 10 fetch'te veri yazılır). Titreme riski YOK çünkü HTML
                     //   tarafı (v12.22) enrichment sırasında render'ı 1200ms'e seyretiyor → veri sık
                     //   yazılır ama ekran akıcı güncellenir. Hız + akıcılık birlikte.
-                    if (done % 10 === 0) {
+                    if (done % 8 === 0) {   // v12.52: 10→8 — kat kartları biraz daha sık dolsun
                         tBuildAndFlush(allRows, hotpickIds, empMap, totalsObj, true, (cacheHits + seedHits + done) + '/' + toteSet.size);
                         tSaveEmpCache(empCache);   // ara kayıt — yarıda kesilse veri güvende
                     }
