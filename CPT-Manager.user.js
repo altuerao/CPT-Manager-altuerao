@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.52
+// @version      12.53
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.52] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.53] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.52';
+    const BRIDGE_VERSION = '12.53';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -6310,10 +6310,60 @@ if (IS_EXSD) {
             // P-N-... (örn. P-1-B281A234, P-5-A284A374) — gerçek pick aisle
             return /^P-\d+-[A-Z0-9]/i.test(t);
         }
-        function tParseFcResponse(html) {
+        function tParseFcResponse(html, toteId) {
             const doc = new DOMParser().parseFromString(html, 'text/html');
             let employee = '', lastPick = '', recentLoc = '';
             const _isToteId = s => /^ts[A-Za-z0-9]{6,}$/i.test(String(s||''));
+
+            // ═══ v12.53 BİRİNCİL KAYNAK: ENVANTER GEÇMİŞİ ("Atlas mantığı", kullanıcı kuralı) ═══
+            //   LOKASYON = tote'a yapılan EN SON alımın KAYNAĞI. En yeni satır:
+            //     Yeni Kutu == toteId  VE  Eski Kutu == gerçek pick lokasyonu (P-X-...)
+            //     → lastPick = Eski Kutu · picker = o satırın Kişi'si · kat = P-N'den.
+            //   Konteyner tahmini ve workforce, LOKASYON için ARTIK KULLANILMAZ; kutu-geçmişi
+            //   tablosu bulunduğu halde alım satırı yoksa LOKASYON boş kalır ("—"), yanlış yazmaz.
+            //   Başlıklar TR/EN: Kişi|Person|User, Eski Kutu|Eski Konteyner|Old/From Container,
+            //   Yeni Kutu|Yeni Konteyner|New/To/Destination Container.
+            //   GÜNCEL KONTEYNER (v11.66 hybrid/staging düşürme İÇİN KORUNUR): en yeni satır
+            //     Eski Kutu == toteId → Yeni Kutu (tote'tan son çıkışın hedefi).
+            let _histHit = false, _histTable = false, _histFloor = 0, _histLoc = '', _histCur = '';
+            try {
+                const _tid = String(toteId || '').trim().toLowerCase();
+                const _mIdx = (labels, res) => { for (let i = 0; i < labels.length; i++) for (const re of res) if (re.test(labels[i])) return i; return -1; };
+                for (const table of doc.querySelectorAll('table')) {
+                    let hdr = null;
+                    for (const tr of table.querySelectorAll('tr')) {
+                        const ths = [...tr.querySelectorAll('th')];
+                        if (ths.length) { hdr = ths.map(th => tClean(th.textContent).toLowerCase()); break; }
+                    }
+                    if (!hdr) continue;
+                    const iOld = _mIdx(hdr, [/eski\s*(kutu|kont)/, /(old|from|source)\s*container/, /^from$/]);
+                    const iNew = _mIdx(hdr, [/yeni\s*(kutu|kont)/, /(new|to|destination|hedef)\s*container/, /^to$/, /hedef\s*(kutu|kont)/]);
+                    if (iOld < 0 || iNew < 0) continue;
+                    _histTable = true;
+                    const iPer = _mIdx(hdr, [/kişi|kisi/, /person/, /^user/, /employee/, /associate/, /login/]);
+                    let rows = [...table.querySelectorAll('tbody tr')];
+                    if (!rows.length) rows = [...table.querySelectorAll('tr')].slice(1);
+                    for (const row of rows) {   // en yeni satır üstte (FC Research sırası)
+                        const tds = [...row.querySelectorAll('td')];
+                        if (tds.length <= Math.max(iOld, iNew)) continue;
+                        const oldC = tClean(tds[iOld]?.textContent);
+                        const newC = tClean(tds[iNew]?.textContent);
+                        if (!_histHit && _tid && newC.toLowerCase() === _tid && tIsRealPickLocation(oldC)) {
+                            _histHit = true; _histLoc = oldC;
+                            const fm = oldC.match(/P-?([1-6])-/i);
+                            if (fm) _histFloor = parseInt(fm[1]);
+                            if (iPer >= 0) { const p = tClean(tds[iPer]?.textContent); if (p && !_isToteId(p)) employee = p; }
+                        }
+                        if (!_histCur && _tid && oldC.toLowerCase() === _tid && newC && newC !== '-' && newC !== '—' && !_isToteId(newC)) {
+                            _histCur = newC;
+                        }
+                        if (_histHit && _histCur) break;
+                    }
+                    if (_histHit || _histCur) break;
+                }
+            } catch (e) {}
+            if (_histHit) lastPick = _histLoc;
+            if (_histCur) recentLoc = _histCur;
             for (const table of doc.querySelectorAll('table')) {
                 // Header satırından kolon indexlerini bul
                 let headerTr = null, L = null;
@@ -6373,8 +6423,10 @@ if (IS_EXSD) {
             //   (Eski/Yeni Konteyner) floor-format al (ör. "pmP-1-B" → kat 1). Picker'ın pick
             //   lokasyonu (örn. "P-3-A254A312") DEĞİL — picker başka kata geçince tote onun
             //   katını gösteriyordu. Tote'un fiziksel konteyner katı esas.
-            let fcFloor = 0, floorLoc = '', _floorFromContainer = false, _containerMover = '';
-            try {
+            let fcFloor = _histFloor, floorLoc = _histLoc, _floorFromContainer = false, _containerMover = '';
+            // v12.53: kutu-geçmişi tablosu ANLAŞILDIYSA (_histTable) eski konteyner taraması
+            //   ATLANIR — o tarama tote'la ilgisiz satırlardan P-N yakalayıp yanlış kat verebiliyordu.
+            if (!_histHit && !_histTable) try {
                 // 1) KAP GEÇMİŞİ: "konteyner"/"container" başlıklı kolonların hücrelerinde ara.
                 //    En güncel satır önce → ilk floor-format konteyner = tote'un son katlı konumu.
                 //    Aynı satırın "Tarafından Taşındı" (mover) hücresini de al → CANLI picker.
@@ -6417,11 +6469,17 @@ if (IS_EXSD) {
             } catch (e) {}
             // Konteyner katı bulunduysa LOKASYON da o konteyner olsun — picker'ın pick
             // lokasyonunu EZ (tote fiziksel olarak o konteynerde, picker'ın yanında değil).
-            if (_floorFromContainer && floorLoc) lastPick = floorLoc;
+            // v12.53: alım satırı yok ama tote'un son çıkışı katlı konteynerdeyse (örn. pmP-2-B)
+            //   KAT oradan alınır — LOKASYON boş kalır (lokasyon yalnızca alım kaynağı olabilir).
+            if (!fcFloor && _histTable && _histCur) {
+                const _fm2 = _histCur.match(/P-?([1-6])-/i);
+                if (_fm2) { fcFloor = parseInt(_fm2[1]); floorLoc = _histCur; }
+            }
+            if (_floorFromContainer && floorLoc && !_histTable) lastPick = floorLoc;   // v12.53: kutu-geçmişi varken LOKASYON konteynerle EZİLMEZ
             // v11.70: picker de EN GÜNCEL konteyner hareketinin taşıyanı olsun (kat ile tutarlı,
             //   canlı). Login gibi görünüyorsa (tote-id değil, makul uzunlukta) eski picker'ı ez.
-            if (_floorFromContainer && _containerMover && !_isToteId(_containerMover) && /^[A-Za-z][A-Za-z0-9._-]{2,}$/.test(_containerMover)) {
-                employee = _containerMover;
+            if (_floorFromContainer && _containerMover && !_histTable && !_isToteId(_containerMover) && /^[A-Za-z][A-Za-z0-9._-]{2,}$/.test(_containerMover)) {
+                employee = _containerMover;   // v12.53: kutu-geçmişi varken picker alım satırından gelir, mover ezmez
             }
             return { employee, lastPick, recentLoc, fcFloor, floorLoc };
         }
@@ -6430,7 +6488,7 @@ if (IS_EXSD) {
         async function tFetchEmployee(toteId) {
             try {
                 const r = await trGet(tBuildFcUrl(toteId), TR_FC_TIMEOUT_MS);
-                if (r && r.status === 200) { _fcStats.ok++; return tParseFcResponse(r.responseText); }
+                if (r && r.status === 200) { _fcStats.ok++; return tParseFcResponse(r.responseText, toteId); }
                 _fcStats.err++;
                 _fcStats.lastErr = 'HTTP ' + (r && r.status || '?');
             } catch (e) {
