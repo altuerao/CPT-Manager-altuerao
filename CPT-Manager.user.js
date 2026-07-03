@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.53
+// @version      12.54
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.53] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.54] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.53';
+    const BRIDGE_VERSION = '12.54';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -5996,7 +5996,10 @@ if (IS_EXSD) {
         } catch (e) {}
 
         const TR_MAX_PAGES        = 200;    // v11.56: derin sayfalama
-        const TR_FC_CONCURRENCY   = 100;    // v12.52: 70→100 — dwell öncelikli kuyrukla birlikte
+        const TR_FC_CONCURRENCY   = 40;     // v12.54: 100→40 — asıl yük artık TOPLU okumada; 100
+                                            //   paralel tekli istek FC'yi boğup timeout üretiyor, o da
+                                            //   (eski neg-cache hatasıyla) 'Bilinmeyen' yığını yapıyordu.
+                                            //   v12.52: 70→100 — dwell öncelikli kuyrukla birlikte
                                             //   'Bilinmeyen' daha hızlı boşalsın (FC ayrı host, 5sn timeout
                                             //   hasarı sınırlar; 40→60→70 artışlarının hepsi sorunsuz oldu).
                                             //   v12.24: 60→70 — "Bilinmeyen lokasyon"daki tote'lar daha
@@ -6483,6 +6486,59 @@ if (IS_EXSD) {
             }
             return { employee, lastPick, recentLoc, fcFloor, floorLoc };
         }
+        // v12.54: ÇOKLU ARAMA yanıtı çözücü — satır başına bir scannable.
+        //   Her tabloda: satır, istenen tote ID'lerinden birini içeriyorsa o tote'undur. Satırdan:
+        //     lokasyon = tIsRealPickLocation geçen İLK hücre (P-X-...; buffer/konteyner ASLA
+        //       lokasyon yazılmaz — v12.53 "Atlas kuralı" ile uyumlu, yanlış lokasyon üretmez)
+        //     picker   = login desenli ilk hücre (tote/lokasyon/sayı/etiket-kelimesi değil)
+        //     güncel konteyner = konteynerimsi ilk hücre (rbMMZ..., tcSTAGING01 — hybrid düşürme için)
+        function tParseFcBulkList(html, ids) {
+            const out = {};
+            try {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const wanted = new Map(); (ids || []).forEach(id => wanted.set(String(id).toLowerCase(), id));
+                const _isToteId2 = s => /^ts[A-Za-z0-9]{6,}$/i.test(String(s || ''));
+                const _STOP = /^(pallet|tote|case|bin|type|status|detail|details|history|action|actions|view|open|missing|missed|picked|buffered|scannable|location|container|user|none|null|true|false)$/i;
+                // v12.54: login = TAMAMEN küçük harf + 3 ardışık rakam yok (Amazon login biçimi).
+                //   Konteynerler (rbMMZ0012B07, tcSTAGING01, cvAtPM00002) büyük harf/rakam dizisi
+                //   içerdiğinden login sanılmaz.
+                const _isLogin = s => /^[a-z][a-z0-9._-]{2,15}$/.test(String(s || '')) && !/\d{3,}/.test(String(s || '')) && !_isToteId2(s) && !_STOP.test(String(s || ''));
+                for (const table of doc.querySelectorAll('table')) {
+                    let rows = [...table.querySelectorAll('tbody tr')];
+                    if (!rows.length) rows = [...table.querySelectorAll('tr')].slice(1);
+                    for (const row of rows) {
+                        const cells = [...row.querySelectorAll('td')].map(td => tClean(td.textContent));
+                        if (!cells.length) continue;
+                        let tid = null;
+                        for (const c of cells) { const k = c.toLowerCase(); if (wanted.has(k)) { tid = wanted.get(k); break; } }
+                        if (!tid) {
+                            const rt = (row.textContent || '').toLowerCase();
+                            for (const [k, orig] of wanted) { if (rt.includes(k)) { tid = orig; break; } }
+                        }
+                        if (!tid || out[tid]) continue;
+                        let lastPick = '', employee = '', recentLoc = '';
+                        for (const c of cells) { if (!lastPick && tIsRealPickLocation(c)) { lastPick = c; break; } }
+                        for (const c of cells) {
+                            if (employee) break;
+                            if (_isLogin(c) && c.toLowerCase() !== tid.toLowerCase() && !tIsRealPickLocation(c)) employee = c.toLowerCase();
+                        }
+                        for (const c of cells) {
+                            if (recentLoc) break;
+                            if (!c || c === '-' || c === '—') continue;
+                            if (c.toLowerCase() === tid.toLowerCase() || _isToteId2(c)) continue;
+                            if (tIsRealPickLocation(c) || _STOP.test(c)) continue;
+                            // konteynerimsi: harfle başlar, İÇİNDE rakam var, boşluksuz (rbMMZ0012B07, tcSTAGING01)
+                            if (/^[A-Za-z][A-Za-z0-9._-]{4,}$/.test(c) && /[0-9]/.test(c)) recentLoc = c;
+                        }
+                        const fm = lastPick.match(/P-?([1-6])-/i);
+                        const fcFloor = fm ? parseInt(fm[1]) : 0;
+                        if (lastPick || employee || recentLoc || fcFloor) out[tid] = { employee, lastPick, recentLoc, fcFloor, floorLoc: lastPick };
+                    }
+                }
+            } catch (e) {}
+            return out;
+        }
+
         // v11.80: FC fetch hata istatistiği — TIMEOUT/network hataları sessizce yutulurdu, artık sayılır
         let _fcStats = { ok: 0, err: 0, lastErr: '' };
         async function tFetchEmployee(toteId) {
@@ -6495,7 +6551,8 @@ if (IS_EXSD) {
                 _fcStats.err++;
                 _fcStats.lastErr = String(e && e.message || e).slice(0, 80);
             }
-            return { employee:'', lastPick:'', recentLoc:'', fcFloor:0, floorLoc:'' };
+            // v12.54: _err — bu bir AĞ HATASI (timeout/HTTP), "FC'de kayıt yok" DEĞİL.
+            return { employee:'', lastPick:'', recentLoc:'', fcFloor:0, floorLoc:'', _err: true };
         }
 
         // Employee cache (localStorage TTL'li)
@@ -7305,12 +7362,63 @@ if (IS_EXSD) {
                 const _byDwellDesc = (a, b) => (_dwellByTote[b] || 0) - (_dwellByTote[a] || 0);
                 toFetch.sort(_byDwellDesc);
                 toRecheck.sort(_byDwellDesc);
+
+                // ═══ v12.54 TOPLU FC OKUMA ("Atlas tarzı", kullanıcı talebi) ═══
+                //   Tek tek tote sorgusu yerine FC Research ÇOKLU ARAMA: tek istekte 40 tote
+                //   (results?s=id1,id2,...). 175 tote ≈ 4-5 istek → hepsi saniyeler içinde dolar.
+                //   Batch ID GEREKMEZ — single/multi her tote'a çalışır. Toplu yanıtta çözülemeyen
+                //   tote'lar alttaki tekli (dwell öncelikli) kuyruğa kalır. Bu FC kurulumu çoklu
+                //   aramayı desteklemiyorsa (2 istek üst üste 200 dönüp 0 tote çözerse) oturum
+                //   boyunca kapatılır (_bulkFcDead) ve tekli yol tek başına sürer — regresyon yok.
+                if (!window._bulkFcDead && toFetch.length > 3) {
+                    const BULK_SIZE = 40, BULK_CONC = 3, BULK_TIMEOUT = 15000;
+                    const _chunks = [];
+                    for (let i = 0; i < toFetch.length; i += BULK_SIZE) _chunks.push(toFetch.slice(i, i + BULK_SIZE));
+                    let _bZeroStreak = window._bulkFcZeroStreak || 0, _bReq200 = 0;
+                    const _bResolved = new Set();
+                    await tPool(_chunks, BULK_CONC, async (ids) => {
+                        try {
+                            const url = 'https://fcresearch-eu.aka.amazon.com/' + TR_FC + '/results?s=' + encodeURIComponent(ids.join(','));
+                            const r = await trGet(url, BULK_TIMEOUT);
+                            if (!r || r.status !== 200 || !r.responseText) return;
+                            _bReq200++;
+                            const map = tParseFcBulkList(r.responseText, ids);
+                            const got = Object.keys(map);
+                            if (!got.length) { _bZeroStreak++; return; }
+                            _bZeroStreak = 0;
+                            for (const tid of got) {
+                                const m = map[tid];
+                                empMap.set(tid, { employee: m.employee || '', lastPick: m.lastPick || '', recentLoc: m.recentLoc || '', fcFloor: m.fcFloor || 0, floorLoc: m.floorLoc || '' });
+                                empCache[tid] = { employee: m.employee || '', lastPick: m.lastPick || '', recentLoc: m.recentLoc || '', fcFloor: m.fcFloor || 0, floorLoc: m.floorLoc || '', ts: Date.now(), _contChk: Date.now() };
+                                _bResolved.add(tid);
+                            }
+                            // Anında ekrana yaz — "hepsi bir anda doluyor" hissi buradan gelir
+                            tBuildAndFlush(allRows, hotpickIds, empMap, totalsObj, true, (cacheHits + seedHits + _bResolved.size) + '/' + toteSet.size);
+                            tSaveEmpCache(empCache);
+                        } catch (e) {}
+                    });
+                    window._bulkFcZeroStreak = _bZeroStreak;
+                    if (_bReq200 >= 2 && _bZeroStreak >= 2) {
+                        window._bulkFcDead = true;
+                        dlog('📡 TOPLU FC: çoklu arama bu FC\'de desteklenmiyor görünüyor (200 döndü, 0 çözüm ×2) → kapatıldı, tekli yol devrede');
+                    }
+                    if (_bResolved.size) {
+                        for (let i = toFetch.length - 1; i >= 0; i--) if (_bResolved.has(toFetch[i])) toFetch.splice(i, 1);
+                        dlog('📡 TOPLU FC: ' + _chunks.length + ' istekte ' + _bResolved.size + ' tote çözüldü · tekliye kalan: ' + toFetch.length);
+                    }
+                }
                 const _fetchOrder = toFetch.concat(toRecheck);
                 dlog('👤 Enrichment: pre-seed ' + seedHits + ' · cache ' + cacheHits + ' · YENİ fetch ' + toFetch.length + (toRecheck.length ? ' · hybrid-recheck ' + toRecheck.length : '') + (_fetchOrder.length === 0 ? ' ✓ (hepsi cache\'ten)' : ''));
 
-                let done = 0, _fcOk = 0, _fcEmpty = 0;
+                let done = 0, _fcOk = 0, _fcEmpty = 0, _fcErr = 0;
                 await tPool(_fetchOrder, TR_FC_CONCURRENCY, async (tid) => {
-                    const { employee, lastPick, recentLoc, fcFloor, floorLoc } = await tFetchEmployee(tid);
+                    const _res = await tFetchEmployee(tid);
+                    // v12.54 KÖK SEBEP FİX: AĞ HATASI ≠ "FC'de kayıt yok". Eskiden timeout/HTTP hatası
+                    //   yiyen tote da neg-cache'e (15-120sn karantina) yazılıyordu → yoğun anda hata
+                    //   yiyen onlarca tote "Bilinmeyen"de birikiyordu (91'lik yığın). Artık hata alan
+                    //   tote CACHE'E YAZILMAZ → bir sonraki taramada anında tekrar denenir.
+                    if (_res && _res._err) { _fcErr++; done++; return; }
+                    const { employee, lastPick, recentLoc, fcFloor, floorLoc } = _res;
                     const emp = (employee||'').trim(), lp = (lastPick||'').trim(), rl = (recentLoc||'').trim();
                     const ff = fcFloor||0, fl = (floorLoc||'').trim();
                     if (emp || lp || rl || ff) {
@@ -7332,7 +7440,7 @@ if (IS_EXSD) {
                         tSaveEmpCache(empCache);   // ara kayıt — yarıda kesilse veri güvende
                     }
                 });
-                dlog('👤 FC enrichment bitti: ' + _fcOk + ' başarılı (lokasyon/picker geldi) · ' + _fcEmpty + ' boş yanıt (FC\'de iz yok) · ' + (toFetch.length - _fcOk - _fcEmpty) + ' diğer (timeout/hata sessizce yutuldu)');
+                dlog('👤 FC enrichment bitti: ' + _fcOk + ' başarılı (lokasyon/picker geldi) · ' + _fcEmpty + ' boş yanıt (FC\'de iz yok) · ' + _fcErr + ' ağ hatası (karantina YOK, sonraki taramada tekrar denenir)');
                 dlog('🌐 FC network: ' + _fcStats.ok + ' HTTP 200 · ' + _fcStats.err + ' hata' + (_fcStats.lastErr ? ' (son: ' + _fcStats.lastErr + ')' : ''));
                 tSaveEmpCache(empCache);
 
