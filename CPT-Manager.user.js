@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.55
+// @version      12.56
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.55] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.56] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.55';
+    const BRIDGE_VERSION = '12.56';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -6037,6 +6037,21 @@ if (IS_EXSD) {
                 });
             });
         }
+        // v12.56: Gerçek section ucu POST ister (kaynaktan doğrulandı):
+        //   POST /IST2/results/inventory-history  gövde: s=<tote>  → EN YENİ satırlar
+        //   (GET /...-more?token= yalnızca ESKİ sayfalama bloklarıydı — eski veri kök sebebi)
+        function trPost(url, bodyObj, timeoutMs) {
+            const data = Object.keys(bodyObj || {}).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(bodyObj[k])).join('&');
+            return new Promise((resolve, reject) => {
+                GM_xmlhttpRequest({
+                    method: 'POST', url, data, nocache: true, timeout: timeoutMs || 15000,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
+                    onload: resolve,
+                    onerror: reject,
+                    ontimeout() { reject(new Error('timeout')); }
+                });
+            });
+        }
 
         // Dwell parser — "1h 25m", "1:25", "25m" gibi formatları dakikaya çevirir
         function tParseDwell(s) {
@@ -6305,6 +6320,10 @@ if (IS_EXSD) {
         function tBuildFcPageUrl(toteId) {
             return TR_FC_HOST_PRIMARY + TR_FC + '/results?s=' + encodeURIComponent(toteId);
         }
+        // v12.56: Envanter Geçmişi section ucu — sayfanın kendi yaptığı POST'un birebir aynısı.
+        function tBuildFcSectionUrl() {
+            return TR_FC_HOST_PRIMARY + TR_FC + '/results/inventory-history';
+        }
         function tBuildFcUrl(toteId) {
             const t1 = Math.floor(Date.now() / 1000), t2 = t1 - TR_FC_HOURS * 3600;
             return 'https://fcresearch-eu.aka.amazon.com/' + TR_FC +
@@ -6569,9 +6588,23 @@ if (IS_EXSD) {
         // v11.80: FC fetch hata istatistiği — TIMEOUT/network hataları sessizce yutulurdu, artık sayılır
         let _fcStats = { ok: 0, err: 0, lastErr: '' };
         async function tFetchEmployee(toteId) {
-            // v12.55: BİRİNCİL = gerçek sayfa (qi-...corp/results?s=) — en yeni işlemler.
-            //   200 dönerse sonucu (boş bile olsa) ona göre değerlendiririz; ağ hatasında
-            //   eski '-more' ucu YEDEK olarak denenir. İkisi de düşerse _err (neg-cache yazılmaz).
+            // v12.56 KÖK SEBEP ÇÖZÜMÜ (kaynaktan doğrulandı): Envanter Geçmişi tablosu ana
+            //   sayfada YOK — sayfa 'POST /IST2/results/inventory-history' (gövde s=<tote>) ile
+            //   AJAX doldurur ve İLK yanıt EN YENİ satırlardır. Eski kod doğrudan GET '-more'
+            //   çekiyordu → o sayfalama ucu ESKİ blokları verir → yanlış/eski lokasyon.
+            //   Sıra: (1) section POST — birincil, (2) sayfa GET — bazı kurulumlarda gömülü gelir,
+            //   (3) '-more' GET — son çare. tParseFcResponse zaten tarihe göre en yeniyi seçer.
+            try {
+                const rp = await trPost(tBuildFcSectionUrl(), { s: toteId }, TR_FC_TIMEOUT_MS);
+                if (rp && rp.status === 200 && rp.responseText) {
+                    const parsed = tParseFcResponse(rp.responseText, toteId);
+                    if (parsed && (parsed.lastPick || parsed.employee || parsed.recentLoc || parsed.fcFloor)) { _fcStats.ok++; return parsed; }
+                    // 200 ama boş → gerçekten kayıt yok olabilir; yine de sayfa GET ile teyit et
+                }
+            } catch (e) {
+                _fcStats.err++;
+                _fcStats.lastErr = String(e && e.message || e).slice(0, 80) + ' (section POST)';
+            }
             try {
                 const r = await trGet(tBuildFcPageUrl(toteId), TR_FC_TIMEOUT_MS);
                 if (r && r.status === 200) { _fcStats.ok++; return tParseFcResponse(r.responseText, toteId); }
