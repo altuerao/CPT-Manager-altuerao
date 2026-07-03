@@ -3014,7 +3014,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.50</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.51</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3487,7 +3487,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.50</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.51</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3566,6 +3566,11 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
         <span class="tr-gbtn-icon">🛤</span>
         <span class="tr-gbtn-label"><span data-i18n="KAT DWELL">KAT DWELL</span></span>
         <span class="tr-gbtn-sub" data-i18n="Pick katına göre grupla (P1–P6)">Pick katına göre grupla (P1–P6)</span>
+      </button>
+      <button class="tr-group-btn" data-mode="pp" onclick="transitSetGroupBy('pp')">
+        <span class="tr-gbtn-icon">🛣</span>
+        <span class="tr-gbtn-label"><span data-i18n="PROCESS PATH DWELL">PROCESS PATH DWELL</span></span>
+        <span class="tr-gbtn-sub" data-i18n="Multi / Single grupla">Multi / Single grupla</span>
       </button>
       <button class="tr-group-btn" data-mode="sortation" onclick="transitSetGroupBy('sortation')">
         <span class="tr-gbtn-icon">📦</span>
@@ -3840,7 +3845,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.50.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.51.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -6712,6 +6717,8 @@ const I18N = {
   'CPT SAATİ DWELL':      { en:'CPT TIME DWELL',  es:'CPT TIEMPO',      zh:'CPT 时间停留',   hi:'CPT समय ड्वेल', ar:'وقت CPT',      pt:'CPT TEMPO',    ru:'CPT ВРЕМЯ',      fr:'CPT TEMPS',     de:'CPT ZEIT' },
   'KAT DWELL':            { en:'FLOOR DWELL',     es:'PISO TIEMPO',     zh:'楼层停留',       hi:'मंजिल ड्वेल',   ar:'الطابق',       pt:'PISO TEMPO',   ru:'ЭТАЖ ВРЕМЯ',     fr:'ÉTAGE TEMPS',   de:'ETAGE ZEIT' },
   'SORTATION':            { en:'SORTATION',       es:'CLASIFICACIÓN',   zh:'分拣',           hi:'सॉर्टेशन',     ar:'الفرز',        pt:'SEPARAÇÃO',    ru:'СОРТИРОВКА',    fr:'TRI',           de:'SORTIERUNG' },
+  'PROCESS PATH DWELL':   { en:'PROCESS PATH DWELL', es:'RUTA PROCESO', zh:'流程路径停留',   hi:'प्रोसेस पाथ',  ar:'مسار العملية', pt:'ROTA PROCESSO', ru:'ПУТЬ ПРОЦЕССА', fr:'CHEMIN PROCESSUS', de:'PROZESSPFAD' },
+  'Multi / Single grupla':{ en:'Group by Multi / Single', es:'Agrupar Multi/Single', zh:'按 Multi/Single 分组', hi:'Multi/Single समूह', ar:'تجميع Multi/Single', pt:'Agrupar Multi/Single', ru:'Группа Multi/Single', fr:'Grouper Multi/Single', de:'Multi/Single gruppieren' },
   'CPT verisi eksik (ExSD)':
                           { en:'CPT data missing (ExSD)',
                             es:'Datos CPT faltantes (ExSD)',
@@ -7190,6 +7197,7 @@ function pickerPhotoTag(login, size) {
 
 // v11.74: Tote process path kısaltma rozeti (Kat Dwell / Transit)
 //   MultiMediumZone→MMZ, SingleNoSLAM→SNS, SingleMedium→SM, HotPick→HP, MultiWrap→MW
+//   v12.51: PPHOVSLAPSmall→HovSS, PPHOV→HOV (HovSS kontrolü HOV'dan ÖNCE — "hov" alt dizesi yutmasın)
 //   Ham değer normalize edilir (PP öneki/boşluk/tire atılır), anahtar kelimeyle eşlenir.
 function _ppAbbr(raw) {
   if (!raw) return '';
@@ -7198,11 +7206,13 @@ function _ppAbbr(raw) {
   if (s.includes('multimediumzone') || (s.includes('multi') && s.includes('medium') && s.includes('zone'))) return 'MMZ';
   if (s.includes('multiwrap')       || (s.includes('multi') && s.includes('wrap')))                         return 'MW';
   if (s.includes('hotpick')         || (s.includes('hot')   && s.includes('pick')))                         return 'HP';
+  if (s.includes('hovslapsmall')    || (s.includes('hov')   && s.includes('slap')))                         return 'HovSS';
+  if (s.includes('hov'))                                                                                     return 'HOV';
   if (s.includes('singlenoslam')    || s.includes('noslam'))                                                 return 'SNS';
   if (s.includes('singlemedium')    || (s.includes('single') && s.includes('medium')))                      return 'SM';
   return '';
 }
-const _PP_BADGE_COLORS = { MMZ:'#3b82f6', SNS:'#a855f7', SM:'#10b981', HP:'#ef4444', MW:'#f59e0b' };
+const _PP_BADGE_COLORS = { MMZ:'#3b82f6', SNS:'#a855f7', SM:'#10b981', HP:'#ef4444', MW:'#f59e0b', HOV:'#ec4899', HovSS:'#06b6d4' };
 function _ppBadge(raw) {
   const ab = _ppAbbr(raw);
   if (!ab) return '';
@@ -7914,7 +7924,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.50 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.51 · IST2</div>
     </div>`;
 }
 
@@ -12594,7 +12604,7 @@ function transitSetGroupBy(mode) {
   // 3 mod: cpt (default), floor (kat dwell), sortation (buffer)
   // Eski 'complete' adı sortation'a migrate (geriye uyumluluk için)
   if (mode === 'complete') mode = 'sortation';
-  if (mode !== 'cpt' && mode !== 'floor' && mode !== 'sortation') return;
+  if (mode !== 'cpt' && mode !== 'floor' && mode !== 'pp' && mode !== 'sortation') return;
   window._transitGroupBy = mode;
   try { localStorage.setItem('cpt_transit_groupby', mode); } catch(e) {}
   document.querySelectorAll('.tr-group-btn').forEach(b => {
@@ -13207,7 +13217,7 @@ function _renderTransitInner() {
   let groupBy = window._transitGroupBy || 'cpt';
   // Geçersiz state'leri ve eski 'complete' adını cpt'ye düşür (migration)
   if (groupBy === 'complete') groupBy = 'sortation';
-  if (groupBy !== 'cpt' && groupBy !== 'floor' && groupBy !== 'sortation') {
+  if (groupBy !== 'cpt' && groupBy !== 'floor' && groupBy !== 'pp' && groupBy !== 'sortation') {
     groupBy = 'cpt';
   }
   window._transitGroupBy = groupBy;
@@ -13218,6 +13228,10 @@ function _renderTransitInner() {
   });
   if (groupBy === 'floor') {
     renderFloorMode();
+    return;
+  }
+  if (groupBy === 'pp') {
+    renderPPMode();
     return;
   }
   if (groupBy === 'sortation') {
@@ -13339,6 +13353,112 @@ function _renderTransitInner() {
     }
     tCards.innerHTML = cards.join('');
     _reapplyFloorExpand();   // v12.14: render sonrası büyütülmüş kat açık kalsın
+  }
+
+  // ─── PROCESS PATH DWELL modu (v12.51) — MULTI / SINGLE gruplama ───
+  //   MULTI  : MultiMediumZone (MMZ) + MultiWrap (MW)
+  //   SINGLE : SingleMedium (SM) + SingleNoSlam (SNS) + HOV + HovSS (PPHOVSLAPSmall)
+  //   DİĞER  : HP + path bilgisi olmayan / eşleşmeyen tote'lar (veri asla sessizce kaybolmaz)
+  function renderPPMode() {
+    if (tCards) tCards.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+
+    function ppBucket(tote) {
+      const raw = tote.pathGroup || tote.path || '';
+      const ab = _ppAbbr(raw);
+      if (ab === 'MMZ' || ab === 'MW') return 'multi';
+      if (ab === 'SM' || ab === 'SNS' || ab === 'HOV' || ab === 'HovSS') return 'single';
+      const s = String(raw).toLowerCase();
+      if (s.includes('multi')) return 'multi';
+      if (s.includes('single') || s.includes('hov')) return 'single';
+      return 'other';
+    }
+    const buckets = { multi: [], single: [], other: [] };
+    allTotes.forEach(t2 => buckets[ppBucket(t2)].push(t2));
+
+    const totalItem  = transit.grandTotal || Object.values(cptTotals).reduce((s,v)=>s+v, 0);
+    const totalTotes = allTotes.length;
+    const totalDetailItems = allTotes.reduce((s,t2)=>s+t2.totalQty, 0);
+    const mItems = buckets.multi.reduce((s,t2)=>s+t2.totalQty, 0);
+    const sItems = buckets.single.reduce((s,t2)=>s+t2.totalQty, 0);
+
+    if (tSummary) tSummary.innerHTML = `
+      <div class="stat-card" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">${t('Toplam Transit')}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--blue);margin-top:4px;font-family:'JetBrains Mono',monospace">${totalItem.toLocaleString('tr-TR')}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${t('ExSD özetinden')}</div>
+      </div>
+      <div class="stat-card" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">${t('Tote Sayısı')}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);margin-top:4px;font-family:'JetBrains Mono',monospace">${totalTotes}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${totalDetailItems.toLocaleString('tr-TR')} ${t('item detay')}</div>
+      </div>
+      <div class="stat-card" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">MULTI</div>
+        <div style="font-size:22px;font-weight:800;color:var(--blue);margin-top:4px;font-family:'JetBrains Mono',monospace">${buckets.multi.length}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${mItems.toLocaleString('tr-TR')} ${t('item')} · MMZ + MW</div>
+      </div>
+      <div class="stat-card" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:700;letter-spacing:.06em">SINGLE</div>
+        <div style="font-size:22px;font-weight:800;color:var(--purple);margin-top:4px;font-family:'JetBrains Mono',monospace">${buckets.single.length}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${sItems.toLocaleString('tr-TR')} ${t('item')} · SM + SNS + HOV + HovSS</div>
+      </div>
+    `;
+
+    if (tCount) {
+      let txt = `${totalTotes} ${t('tote')} · ${totalDetailItems.toLocaleString('tr-TR')} ${t('item')} · MULTI ${buckets.multi.length} · SINGLE ${buckets.single.length}`;
+      if (buckets.other.length) txt += ` · ${t('Diğer')} ${buckets.other.length}`;
+      if (transit.enriching) {
+        const prog = transit.enrichProgress || '?';
+        txt += ` · 🔄 ${t('Lokasyon/picker yükleniyor')} (${prog})`;
+      }
+      tCount.textContent = txt;
+    }
+
+    if (transit.enriching) {
+      clearTimeout(window._transitAutoRefresh);
+      window._transitAutoRefresh = setTimeout(() => {
+        if (_activeTab === 'transit') renderTransit();
+      }, 3000);
+    }
+
+    // Sıralama: önce kullanıcı tercihi (dwell/qty/id), sonra path kümesine göre stabil grupla
+    //   → MULTI kartında MMZ'ler bir arada, sonra MW'ler; SINGLE'da SM → SNS → HOV → HovSS
+    const sortMode = window._transitToteSort || 'dwell';
+    const sortTotes = arr => {
+      const a = arr.slice();
+      if (sortMode === 'dwell') a.sort((x,y) => _liveDwell(y) - _liveDwell(x));
+      else if (sortMode === 'qty') a.sort((x,y) => y.totalQty - x.totalQty);
+      else a.sort((x,y) => x.scannableId.localeCompare(y.scannableId));
+      return a;
+    };
+    const abbrRank = { MMZ:0, MW:1, SM:0, SNS:1, HOV:2, HovSS:3 };
+    const clusterSort = arr => {
+      const a = sortTotes(arr);
+      a.sort((x,y) => {
+        const rx = abbrRank[_ppAbbr(x.pathGroup || x.path)] ?? 9;
+        const ry = abbrRank[_ppAbbr(y.pathGroup || y.path)] ?? 9;
+        return rx - ry;
+      });
+      return a;
+    };
+    const subCounts = arr => {
+      const c = {};
+      arr.forEach(t2 => { const ab = _ppAbbr(t2.pathGroup || t2.path) || '?'; c[ab] = (c[ab] || 0) + 1; });
+      return Object.keys(c).map(k => `${k} ${c[k]}`).join(' · ');
+    };
+
+    const _bStyle = 'font-size:9px;letter-spacing:0;width:46px';
+    const cards = [];
+    if (buckets.multi.length)  cards.push(renderFloorCard('pp-multi',  clusterSort(buckets.multi),  { badge:'MULTI',  badgeStyle:_bStyle, sub: subCounts(buckets.multi),  kicker:'Process Path' }));
+    if (buckets.single.length) cards.push(renderFloorCard('pp-single', clusterSort(buckets.single), { badge:'SINGLE', badgeStyle:_bStyle, sub: subCounts(buckets.single), kicker:'Process Path' }));
+    if (buckets.other.length)  cards.push(renderFloorCard('pp-other',  clusterSort(buckets.other),  { badge:'?', sub: subCounts(buckets.other) || t('Path bilgisi yok'), kicker:'Process Path' }));
+
+    if (!cards.length) {
+      tCards.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3);background:var(--card);border:1px solid var(--border);border-radius:var(--radius)">${t('Veri bekleniyor... Rodeo sayfası açık olmalı.')}</div>`;
+      return;
+    }
+    tCards.innerHTML = cards.join('');
+    _reapplyFloorExpand();
   }
 
 
@@ -13723,10 +13843,13 @@ function _renderTransitInner() {
 
 
 
-  function renderFloorCard(floorKey, totes) {
+  function renderFloorCard(floorKey, totes, opts) {
+    const o = opts || {};
     const isOther = floorKey === 'other';
-    const floorLabel = isOther ? t('Diğer') : ('P' + floorKey);
-    const floorSub = isOther ? t('Bilinmeyen lokasyon') : `${t('Kat')} ${floorKey}`;
+    const floorLabel = o.badge  || (isOther ? t('Diğer') : ('P' + floorKey));
+    const floorSub   = o.sub    || (isOther ? t('Bilinmeyen lokasyon') : `${t('Kat')} ${floorKey}`);
+    const kicker     = o.kicker || t('Pick Floor');
+    const badgeStyle = o.badgeStyle ? ` style="${o.badgeStyle}"` : '';
     const detailCount = totes.reduce((s,t)=>s+t.totalQty, 0);
     // v12.01: CANLI max dwell — kart başlığında en uzun bekleyen tote'un canlı dwell'i
     const maxDwell = totes.reduce((m,t)=>Math.max(m, _liveDwell(t)), 0);
@@ -13735,10 +13858,10 @@ function _renderTransitInner() {
     return `
       <div class="tr-floor-card" data-floor-key="${floorKey}" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);display:flex;flex-direction:column">
         <div class="tr-floor-header" onclick="toggleFloorExpand('${floorKey}')" title="${t('Büyütmek/küçültmek için tıkla')}" style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
-          <div class="tr-floor-badge">${floorLabel}</div>
+          <div class="tr-floor-badge"${badgeStyle}>${floorLabel}</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.2;display:flex;align-items:center">${floorSub}<span class="tr-expand-hint">⤢</span></div>
-            <div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">${t('Pick Floor')}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">${kicker}</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:18px;font-weight:800;color:${headerColor};font-family:'JetBrains Mono',monospace;line-height:1">${totes.length}</div>
