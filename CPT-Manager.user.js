@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.54
+// @version      12.55
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.54] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.55] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.54';
+    const BRIDGE_VERSION = '12.55';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -6296,6 +6296,15 @@ if (IS_EXSD) {
         }
 
         // FC Research — tote → employee/lastPick (host: fcresearch-eu.aka.amazon.com)
+        // v12.55: BİRİNCİL — kullanıcının gerçekte baktığı sayfa (adres çubuğundan birebir):
+        //   qi-fcresearch-eu.corp.amazon.com/IST2/results?s=<tote>
+        //   EN YENİ işlemler burada. Eski tBuildFcUrl ('-more?token=' ucu) SAYFALAMA ucudur:
+        //   devam/ESKİ satır bloklarını döndürür → "çok eski veriyi çekiyor" şikayetinin kök sebebi.
+        //   O uç artık yalnızca yedek (ana sayfa ağ hatası verirse).
+        const TR_FC_HOST_PRIMARY = 'https://qi-fcresearch-eu.corp.amazon.com/';
+        function tBuildFcPageUrl(toteId) {
+            return TR_FC_HOST_PRIMARY + TR_FC + '/results?s=' + encodeURIComponent(toteId);
+        }
         function tBuildFcUrl(toteId) {
             const t1 = Math.floor(Date.now() / 1000), t2 = t1 - TR_FC_HOURS * 3600;
             return 'https://fcresearch-eu.aka.amazon.com/' + TR_FC +
@@ -6346,7 +6355,25 @@ if (IS_EXSD) {
                     const iPer = _mIdx(hdr, [/kişi|kisi/, /person/, /^user/, /employee/, /associate/, /login/]);
                     let rows = [...table.querySelectorAll('tbody tr')];
                     if (!rows.length) rows = [...table.querySelectorAll('tr')].slice(1);
-                    for (const row of rows) {   // en yeni satır üstte (FC Research sırası)
+                    // v12.55: "tarihe göre sıraladığında EN SON işlem" (kullanıcı kuralı) —
+                    //   DOM sırasına güvenme: data-row-id (ISO) ya da ilk hücredeki tarih
+                    //   metninden zaman çıkar, EN YENİ ÜSTTE olacak şekilde kendimiz sırala.
+                    const _rowTs = row => {
+                        try {
+                            const rid = row.getAttribute && row.getAttribute('data-row-id');
+                            if (rid) { const t = Date.parse(rid); if (!isNaN(t)) return t; }
+                            const ftd = row.querySelector && row.querySelector('td');
+                            const m = ftd && tClean(ftd.textContent).match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}(:\d{2})?)/);
+                            if (m) { const t = Date.parse(m[1] + 'T' + m[2]); if (!isNaN(t)) return t; }
+                        } catch (e) {}
+                        return null;
+                    };
+                    if (rows.some(r => _rowTs(r) !== null)) {
+                        rows = rows.map((r, i) => ({ r, i, ts: _rowTs(r) }))
+                                   .sort((a, b) => (b.ts ?? -1) - (a.ts ?? -1) || a.i - b.i)
+                                   .map(x => x.r);
+                    }
+                    for (const row of rows) {   // en yeni satır üstte (tarih sıralı ya da FC sırası)
                         const tds = [...row.querySelectorAll('td')];
                         if (tds.length <= Math.max(iOld, iNew)) continue;
                         const oldC = tClean(tds[iOld]?.textContent);
@@ -6542,15 +6569,22 @@ if (IS_EXSD) {
         // v11.80: FC fetch hata istatistiği — TIMEOUT/network hataları sessizce yutulurdu, artık sayılır
         let _fcStats = { ok: 0, err: 0, lastErr: '' };
         async function tFetchEmployee(toteId) {
+            // v12.55: BİRİNCİL = gerçek sayfa (qi-...corp/results?s=) — en yeni işlemler.
+            //   200 dönerse sonucu (boş bile olsa) ona göre değerlendiririz; ağ hatasında
+            //   eski '-more' ucu YEDEK olarak denenir. İkisi de düşerse _err (neg-cache yazılmaz).
             try {
-                const r = await trGet(tBuildFcUrl(toteId), TR_FC_TIMEOUT_MS);
+                const r = await trGet(tBuildFcPageUrl(toteId), TR_FC_TIMEOUT_MS);
                 if (r && r.status === 200) { _fcStats.ok++; return tParseFcResponse(r.responseText, toteId); }
                 _fcStats.err++;
-                _fcStats.lastErr = 'HTTP ' + (r && r.status || '?');
+                _fcStats.lastErr = 'HTTP ' + (r && r.status || '?') + ' (ana sayfa)';
             } catch (e) {
                 _fcStats.err++;
                 _fcStats.lastErr = String(e && e.message || e).slice(0, 80);
             }
+            try {
+                const r2 = await trGet(tBuildFcUrl(toteId), TR_FC_TIMEOUT_MS);
+                if (r2 && r2.status === 200) { _fcStats.ok++; return tParseFcResponse(r2.responseText, toteId); }
+            } catch (e2) {}
             // v12.54: _err — bu bir AĞ HATASI (timeout/HTTP), "FC'de kayıt yok" DEĞİL.
             return { employee:'', lastPick:'', recentLoc:'', fcFloor:0, floorLoc:'', _err: true };
         }
@@ -7378,7 +7412,7 @@ if (IS_EXSD) {
                     const _bResolved = new Set();
                     await tPool(_chunks, BULK_CONC, async (ids) => {
                         try {
-                            const url = 'https://fcresearch-eu.aka.amazon.com/' + TR_FC + '/results?s=' + encodeURIComponent(ids.join(','));
+                            const url = TR_FC_HOST_PRIMARY + TR_FC + '/results?s=' + encodeURIComponent(ids.join(','));
                             const r = await trGet(url, BULK_TIMEOUT);
                             if (!r || r.status !== 200 || !r.responseText) return;
                             _bReq200++;
