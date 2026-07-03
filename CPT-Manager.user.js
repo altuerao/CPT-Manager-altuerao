@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.56
+// @version      12.57
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.56] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.57] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.56';
+    const BRIDGE_VERSION = '12.57';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -5996,7 +5996,9 @@ if (IS_EXSD) {
         } catch (e) {}
 
         const TR_MAX_PAGES        = 200;    // v11.56: derin sayfalama
-        const TR_FC_CONCURRENCY   = 40;     // v12.54: 100→40 — asıl yük artık TOPLU okumada; 100
+        const TR_FC_CONCURRENCY   = 150;    // v12.57: Atlas ile BİREBİR (FC_CONCURRENCY=150). Tek GET +
+                                            //   doğru token; Atlas bu eşzamanlılıkla tüm transitleri anında dolduruyor.
+                                            //   v12.54: 100→40 — asıl yük artık TOPLU okumada; 100
                                             //   paralel tekli istek FC'yi boğup timeout üretiyor, o da
                                             //   (eski neg-cache hatasıyla) 'Bilinmeyen' yığını yapıyordu.
                                             //   v12.52: 70→100 — dwell öncelikli kuyrukla birlikte
@@ -6008,7 +6010,8 @@ if (IS_EXSD) {
                                             //   BİTMİYORDU (40sn+ sürüp yeni taramaya çarpıyordu, 100+ tote
                                             //   enrichment'sız "Bilinmeyen lokasyon"da kalıyordu). FC farklı host
                                             //   olduğu için Rodeo'yu etkilemez, enrichment hızlanır.
-        const TR_FC_HOURS         = 8;      // v11.81: 4→8 saat — uzun transit kalan tote'lar da yakalansın (eski hareketleri kaçırma)
+        const TR_FC_HOURS         = 24;     // v12.57: Atlas ile BİREBİR (8→24). Atlas 24 saatlik pencere
+                                            //   + firstResult:0 token'ıyla en yeni satırı ilk sırada alır.
         const TR_PAGE_TIMEOUT_MS  = 20000;  // v11.77: 15000→20000 — size=3000 sayfa için pay (büyük günde yavaş yanıt)
         const TR_FC_TIMEOUT_MS    = 5000;   // v12.10: 8000→5000 — takılan FC isteği 5sn'de pes etsin, pool
                                             //   tıkanmasın. Yanıt veren tote'lar zaten <2sn geliyor; 8sn bekleyen
@@ -6532,6 +6535,71 @@ if (IS_EXSD) {
             }
             return { employee, lastPick, recentLoc, fcFloor, floorLoc };
         }
+        // v12.57: ATLAS parseFcResponse BİREBİR — İLK tbody satırını al (doğru token'la en yeni
+        //   satır zaten ilk sırada). Atlas 'Employee/Last Pick' başlıklarına bakar; senin FC'de
+        //   başlıklar Türkçe (Kişi/Eski Kutu/Yeni Kutu) olduğu için ikisini de tanıtıyoruz.
+        //   Lokasyon = Eski Kutu (alım kaynağı), picker = Kişi, güncel konteyner = Yeni Kutu.
+        //   'ts'/'cv' ile başlayan değer lokasyon değildir (Atlas looksLikeToteId kuralı).
+        function tParseFcAtlas(html, toteId) {
+            const looksLikeToteId = v => /^(ts|cv|tsx)[a-z0-9]/i.test((v || '').trim());
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            for (const table of doc.querySelectorAll('table')) {
+                let hdr = null;
+                for (const tr of table.querySelectorAll('tr')) {
+                    const ths = [...tr.querySelectorAll('th')];
+                    if (ths.length) { hdr = ths.map(th => tClean(th.textContent).toLowerCase()); break; }
+                }
+                if (!hdr) continue;
+                const iE = tCi(hdr, ['employee', 'associate', 'picker', 'kişi', 'kisi', 'person']);
+                const iL = tCi(hdr, ['last pick', 'lastpick', 'pick location', 'eski kutu', 'eski konteyner', 'old container', 'from container']);
+                const iN = tCi(hdr, ['yeni kutu', 'yeni konteyner', 'new container', 'to container', 'destination']);
+                if (iL < 0) continue;
+                // v12.57: başlık <tr>'ı (th içeren) atla; İLK VERİ satırını (td'li, en yeni) al.
+                let row = null;
+                for (const tr of table.querySelectorAll('tr')) {
+                    if (tr.querySelector('th')) continue;
+                    if (tr.querySelector('td')) { row = tr; break; }
+                }
+                if (!row) continue;
+                const tds = [...row.querySelectorAll('td')];
+                if (tds.length <= iL) continue;
+                const empVal = iE >= 0 ? tClean(tds[iE] && tds[iE].textContent) : '';
+                const lpVal  = tClean(tds[iL] && tds[iL].textContent);
+                const ncVal  = iN >= 0 ? tClean(tds[iN] && tds[iN].textContent) : '';
+                const lastPick = looksLikeToteId(lpVal) ? '' : lpVal;
+                const fm = lastPick.match(/\bP[-\s]?([1-6])\b/i);
+                return {
+                    employee: (empVal && !looksLikeToteId(empVal)) ? empVal.toLowerCase() : '',
+                    lastPick,
+                    recentLoc: (ncVal && ncVal !== '-' && ncVal !== '—') ? ncVal : '',
+                    fcFloor: fm ? parseInt(fm[1]) : 0,
+                    floorLoc: lastPick
+                };
+            }
+            // Fallback: başlıksız legacy tablo — Atlas'ın td[8]=Kişi, td[9]=Eski Kutu düzeni
+            let row = null;
+            for (const tr of doc.querySelectorAll('table tr')) {
+                if (tr.querySelector('th')) continue;
+                if (tr.querySelector('td')) { row = tr; break; }
+            }
+            if (row) {
+                const tds = [...row.querySelectorAll('td')];
+                const empVal = tClean((tds[8] || {}).textContent || '');
+                const lpVal  = tClean((tds[9] || {}).textContent || '');
+                const ncVal  = tClean((tds[10] || {}).textContent || '');
+                const lastPick = looksLikeToteId(lpVal) ? '' : lpVal;
+                const fm = lastPick.match(/\bP[-\s]?([1-6])\b/i);
+                return {
+                    employee: (empVal && !looksLikeToteId(empVal)) ? empVal.toLowerCase() : '',
+                    lastPick,
+                    recentLoc: (ncVal && ncVal !== '-' && ncVal !== '—' && !looksLikeToteId(ncVal)) ? ncVal : '',
+                    fcFloor: fm ? parseInt(fm[1]) : 0,
+                    floorLoc: lastPick
+                };
+            }
+            return { employee: '', lastPick: '', recentLoc: '', fcFloor: 0, floorLoc: '' };
+        }
+
         // v12.54: ÇOKLU ARAMA yanıtı çözücü — satır başına bir scannable.
         //   Her tabloda: satır, istenen tote ID'lerinden birini içeriyorsa o tote'undur. Satırdan:
         //     lokasyon = tIsRealPickLocation geçen İLK hücre (P-X-...; buffer/konteyner ASLA
@@ -6588,37 +6656,20 @@ if (IS_EXSD) {
         // v11.80: FC fetch hata istatistiği — TIMEOUT/network hataları sessizce yutulurdu, artık sayılır
         let _fcStats = { ok: 0, err: 0, lastErr: '' };
         async function tFetchEmployee(toteId) {
-            // v12.56 KÖK SEBEP ÇÖZÜMÜ (kaynaktan doğrulandı): Envanter Geçmişi tablosu ana
-            //   sayfada YOK — sayfa 'POST /IST2/results/inventory-history' (gövde s=<tote>) ile
-            //   AJAX doldurur ve İLK yanıt EN YENİ satırlardır. Eski kod doğrudan GET '-more'
-            //   çekiyordu → o sayfalama ucu ESKİ blokları verir → yanlış/eski lokasyon.
-            //   Sıra: (1) section POST — birincil, (2) sayfa GET — bazı kurulumlarda gömülü gelir,
-            //   (3) '-more' GET — son çare. tParseFcResponse zaten tarihe göre en yeniyi seçer.
+            // v12.57: ATLAS BİREBİR — tek GET, doğru token (firstResult:0 + containerScannableId
+            //   + isSourceContainerSearchComplete). Bu token EN YENİ satırı tbody'nin İLK satırına
+            //   koyar; parser da ilk satırı alır (tParseFcAtlas). Eski '-more' GET'i doğru token'la
+            //   çağrıldığında Atlas'ta hiç eski veri gelmiyor — sorun bizim yanlış pencere/parse'tı.
+            //   Ağ hatasında (_err) neg-cache YAZILMAZ; bir sonraki taramada tekrar denenir.
             try {
-                const rp = await trPost(tBuildFcSectionUrl(), { s: toteId }, TR_FC_TIMEOUT_MS);
-                if (rp && rp.status === 200 && rp.responseText) {
-                    const parsed = tParseFcResponse(rp.responseText, toteId);
-                    if (parsed && (parsed.lastPick || parsed.employee || parsed.recentLoc || parsed.fcFloor)) { _fcStats.ok++; return parsed; }
-                    // 200 ama boş → gerçekten kayıt yok olabilir; yine de sayfa GET ile teyit et
-                }
-            } catch (e) {
+                const r = await trGet(tBuildFcUrl(toteId), TR_FC_TIMEOUT_MS);
+                if (r && r.status === 200) { _fcStats.ok++; return tParseFcAtlas(r.responseText, toteId); }
                 _fcStats.err++;
-                _fcStats.lastErr = String(e && e.message || e).slice(0, 80) + ' (section POST)';
-            }
-            try {
-                const r = await trGet(tBuildFcPageUrl(toteId), TR_FC_TIMEOUT_MS);
-                if (r && r.status === 200) { _fcStats.ok++; return tParseFcResponse(r.responseText, toteId); }
-                _fcStats.err++;
-                _fcStats.lastErr = 'HTTP ' + (r && r.status || '?') + ' (ana sayfa)';
+                _fcStats.lastErr = 'HTTP ' + (r && r.status || '?');
             } catch (e) {
                 _fcStats.err++;
                 _fcStats.lastErr = String(e && e.message || e).slice(0, 80);
             }
-            try {
-                const r2 = await trGet(tBuildFcUrl(toteId), TR_FC_TIMEOUT_MS);
-                if (r2 && r2.status === 200) { _fcStats.ok++; return tParseFcResponse(r2.responseText, toteId); }
-            } catch (e2) {}
-            // v12.54: _err — bu bir AĞ HATASI (timeout/HTTP), "FC'de kayıt yok" DEĞİL.
             return { employee:'', lastPick:'', recentLoc:'', fcFloor:0, floorLoc:'', _err: true };
         }
 
@@ -7437,7 +7488,7 @@ if (IS_EXSD) {
                 //   tote'lar alttaki tekli (dwell öncelikli) kuyruğa kalır. Bu FC kurulumu çoklu
                 //   aramayı desteklemiyorsa (2 istek üst üste 200 dönüp 0 tote çözerse) oturum
                 //   boyunca kapatılır (_bulkFcDead) ve tekli yol tek başına sürer — regresyon yok.
-                if (!window._bulkFcDead && toFetch.length > 3) {
+                if (window._bulkFcEnabled && !window._bulkFcDead && toFetch.length > 3) {   // v12.57: Atlas'ta toplu okuma yok → varsayılan KAPALI (tekli Atlas yolu birincil)
                     const BULK_SIZE = 40, BULK_CONC = 3, BULK_TIMEOUT = 15000;
                     const _chunks = [];
                     for (let i = 0; i < toFetch.length; i += BULK_SIZE) _chunks.push(toFetch.slice(i, i + BULK_SIZE));
