@@ -3014,7 +3014,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.57</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.58</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3487,7 +3487,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.57</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.58</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3845,7 +3845,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.57.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.58.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7924,7 +7924,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.57 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.58 · IST2</div>
     </div>`;
 }
 
@@ -13222,6 +13222,11 @@ function _renderTransitInner() {
   }
   window._transitGroupBy = groupBy;
   try { localStorage.setItem('cpt_transit_groupby', groupBy); } catch(e) {}
+  // v12.58: PP kat filtre çubuğu yalnızca PP modunda görünsün — diğer modlara geçerken kaldır.
+  if (groupBy !== 'pp') {
+    const _fb = document.getElementById('pp-floor-bar');
+    if (_fb) _fb.remove();
+  }
   // Toggle butonlarının aktif state'i
   document.querySelectorAll('.tr-group-btn').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-mode') === groupBy);
@@ -13362,6 +13367,17 @@ function _renderTransitInner() {
   function renderPPMode() {
     if (tCards) tCards.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
 
+    // v12.58: PP modu kat çıkarımı — floor modundaki getFloor ile AYNI mantık.
+    //   Tote'un fiziksel katı: önce FC fcFloor, sonra lokasyon P-N deseninden.
+    function _ppFloorOf(tote) {
+      if (tote.fcFloor >= 1 && tote.fcFloor <= 6) return tote.fcFloor;
+      if (tote._locFromPicker) return null;
+      const tryStr = (tote.location === 'Bin') ? tote.scannableId : tote.location;
+      if (!tryStr) return null;
+      const m = String(tryStr).match(/P-?([1-6])-/i);
+      return m ? parseInt(m[1]) : null;
+    }
+
     function ppBucket(tote) {
       const raw = tote.pathGroup || tote.path || '';
       const ab = _ppAbbr(raw);
@@ -13372,8 +13388,24 @@ function _renderTransitInner() {
       if (s.includes('single') || s.includes('hov')) return 'single';
       return 'other';
     }
-    const buckets = { multi: [], single: [], other: [] };
-    allTotes.forEach(t2 => buckets[ppBucket(t2)].push(t2));
+    // Tüm tote'lar (kat filtresi öncesi) — buton rozetlerindeki kat sayıları için
+    const allBuckets = { multi: [], single: [], other: [] };
+    allTotes.forEach(t2 => allBuckets[ppBucket(t2)].push(t2));
+
+    // v12.58 KAT FİLTRESİ: aktif kat seçiliyse MULTI ve SINGLE'ı AYNI ANDA o kata göre süz.
+    //   'all' → hepsi · 1-6 → o kat · 'none' → katı çıkarılamayan (Diğer) tote'lar.
+    const _ppFloor = window._ppFloorFilter || 'all';
+    const _floorMatch = t2 => {
+      if (_ppFloor === 'all') return true;
+      const f = _ppFloorOf(t2);
+      if (_ppFloor === 'none') return f == null;
+      return f === _ppFloor;
+    };
+    const buckets = {
+      multi:  allBuckets.multi.filter(_floorMatch),
+      single: allBuckets.single.filter(_floorMatch),
+      other:  allBuckets.other.filter(_floorMatch),
+    };
 
     const totalItem  = transit.grandTotal || Object.values(cptTotals).reduce((s,v)=>s+v, 0);
     const totalTotes = allTotes.length;
@@ -13407,12 +13439,45 @@ function _renderTransitInner() {
     if (tCount) {
       let txt = `${totalTotes} ${t('tote')} · ${totalDetailItems.toLocaleString('tr-TR')} ${t('item')} · MULTI ${buckets.multi.length} · SINGLE ${buckets.single.length}`;
       if (buckets.other.length) txt += ` · ${t('Diğer')} ${buckets.other.length}`;
+      if (_ppFloor !== 'all') txt += ` · 🛗 P${_ppFloor}`;
       if (transit.enriching) {
         const prog = transit.enrichProgress || '?';
         txt += ` · 🔄 ${t('Lokasyon/picker yükleniyor')} (${prog})`;
       }
       tCount.textContent = txt;
     }
+
+    // v12.58: P1–P6 kat filtre çubuğu — MULTI ve SINGLE'ı aynı anda süzer.
+    //   Her butonda o kattaki (multi+single) tote sayısı; boş katlar soluk ve tıklanamaz.
+    //   tCards'ın hemen üstüne, kalıcı bir konteynere basılır (#pp-floor-bar).
+    (function renderPpFloorBar() {
+      let bar = document.getElementById('pp-floor-bar');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'pp-floor-bar';
+        bar.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px 0';
+        if (tCards && tCards.parentNode) tCards.parentNode.insertBefore(bar, tCards);
+      }
+      const floorCount = f => allBuckets.multi.concat(allBuckets.single, allBuckets.other)
+                                 .filter(t2 => _ppFloorOf(t2) === f).length;
+      const btn = (key, label, count, active, enabled) => {
+        const bg = active ? 'linear-gradient(135deg,var(--purple),var(--blue))' : 'var(--card)';
+        const col = active ? '#fff' : (enabled ? 'var(--text)' : 'var(--text3)');
+        const bd = active ? 'transparent' : 'var(--border)';
+        const op = enabled ? '1' : '.45';
+        const cur = enabled ? 'pointer' : 'default';
+        const badge = count != null ? `<span style="margin-left:6px;font-size:10px;opacity:.85;font-family:'JetBrains Mono',monospace">${count}</span>` : '';
+        return `<button ${enabled ? `onclick="ppSetFloor('${key}')"` : 'disabled'} style="cursor:${cur};opacity:${op};font-size:12px;font-weight:700;padding:7px 14px;border-radius:9px;background:${bg};color:${col};border:1px solid ${bd};white-space:nowrap;transition:all .15s">${label}${badge}</button>`;
+      };
+      let h = btn('all', t('Tümü'), allBuckets.multi.length + allBuckets.single.length + allBuckets.other.length, _ppFloor === 'all', true);
+      for (let f = 1; f <= 6; f++) {
+        const c = floorCount(f);
+        h += btn(String(f), 'P' + f, c, _ppFloor === f, c > 0);
+      }
+      const other = allBuckets.multi.concat(allBuckets.single, allBuckets.other).filter(t2 => _ppFloorOf(t2) == null).length;
+      if (other > 0) h += btn('none', t('Diğer'), other, _ppFloor === 'none', true);
+      bar.innerHTML = h;
+    })();
 
     if (transit.enriching) {
       clearTimeout(window._transitAutoRefresh);
@@ -13461,9 +13526,12 @@ function _renderTransitInner() {
     _reapplyFloorExpand();
   }
 
-
-  // ═══════════════════════════════════════════════════════════════
-  // SORTATION — sadece ExSD (CPT saati) bazında Batch ID listesi
+  // v12.58: PP modu kat filtresi — buton tıklaması. Aynı kata tekrar basınca 'all'e döner.
+  window.ppSetFloor = function(key) {
+    const val = (key === 'all' || key === 'none') ? key : parseInt(key);
+    window._ppFloorFilter = (window._ppFloorFilter === val) ? 'all' : val;
+    renderPPMode();
+  };
   // Veri kaynağı: Buffer Current Status DOM scrape → cpt_complete_batches_v1
   // ═══════════════════════════════════════════════════════════════
   // SORTATION — CPT Saati Dwell tarzında kartlar
