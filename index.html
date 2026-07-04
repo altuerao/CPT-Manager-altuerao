@@ -3014,7 +3014,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.58</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.59</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3487,7 +3487,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.58</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.59</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3845,7 +3845,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.58.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.59.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7924,7 +7924,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.58 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.59 · IST2</div>
     </div>`;
 }
 
@@ -13455,7 +13455,8 @@ function _renderTransitInner() {
       if (!bar) {
         bar = document.createElement('div');
         bar.id = 'pp-floor-bar';
-        bar.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px 0';
+        // v12.59: tam genişlik, butonlar eşit pay alıp baştan sona kaplar
+        bar.style.cssText = 'display:flex;gap:10px;align-items:stretch;margin:0 0 16px 0;width:100%';
         if (tCards && tCards.parentNode) tCards.parentNode.insertBefore(bar, tCards);
       }
       const floorCount = f => allBuckets.multi.concat(allBuckets.single, allBuckets.other)
@@ -13464,10 +13465,12 @@ function _renderTransitInner() {
         const bg = active ? 'linear-gradient(135deg,var(--purple),var(--blue))' : 'var(--card)';
         const col = active ? '#fff' : (enabled ? 'var(--text)' : 'var(--text3)');
         const bd = active ? 'transparent' : 'var(--border)';
-        const op = enabled ? '1' : '.45';
+        const op = enabled ? '1' : '.4';
         const cur = enabled ? 'pointer' : 'default';
-        const badge = count != null ? `<span style="margin-left:6px;font-size:10px;opacity:.85;font-family:'JetBrains Mono',monospace">${count}</span>` : '';
-        return `<button ${enabled ? `onclick="ppSetFloor('${key}')"` : 'disabled'} style="cursor:${cur};opacity:${op};font-size:12px;font-weight:700;padding:7px 14px;border-radius:9px;background:${bg};color:${col};border:1px solid ${bd};white-space:nowrap;transition:all .15s">${label}${badge}</button>`;
+        const shadow = active ? 'box-shadow:0 4px 14px rgba(124,58,237,.35);' : '';
+        const badge = count != null ? `<span style="margin-left:8px;font-size:13px;opacity:.85;font-family:'JetBrains Mono',monospace;font-weight:800">${count}</span>` : '';
+        // flex:1 → her buton eşit genişlik, çubuk baştan sona dolar
+        return `<button ${enabled ? `onclick="ppSetFloor('${key}')"` : 'disabled'} style="flex:1 1 0;cursor:${cur};opacity:${op};font-size:15px;font-weight:800;padding:14px 8px;border-radius:12px;background:${bg};color:${col};border:1.5px solid ${bd};white-space:nowrap;transition:all .15s;${shadow}">${label}${badge}</button>`;
       };
       let h = btn('all', t('Tümü'), allBuckets.multi.length + allBuckets.single.length + allBuckets.other.length, _ppFloor === 'all', true);
       for (let f = 1; f <= 6; f++) {
@@ -13530,7 +13533,8 @@ function _renderTransitInner() {
   window.ppSetFloor = function(key) {
     const val = (key === 'all' || key === 'none') ? key : parseInt(key);
     window._ppFloorFilter = (window._ppFloorFilter === val) ? 'all' : val;
-    renderPPMode();
+    // renderPPMode _renderTransitInner scope'unda; dışarıdan public wrapper ile tetikle.
+    if (typeof renderTransit === 'function') renderTransit();
   };
   // Veri kaynağı: Buffer Current Status DOM scrape → cpt_complete_batches_v1
   // ═══════════════════════════════════════════════════════════════
