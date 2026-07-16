@@ -2071,6 +2071,13 @@ select option { background: var(--surface); }
 }
 
 /* ── Transit gruplama toggle — büyük 2 buton ── */
+.bk-chip:hover { border-color: var(--blue) !important; background: var(--card-hover) !important; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+.bk-chip:active { transform: translateY(0); }
+.bk-chip-code:active { cursor: grabbing !important; }
+.bk-chip-code:hover { border-color: var(--blue) !important; }
+.bk-drag-handle:active { cursor: grabbing !important; }
+.bk-group[draggable="true"]:hover { border-color: var(--border) !important; }
+.bk-person:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
 .tr-group-btn {
   flex: 1;
   display: flex;
@@ -3014,7 +3021,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.59</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.72</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3113,8 +3120,14 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 
 <!-- ── SEKMELER ── -->
 <div id="tab-nav">
-  <button class="tab active" onclick="switchTab('tracker')">📋 <span data-i18n="Tracker">Tracker</span></button>
-  <button class="tab" onclick="switchTab('transit')">🚚 <span data-i18n="Transit">Transit</span></button>
+  <!-- v12.72: SEKME SIRASI ≠ AÇILIŞ SEKMESİ — ikisi ayrı şeyler, karıştırma.
+         · SIRA      : Tracker üstte, Transit hemen altında (bu butonların yazılış sırası).
+         · AÇILIŞ    : yine TRANSIT — .active bu butonda, page-transit .visible, _activeTab='transit'.
+           Yani pano Transit'te açılır, transit verisi ilk yüklenir; Tracker sadece listede önce durur.
+       DİKKAT: switchTab içindeki `tabs` dizisi bu butonlarla AYNI SIRADA olmalı —
+       aktif sekme `document.querySelectorAll('.tab')[tabs.indexOf(tab)]` ile index'ten bulunuyor. -->
+  <button class="tab" onclick="switchTab('tracker')">📋 <span data-i18n="Tracker">Tracker</span></button>
+  <button class="tab active" onclick="switchTab('transit')">🚚 <span data-i18n="Transit">Transit</span></button>
   <button class="tab" onclick="switchTab('planning')">📋 <span data-i18n="Planlama">Planlama</span></button>
   <button class="tab" onclick="switchTab('assignment')">👥 <span data-i18n="Picker Atama">Picker Atama</span></button>
   <button class="tab" onclick="switchTab('analyzer')">🔍 <span data-i18n="Picker Analizi">Picker Analizi</span></button>
@@ -3139,7 +3152,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 </div>
 
 <!-- TRACKER -->
-<div class="page visible" id="page-tracker">
+<div class="page" id="page-tracker">
   <div id="tracker-layout">
 
     <!-- Aktif CPT sütunu -->
@@ -3487,7 +3500,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.59</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.72</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3513,7 +3526,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 </div>
 
 <!-- TRANSIT -->
-<div class="page" id="page-transit">
+<div class="page visible" id="page-transit">
   <div id="transit-wrap">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
       <div>
@@ -3845,7 +3858,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.59.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.72.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7345,7 +7358,14 @@ window.__cptBuildInfo = _CPT_BUILD_INFO;
 console.log('%c CPT Manager v' + _CPT_VERSION + ' ', 'background:#7c3aed;color:#fff;font-weight:bold;padding:2px 6px;border-radius:3px',
             ' crafted by ' + _CPT_AUTHOR + ' · © 2026');
 
-let _activeTab = 'tracker';
+// v12.69 [TRANSIT ÖNCELİĞİ]: Varsayılan sekme 'tracker' idi. Kullanıcı isteği: "pano açıldığı
+//   an tüm canlı transit bilgisini görmek istiyorum". Kritik olan sadece görsel değil —
+//   _scheduleTransitRender'ın İLK SATIRI `if (_activeTab !== 'transit') return;` olduğu için
+//   Tracker'dayken gelen transit verisi localStorage'a yazılıyor ama HİÇ render edilmiyordu;
+//   Transit'e tıklandığı an 2000 tote sıfırdan çiziliyordu ("geç açılıyor" hissi).
+//   Bununla birlikte üç yer daha değişti: tab butonundaki .active, page div'indeki .visible ve
+//   boot render'ı (aşağıda) — dördü birden olmazsa sekme ile içerik uyuşmaz.
+let _activeTab = 'transit';
 
 // ═══════════════════════════════════════════════════════════════════
 // KULLANIM KILAVUZU MODAL'I
@@ -7924,7 +7944,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.59 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.72 · IST2</div>
     </div>`;
 }
 
@@ -8083,6 +8103,9 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
   // v10.20: Tab sıralaması (Batch Takip kaldırıldı)
+  // v12.70: Booklama kaldırıldı.
+  // v12.72: Sıra Tracker→Transit'e çevrildi (açılış sekmesi yine transit — bkz. _activeTab).
+  //   Bu dizinin sırası tab-nav'daki BUTON SIRASIYLA birebir aynı olmalı (index bazlı eşleşme).
   const tabs = ['tracker','transit','planning','assignment','analyzer','barcode','training'];
   document.querySelectorAll('.tab')[tabs.indexOf(tab)]?.classList.add('active');
   document.getElementById('page-' + tab)?.classList.add('visible');
@@ -8483,7 +8506,11 @@ function _trTxt(hex){
 // ══════════════════════════════════════════════
 //  v10.79: EĞİTİM İZNİ — Vardiya bazlı kalıcı store + Excel içe aktarma
 // ══════════════════════════════════════════════
-const PERM_TROB2_SEED = {};   // v12.31: gömülü seed KALDIRILDI — ilk açılışta eğitim listesi BOŞ başlar (kullanıcı isteği). Yedek Yükle ile dolar.
+// v12.72: SİTE SÜRÜMÜ — eğitim seed'i BİLEREK BOŞ. GitHub Pages herkese açık; gerçek
+//   çalışan adı + badge numarası buraya KONMAZ (kaynak görüntülenince okunur).
+//   Sitede eğitim verisi yalnızca kullanıcının kendi "Yedek Yükle"siyle gelir ve
+//   o tarayıcının localStorage'ında kalır. Lokal sürümde (CPT_Manager.html) seed doludur.
+const PERM_TROB2_SEED = {};
 // ═══ v10.93: TROB2 PICK PERM (PDF NameTag) → pick yetkileri ═══════════════
 // Çift yazılan eğitimler tekilleştirildi. Yüklemede trob2 store'una BİR KEZ
 // birleştirilir (union; mevcutları BOZMAZ, sadece eksik/yeni olanı ekler).
@@ -9138,6 +9165,8 @@ function _renderSupportPanel(){
   el.innerHTML=html;
 }
 window._renderSupportPanel=_renderSupportPanel;
+
+
 function renderTraining() {
   permLoadStore();
   try{ _renderSupportPanel(); }catch(e){}
@@ -9316,21 +9345,55 @@ function trTrackerChips(login) {
 // Userscript her 90sn'de transit verisini günceller (Rodeo ExSD açıkken).
 // HTML tarafında 10sn'de bir storage'dan yeniden okuyup render ederiz.
 // Bu sayede kullanıcının "Yenile" butonuna basmasına gerek kalmaz.
-// Userscript 15sn'de cptTotals'ı, 45sn'de tam veriyi günceller — HTML 3sn polling ile yakalar.
+// Userscript 60sn'de tam veriyi, 8sn'de (yalnız değişmişse) cptTotals'ı günceller.
 let _transitLastRev = '';
-setInterval(() => {
+
+// v12.69 [İÇERİK BAZLI REV — transit önceliği]
+//   ESKİ rev: ts|toteSayısı|cptToplam — İKİ YÖNDEN birden hatalıydı:
+//     (1) AŞIRI HASSAS: userscript'in 8sn hafif refresh'i cptTotals değişmese bile ts'i bump
+//         ediyordu → rev hep farklı → tam renderTransit HER 8sn. Anti-titreme koruması ölüydü.
+//         (Bu turda userscript v12.69'da da düzeltildi: ts artık sadece içerik değişince ilerler.
+//          Burası ikinci savunma hattı — rev ts'e hiç bakmazsa hangi sebeple bump edilirse edilsin
+//          gereksiz render olmaz.)
+//     (2) KÖR: enrichment lokasyon/picker doldurur ama tote SAYISI değişmez → ts olmasaydı
+//         enrichment ilerlemesi HİÇ render tetiklemezdi ("Bilinmeyen lokasyon" ekranda kalırdı).
+//   YENİ rev ts'e HİÇ bakmaz, İÇERİĞİ ölçer: tote sayısı + lokasyonu dolu + picker'ı dolu +
+//   katı çözülmüş + cptToplam + enriching. Enrichment ilerledikçe rev değişir (render olur),
+//   hiçbir şey değişmediğinde sabit kalır (render olmaz).
+//   DAKİKA KOVASI: dwell ekranda dakika cinsinden CANLI gösteriliyor (dwellStartMs'ten hesaplanır).
+//   Dakika değişince rev de değişsin ki tick render tetikleyebilsin — dakikada bir, 8sn'de bir değil.
+//   Alan adları blob'a göre: location / lastPicker / fcFloor (userscript cache'indeki
+//   employee/lastPick/recentLoc DEĞİL — o isimler sadece userscript içinde geçerli).
+//   Maliyet: 2000 tote üzerinde 3 alan kontrolü — tam DOM render'ının yanında ihmal edilebilir.
+function _transitComputeRev() {
   try {
     const raw = localStorage.getItem('cpt_transit_batches_v9');
-    if (!raw) return;
+    if (!raw) return 'yok';
     const p = JSON.parse(raw);
-    // Revizyon anahtarı: ts + tote sayısı + cptTotals toplam (hafif refresh'i de yakalar)
+    const totes = p.totes || {};
+    let n = 0, loc = 0, pick = 0, flr = 0;
+    for (const k in totes) {
+      n++;
+      const t = totes[k];
+      if (!t) continue;
+      if (t.location)   loc++;
+      if (t.lastPicker) pick++;
+      if (t.fcFloor)    flr++;
+    }
     const cptSum = Object.values(p.cptTotals || {}).reduce((s,v)=>s+v, 0);
-    const rev = String(p.ts || '') + '|' + Object.keys(p.totes||{}).length + '|' + cptSum;
-    if (rev === _transitLastRev) return;
-    _transitLastRev = rev;
-    if (_activeTab === 'transit') renderTransit();
-  } catch(e) {}
-}, 20000);  // v10.51: 3sn → 20sn — kullanıcı isteği üzerine yavaşlatıldı
+    return n + '|' + loc + '|' + pick + '|' + flr + '|' + cptSum + '|' +
+           (p.enriching ? 1 : 0) + '|' + Math.floor(Date.now() / 60000);
+  } catch(e) { return 'hata'; }
+}
+
+// v12.69 [TEK RENDER KAPISI — transit önceliği]
+//   Transit'i çizen ALTI ayrı yol vardı; ÜÇÜ rev/debounce'u tamamen atlayıp renderTransit'i
+//   doğrudan çağırıyordu (bu 20sn poller, 30sn dwell tick, focus/visibility). Üstelik bu poller
+//   ile _scheduleTransitRender AYNI _transitLastRev'i paylaşıp birbirini rastgele preempt ediyordu.
+//   Artık hepsi _scheduleTransitRender'dan geçer: tek debounce, tek rev, tek karar.
+//   Kullanıcının kendi eylemleri (sıralama/gruplama) doğrudan renderTransit çağırmaya devam eder —
+//   orada anında tepki isteniyor, debounce beklemek yanlış olur.
+setInterval(() => { _scheduleTransitRender(); }, 20000);
 
 // Cross-tab storage event + BroadcastChannel — userscript yazınca render.
 // v11.66: TİTREME FIX — storage ve BC aynı anda tetikleniyordu (çift render).
@@ -9359,15 +9422,10 @@ function _scheduleTransitRender() {
   _transitRenderTimer = setTimeout(() => {
     _transitRenderTimer = null;
     try {
-      // Revizyon kontrolü — veri gerçekten değişmediyse render etme
-      const raw = localStorage.getItem('cpt_transit_batches_v9');
-      if (raw) {
-        const p = JSON.parse(raw);
-        const cptSum = Object.values(p.cptTotals || {}).reduce((s,v)=>s+v, 0);
-        const rev = String(p.ts || '') + '|' + Object.keys(p.totes||{}).length + '|' + cptSum;
-        if (rev === _transitLastRev) return;   // değişiklik yok → titreme yapma
-        _transitLastRev = rev;
-      }
+      // v12.69: Revizyon kontrolü artık İÇERİK bazlı (ts kullanmaz) — tek kaynak _transitComputeRev
+      const rev = _transitComputeRev();
+      if (rev === _transitLastRev) return;   // değişiklik yok → titreme yapma
+      _transitLastRev = rev;
       if (_activeTab === 'transit') { _transitLastRenderMs = Date.now(); renderTransit(); }
     } catch(e) {}
   }, _delay);
@@ -9388,21 +9446,24 @@ try {
 //   Bu, dwellStartMs'ten canlı hesaplanan dwell süresinin pano'ya yansımasını sağlar.
 //   Network/refresh gerekmiyor — sadece DOM güncelleme. 30sn aralığı dwell granularitesi
 //   (dakika cinsinden) için yeterli, ekranı titretmez. Veri değişimi yoksa bile çalışır.
+// v12.69: Artık doğrudan renderTransit DEĞİL — tek kapıdan geçer. Rev'deki dakika kovası
+//   sayesinde dakika değişmişse render olur, değişmemişse olmaz (eskiden 30sn'de bir ZORLA
+//   tam çizim yapıyordu; dwell dakika cinsinden gösterildiği için 30sn'lik çizimin yarısı boşunaydı).
 setInterval(() => {
   if (_activeTab !== 'transit') return;
-  // Veri yoksa skip
-  const raw = localStorage.getItem('cpt_transit_batches_v9');
-  if (!raw) return;
-  try { renderTransit(); } catch(e) {}
+  _scheduleTransitRender();
 }, 30000);
 
 // v12.02: TARAYICI SEKMESİ FOCUS — kullanıcı pano sekmesine geri dönünce anında tazele.
 //   Tarayıcı background tab'ları timer'ları throttle eder; geri dönünce bizim verimiz
 //   stale görünebilir. Bu yüzden visibility/focus event'lerinde renderTransit zorla.
 //   Bu tarayıcı sekmesi geçişlerinde "veri kayboldu" hissinin önüne geçer.
+// v12.69: Doğrudan renderTransit yerine tek kapı. Sekmeye her dönüşte ZORLA tam çizim yapmak
+//   gereksizdi — DOM zaten çizili duruyor. Veri değişmişse rev yakalar ve çizer, değişmemişse
+//   dokunmaz. "Veri kayboldu" hissine karşı koruma aynen sürüyor, bedeli sıfır.
 const _onPanoVisible = () => {
   if (_activeTab !== 'transit') return;
-  setTimeout(() => { try { renderTransit(); } catch(e) {} }, 150);
+  setTimeout(() => { try { _scheduleTransitRender(); } catch(e) {} }, 150);
 };
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) _onPanoVisible();
@@ -12670,12 +12731,20 @@ function transitForceRefresh() {
     try { curTs = JSON.parse(localStorage.getItem('cpt_transit_batches_v9')||'{}').ts || 0; } catch(e) {}
     // Yeni veri geldiyse hemen render et ve durdur
     if (curTs > lastTs) {
+      // Kullanıcı Yenile'ye bastı ve veri geldi → ANINDA çiz (debounce bekletmek yanlış olur).
       renderTransit();
+      // v12.69: rev'i tohumla — yoksa hemen ardından gelen _scheduleTransitRender aynı veriyi
+      //   bir kez daha çizerdi (rev '' ile karşılaştırılıp farklı çıkardı).
+      try { _transitLastRev = _transitComputeRev(); } catch(e) {}
       toast('✓ Veri güncellendi');
       clearInterval(poll);
       return;
     }
-    renderTransit(); // yine de tazele
+    // v12.69: Eskiden burada koşulsuz renderTransit() vardı ("yine de tazele") → veri gelmese
+    //   bile 12sn boyunca SANİYEDE BİR tam çizim. ts zaten yukarıda kontrol ediliyor; push()
+    //   ts'i mutlaka ilerlettiği için "ts değişmedi ama veri değişti" durumu mümkün değil —
+    //   yani bu çizimler tamamen boşunaydı. Tek kapıya alındı: değişmediyse çizmez.
+    _scheduleTransitRender();
     if (ticks >= 12) clearInterval(poll); // 12sn sonra bırak
   }, 1000);
 }
@@ -13045,6 +13114,17 @@ function _liveDwell(t) {
     : ((t && t.maxDwell) || 0);
 }
 
+// v12.60: PP modu kat filtresi — MODÜL SEVİYESİNDE, koşulsuz tanım.
+//   ÖNCEKİ HATA: ppSetFloor _renderTransitInner içinde, groupBy==='pp' erken-return'ünden
+//   SONRA atanıyordu → PP modunda o satıra hiç ulaşılmıyor, ppSetFloor tanımsız kalıyor,
+//   butona basınca inline onclick sessizce "ppSetFloor is not defined" veriyordu. Artık
+//   global tanım her zaman mevcut; toggle + renderTransit tetiklemesi PP kartlarını süzer.
+window.ppSetFloor = function(key) {
+  const val = (key === 'all' || key === 'none') ? key : parseInt(key);
+  window._ppFloorFilter = (window._ppFloorFilter === val) ? 'all' : val;
+  if (typeof renderTransit === 'function') renderTransit();
+};
+
 function renderTransit() {
   // v12.16: Bir kat kartı BÜYÜTÜLMÜŞSE render'ı DONDUR. Kullanıcı şikayeti:
   //   "büyüyen kartın içine bir şeyler gelip gidiyor." 60sn refresh + 30sn dwell tick
@@ -13322,7 +13402,12 @@ function _renderTransitInner() {
     if (transit.enriching) {
       clearTimeout(window._transitAutoRefresh);
       window._transitAutoRefresh = setTimeout(() => {
-        if (_activeTab === 'transit') renderTransit();
+        // v12.69: renderTransit → _scheduleTransitRender. Bu 3sn'lik "enrichment sürerken kendini
+      //   yeniden çağır" döngüsü rev/debounce'u ATLAYIP tam çizim yapıyordu — v12.22'nin
+      //   "enrichment'ta 1200ms'e seyret, titreme olmasın" fiksiyle doğrudan çakışıyordu.
+      //   Artık tek kapıdan geçer: enrichment ilerlediyse (rev'deki lokasyon/picker sayacı arttı)
+      //   çizer, ilerlemediyse çizmez. Döngü korunuyor (enrichment bitene kadar yoklamaya devam).
+      if (_activeTab === 'transit') _scheduleTransitRender();
       }, 3000);
     }
 
@@ -13485,7 +13570,12 @@ function _renderTransitInner() {
     if (transit.enriching) {
       clearTimeout(window._transitAutoRefresh);
       window._transitAutoRefresh = setTimeout(() => {
-        if (_activeTab === 'transit') renderTransit();
+        // v12.69: renderTransit → _scheduleTransitRender. Bu 3sn'lik "enrichment sürerken kendini
+      //   yeniden çağır" döngüsü rev/debounce'u ATLAYIP tam çizim yapıyordu — v12.22'nin
+      //   "enrichment'ta 1200ms'e seyret, titreme olmasın" fiksiyle doğrudan çakışıyordu.
+      //   Artık tek kapıdan geçer: enrichment ilerlediyse (rev'deki lokasyon/picker sayacı arttı)
+      //   çizer, ilerlemediyse çizmez. Döngü korunuyor (enrichment bitene kadar yoklamaya devam).
+      if (_activeTab === 'transit') _scheduleTransitRender();
       }, 3000);
     }
 
@@ -13530,12 +13620,6 @@ function _renderTransitInner() {
   }
 
   // v12.58: PP modu kat filtresi — buton tıklaması. Aynı kata tekrar basınca 'all'e döner.
-  window.ppSetFloor = function(key) {
-    const val = (key === 'all' || key === 'none') ? key : parseInt(key);
-    window._ppFloorFilter = (window._ppFloorFilter === val) ? 'all' : val;
-    // renderPPMode _renderTransitInner scope'unda; dışarıdan public wrapper ile tetikle.
-    if (typeof renderTransit === 'function') renderTransit();
-  };
   // Veri kaynağı: Buffer Current Status DOM scrape → cpt_complete_batches_v1
   // ═══════════════════════════════════════════════════════════════
   // SORTATION — CPT Saati Dwell tarzında kartlar
@@ -14096,7 +14180,8 @@ function _renderTransitInner() {
   if(transit.enriching) {
     clearTimeout(window._transitAutoRefresh);
     window._transitAutoRefresh = setTimeout(() => {
-      if(_activeTab === 'transit') renderTransit();
+      // v12.69: renderTransit → _scheduleTransitRender (bkz. yukarıdaki not — aynı 3sn döngüsü).
+    if(_activeTab === 'transit') _scheduleTransitRender();
     }, 3000);
   }
 
@@ -14677,9 +14762,15 @@ function gsBuildIndex() {
 
   // 7) Eğitimi Olanlar (training) — login + isim + eğitim türleri → Eğitim sayfasında bulunur.
   //    "REBIN" gibi bir eğitim türü aratınca meta üzerinden o eğitimli pickerlar da gelir.
+  //    v12.72 [ARAMA FİKSİ]: Eskiden gömülü TRAINING_DATA sabitinden okunuyordu. v12.31'de o
+  //      sabit gizlilik gerekçesiyle boşaltılınca eğitim araması SESSİZCE öldü — "Yedek Yükle"
+  //      ile kendi listesini getiren kullanıcı bile aratamıyordu (arama boş sabite bakıyordu).
+  //      Artık CANLI store'dan okunuyor: seed'den mi geldi, yedekten mi geldi fark etmez.
   try {
-    if (typeof TRAINING_DATA !== 'undefined' && TRAINING_DATA) {
-      Object.entries(TRAINING_DATA).forEach(([login, v]) => {
+    permLoadStore();
+    const _trIdx = (typeof _permIndexByLogin !== 'undefined' && _permIndexByLogin) || {};
+    if (Object.keys(_trIdx).length) {
+      Object.entries(_trIdx).forEach(([login, v]) => {
         const trs = (v.t || []).join(', ');
         items.push({ type:'picker', label:login, meta:'eğitim · '+trs, page:'training', target:'picker:'+login, fc:login });
         if (v.n) items.push({ type:'picker', label:v.n, meta:'eğitim · '+trs, page:'training', target:'picker:'+login, fc:login });
@@ -17452,7 +17543,18 @@ initStaticButtons();
 try { _updateAutoMsgButton(); } catch(e) {}
 
 // Sayfayı ilk kez render et
-render();
+// v12.69 [TRANSIT ÖNCELİĞİ]: Eskiden koşulsuz render() (=Tracker) çağrılıyordu. Varsayılan sekme
+//   artık Transit olduğu için bu, GÖRÜNMEYEN Tracker'ı çizip görünen Transit'i BOŞ bırakırdı
+//   (renderTransit'i boot'ta kimse çağırmıyor; ilk veri olayına kadar ekran boş kalırdı).
+//   Artık aktif sekme neyse o çizilir. Tracker'a geçilince switchTab zaten render() çağırıyor.
+//   _transitLastRev boot çiziminden sonra tohumlanır → ilk _scheduleTransitRender gereksiz
+//   ikinci bir tam render yapmaz.
+if (_activeTab === 'transit') {
+  renderTransit();
+  try { _transitLastRev = _transitComputeRev(); } catch(e) {}
+} else {
+  render();
+}
 // Kaydedilmiş vardiyayı geri yükle
 setTimeout(restoreShiftButtons, 300);
 

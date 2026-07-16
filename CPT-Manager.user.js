@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.59
+// @version      12.72
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -409,9 +409,9 @@ try {
                 });
                 L.push('');
                 L.push('Kurulum bayrakları:');
-                L.push('  wf: ' + localStorage.getItem('cpt_pc_setup_wf_v4'));
-                L.push('  pa: ' + localStorage.getItem('cpt_pc_setup_pa_v4'));
-                L.push('  sc: ' + localStorage.getItem('cpt_pc_setup_sc_v4'));
+                L.push('  wf: ' + localStorage.getItem('cpt_pc_setup_wf_v6'));
+                L.push('  pa: ' + localStorage.getItem('cpt_pc_setup_pa_v6'));
+                L.push('  sc: ' + localStorage.getItem('cpt_pc_setup_sc_v6'));
                 var out = L.join('\n');
                 console.log(out);
                 var w = window.open('', '_blank');
@@ -424,10 +424,10 @@ try {
             try {
                 var pg = _PC_PATH_WF?'wf':(_PC_PATH_PA?'pa':(_PC_PATH_SC?'sc':null));
                 if (!pg) { alert('Bu bir Picking Console ayar sayfası değil.\nworkforce / pick-areas / scorecard sayfasında çalıştır.'); return; }
-                localStorage.removeItem('cpt_pc_setup_'+pg+'_v4');
+                localStorage.removeItem('cpt_pc_setup_'+pg+'_v6');
                 if (typeof _pcApplySettings === 'function') {
                     _pcApplySettings(document, pg, function(ok){
-                        if (ok) { try { localStorage.setItem('cpt_pc_setup_'+pg+'_v4','done'); } catch(e){} }
+                        if (ok) { try { localStorage.setItem('cpt_pc_setup_'+pg+'_v6','done'); } catch(e){} }
                         alert(ok ? ('✓ '+pg+' ayarları uygulandı.') : ('⚠️ '+pg+' ayarları uygulanamadı — "🔧 PC ayar teşhis" ile dişli/panel yapısına bak, bana ilet.'));
                     });
                 } else alert('_pcApplySettings yok.');
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.59] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.72] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.59';
+    const BRIDGE_VERSION = '12.72';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -725,7 +725,6 @@ if (IS_CPT_SITE) {
         } catch(e) {}
     }, 250);
 
-    try { console.log('[CPT BRIDGE] ters köprü aktif (site→GM: vardiya/yenile/atama sinyalleri)'); } catch(e) {}
 }
 
 // Oto yenileme açık mı
@@ -1488,11 +1487,16 @@ if (IS_PICKING && !IS_IFRAME) {
 //  script iframe'de tekrar çalışır → kendi ayarını yapar).
 //
 //  Ayar reçeteleri (ekran görüntülerinden birebir):
-//    • workforce: Page=All · KAPALI={Station ID, Workcell Type, Use UTC, Auto Refresh} · gerisi AÇIK
+//    • workforce: Page=All · TÜM kolonlar AÇIK (v12.70) · KAPALI={Use UTC, Auto Refresh}
+//        (Use UTC kapalı KALMALI — açılırsa saatler UTC gelir, CPT eşleştirmesi bozulur.
+//         Auto Refresh kapalı kalmalı — sayfa kendi kendine yenilenirse tarama yarıda kesilir.)
 //    • pick-areas: Page=All · TÜM kolonlar AÇIK · +{Show Batch ID, Show Process Path} AÇIK
 //    • scorecard:  Page=All · TÜM kolonlar AÇIK
 //
-//  TEK SEFERLİK: her sayfa bir kez ayarlanınca bayrak (cpt_pc_setup_{page}_v3) konur.
+//  TEK SEFERLİK: her sayfa bir kez ayarlanınca bayrak (cpt_pc_setup_{page}_v6) konur.
+//  v12.70: Bayrak v4→v5 BUMP EDİLDİ. Reçete değişti (artık tüm kolonlar açık); bayrak
+//    bump edilmezse mevcut kullanıcılarda 'done' yazılı kalır, kurulum bir daha KOŞMAZ ve
+//    Station ID/Workcell Type kapalı kalırdı. Bump ile herkeste bir kez yeniden uygulanır.
 //    (Kullanıcı: "tekrar bozulursa kontrol et'e gerek yok" — self-heal YOK.)
 //  Panel/öğe bulunamazsa SESSİZCE vazgeçer (hiçbir şeyi bozmaz).
 // ════════════════════════════════════════════════════════
@@ -1500,7 +1504,11 @@ if (IS_PICKING && !IS_IFRAME) {
 // ── Ortak ayar uygulayıcı: verilen document (ana sayfa VEYA iframe) içinde çalışır ──
 function _pcApplySettings(doc, page, done){
     // page: 'wf' | 'pa' | 'sc'
-    var OFF_COLUMNS = { wf: ['station id','workcell type'], pa: [], sc: [] }[page];
+    // v12.70: workforce'ta artık HİÇBİR kolon kapatılmıyor (kullanıcı: "hepsi açık olsun").
+    //   Eskiden Station ID + Workcell Type kapatılıyordu çünkü parseRow sabit index kullanıyordu
+    //   ve o sayılar bu iki kolon kapalıyken doğruydu. parseRow artık başlıktan çözüyor
+    //   (bkz. _wfColMap) → kolonların açık olması veriyi bozmaz.
+    var OFF_COLUMNS = { wf: [], pa: [], sc: [] }[page];
     var EXTRA_TOGGLES = { wf: [], pa: ['show batch id','show process path'], sc: [] }[page];
     // Panel dışı, sayfa gövdesindeki KAPALI yapılacak toggle'lar (metin → kapat)
     var OFF_BODY_TOGGLES = { wf: ['use utc','auto refresh'], pa: [], sc: [] }[page];
@@ -1578,10 +1586,60 @@ function _pcApplySettings(doc, page, done){
         }
         return false;
     }
+    // ═══════════════════════════════════════════════════════════════
+    // v12.71 [SEÇİM KUTUSU FİKSİ] — Kullanıcı: "otomatik yaptığında düzenlemeyi buraya
+    //   tik koyuyor, buna gerek yok" (tablodaki TÜM satırlar seçili geliyordu).
+    //   KÖK SEBEP: attempt() içinde `panel = doc.querySelector(...) || doc` vardı. Amazon
+    //   Cloudscape'i güncelleyip class adlarını hash'ledi (awsui_root_xjuzf_2k3hr_559) →
+    //   [class*="preferences"] eşleşmeyi bıraktı → panel `doc` oldu → applyColumns TÜM
+    //   sayfayı taradı. OFF_COLUMNS boş olduğu için her checkbox `!off&&!on` dalına düşüp
+    //   TIKLANDI: tablonun "hepsini seç" kutusu + her satırın kutusu dahil.
+    //   ÇÖZÜM 3 katman: (1) `|| doc` kaldırıldı — panel yoksa hiç dokunma, (2) panel bulucu
+    //   hash'li isimlere dayanıklı, (3) tablo içindeki hiçbir checkbox'a ASLA dokunulmaz.
+    // ═══════════════════════════════════════════════════════════════
+    // Bu checkbox tabloya mı ait? (satır seçimi / "hepsini seç") → ASLA dokunma.
+    //   Tercih paneli bir modal, tablonun DIŞINDA; kolon toggle'ları <table> içinde olmaz.
+    function _isTableCheckbox(el){
+        try {
+            return !!(el.closest('table') || el.closest('thead') || el.closest('tbody') ||
+                      el.closest('[class*="table-selection"],[class*="selection-area"],[class*="selection-trigger"]'));
+        } catch(e){ return true; }   // emin olamıyorsak DOKUNMA (güvenli taraf)
+    }
+    // Tercih panelini bul. Hash'li classname'lere dayanıklı: önce standart seçiciler,
+    //   sonra Onayla/İptal butonunun toggle içeren atası. Bulunamazsa null → çağıran vazgeçer.
+    function findPanel(){
+        var p = doc.querySelector('[role="dialog"]')
+             || doc.querySelector('[class*="modal"]')
+             || doc.querySelector('[class*="preferences"]');
+        if (p && vis(p)) return p;
+        // Hash'li Cloudscape: Onayla butonundan yukarı çık, birkaç toggle barındıran ilk ata panel'dir
+        var btn = findByText('button', /^\s*(confirm|apply|save|onayla|uygula|kaydet)\s*$/i);
+        if (btn && vis(btn)) {
+            var n = btn;
+            for (var i=0; i<8 && n; i++) {
+                n = n.parentElement;
+                if (!n || n === doc.body) break;
+                if (n.querySelectorAll('[role="switch"],input[type="checkbox"]').length >= 3 &&
+                    !n.querySelector('tr.awsui-table-row')) return n;   // tabloyu kapsıyorsa panel DEĞİL
+            }
+        }
+        return null;
+    }
+    // Açık kalan paneli kapat (vazgeçtiysek kullanıcının ekranında modal bırakma)
+    function closePanel(){
+        try {
+            var c = findByText('button', /^\s*(cancel|iptal|vazge[çc])\s*$/i);
+            if (c && vis(c)) { c.click(); return; }
+            doc.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', code:'Escape', keyCode:27, bubbles:true}));
+        } catch(e){}
+    }
     function applyColumns(scope){
-        var root=scope||doc; var sw=root.querySelectorAll('[role="switch"],input[type="checkbox"]'); var ch=0;
+        if(!scope) return 0;                       // v12.71: panel yoksa HİÇBİR ŞEYE dokunma
+        var sw=scope.querySelectorAll('[role="switch"],input[type="checkbox"]'); var ch=0;
         for(var i=0;i<sw.length;i++){ var s=sw[i]; if(!vis(s)) continue;
+            if(_isTableCheckbox(s)) continue;      // v12.71: tablo seçim kutuları ASLA
             var row=s.closest('label,li,tr,[class*="row"],[class*="option"],div'); var lt=row?norm(row.textContent):'';
+            if(!lt) continue;                      // v12.71: etiketsiz checkbox = ne olduğu belirsiz → dokunma
             if(/wrap lines|sticky header|property key|column description|page size|^\d+$|^all$/.test(lt)) continue;
             var on=s.checked||s.getAttribute('aria-checked')==='true';
             var off=OFF_COLUMNS.some(function(o){return lt.indexOf(o)===0||lt===o;});
@@ -1596,6 +1654,7 @@ function _pcApplySettings(doc, page, done){
             if(nt===txt||nt.indexOf(txt)===0){
                 var s=all[i].querySelector('[role="switch"],input[type="checkbox"]')
                     ||(all[i].closest('label,div,li')&&all[i].closest('label,div,li').querySelector('[role="switch"],input[type="checkbox"]'));
+                if(s&&_isTableCheckbox(s)) break;   // v12.71: tablo seçim kutusuna denk geldiysek vazgeç
                 if(s&&vis(s)){ var on=s.checked||s.getAttribute('aria-checked')==='true';
                     if(wantOn&&!on){ _clickSwitch(s); return true; }
                     if(!wantOn&&on){ _clickSwitch(s); return true; } }
@@ -1611,7 +1670,12 @@ function _pcApplySettings(doc, page, done){
         if(!vis(gear)){ if(tries<MAX) return setTimeout(attempt,500); dlog('⚙️ PC ['+page+'] panel yok, atlandı'); return done && done(false); }
         try{gear.click();}catch(e){}
         setTimeout(function(){
-            var panel=doc.querySelector('[class*="modal"],[role="dialog"],[class*="preferences"]')||doc;
+            // v12.71: `|| doc` KALDIRILDI. Panel bulunamazsa kolon/sayfa-boyutu ayarına HİÇ
+            //   girmiyoruz — eskiden tüm sayfayı tarayıp tablodaki seçim kutularını tikliyordu.
+            //   Kurulum atlanırsa da script ÇALIŞIR: v12.70'ten beri kolonlar başlıktan
+            //   (data-awsui-column-id) çözülüyor, hangi kolonun açık olduğu önemli değil.
+            var panel=findPanel();
+            if(!panel){ closePanel(); dlog('⚙️ PC ['+page+'] tercih paneli bulunamadı → kurulum atlandı (script yine de çalışır: kolonlar başlıktan okunuyor)'); return done && done(false); }
             var okSize=setPageSizeAll(panel); var nCol=applyColumns(panel);
             setTimeout(function(){
                 var confd=confirmPanel(panel);
@@ -1651,7 +1715,7 @@ function _pcSetupViaIframe(url, page, cb){
                 // iframe içindeki instance bayrağı koyduysa başarı say
                 var ok=false;
                 try { ok = (f.contentWindow && f.contentWindow.localStorage &&
-                            f.contentWindow.localStorage.getItem('cpt_pc_setup_'+page+'_v4')==='done'); } catch(e){}
+                            f.contentWindow.localStorage.getItem('cpt_pc_setup_'+page+'_v6')==='done'); } catch(e){}
                 clearTimeout(killer); fin(ok);
             }, 14000);   // iframe içi ayar ~12sn sürer, 14sn sonra kapat
         });
@@ -1667,7 +1731,7 @@ function _pcSetupViaIframe(url, page, cb){
     if (IS_IFRAME) {
         var pg = _PC_PATH_PA ? 'pa' : (_PC_PATH_SC ? 'sc' : (_PC_PATH_WF ? 'wf' : null));
         if (!pg) return;
-        var fl = 'cpt_pc_setup_'+pg+'_v4';
+        var fl = 'cpt_pc_setup_'+pg+'_v6';
         try { if (localStorage.getItem(fl)==='done') return; } catch(e){ return; }
         _pcApplySettings(document, pg, function(ok){ if(ok){ try{ localStorage.setItem(fl,'done'); }catch(e){} } });
         return;
@@ -1677,24 +1741,24 @@ function _pcSetupViaIframe(url, page, cb){
     if (!IS_WORKFORCE) return;
     // Zaten hepsi kurulduysa hiç uğraşma
     try {
-        if (localStorage.getItem('cpt_pc_setup_wf_v4')==='done'
-         && localStorage.getItem('cpt_pc_setup_pa_v4')==='done'
-         && localStorage.getItem('cpt_pc_setup_sc_v4')==='done') return;
+        if (localStorage.getItem('cpt_pc_setup_wf_v6')==='done'
+         && localStorage.getItem('cpt_pc_setup_pa_v6')==='done'
+         && localStorage.getItem('cpt_pc_setup_sc_v6')==='done') return;
     } catch(e){ return; }
 
     // 2a) Workforce kendi ayarı
     _pcApplySettings(document, 'wf', function(ok){
-        if(ok){ try{ localStorage.setItem('cpt_pc_setup_wf_v4','done'); }catch(e){} }
+        if(ok){ try{ localStorage.setItem('cpt_pc_setup_wf_v6','done'); }catch(e){} }
 
         // 2b) Areas C4 (gerekiyorsa) → sonra Scorecard (gerekiyorsa) → sıralı
         function doPA(next){
-            var paDone=false; try{ paDone = localStorage.getItem('cpt_pc_setup_pa_v4')==='done'; }catch(e){}
+            var paDone=false; try{ paDone = localStorage.getItem('cpt_pc_setup_pa_v6')==='done'; }catch(e){}
             if(paDone) return next();
             dlog('➡️ PC oto: Areas C4 iframe açılıyor…');
             _pcSetupViaIframe(URLS.pa, 'pa', function(){ next(); });
         }
         function doSC(next){
-            var scDone=false; try{ scDone = localStorage.getItem('cpt_pc_setup_sc_v4')==='done'; }catch(e){}
+            var scDone=false; try{ scDone = localStorage.getItem('cpt_pc_setup_sc_v6')==='done'; }catch(e){}
             if(scDone) return next();
             dlog('➡️ PC oto: Scorecard iframe açılıyor…');
             _pcSetupViaIframe(URLS.sc, 'sc', function(){ next(); });
@@ -1766,9 +1830,45 @@ if (IS_WORKFORCE && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (so
     }
 
     // Workforce tablo satırını parse et
-    function parseRow(cells, now) {
+    // ═══════════════════════════════════════════════════════════════════
+    // v12.70 [KOLON KAYMASI FİKSİ] — Pick Console'a yeni kolon eklenince script kırılıyordu.
+    //   SORUN: parseRow kolonları SABİT index ile okuyordu (location=cells[5], pickArea=cells[4],
+    //   path=cells[3], status=cells[8], lastContainer=cells[10]). Bu sayılar yalnızca
+    //   Station ID + Workcell Type KAPALIYKEN doğruydu. Amazon bu iki kolonu ekledi; açıldıkları
+    //   an her şey 2 kayıyor → path=Workcell Type, location=Process Path okuyordu. Yani veri
+    //   yanlış değil, TAMAMEN başka kolondan geliyordu.
+    //   ÇÖZÜM: Index'i başlıktan çöz. Cloudscape her <th>'ye data-awsui-column-id koyuyor
+    //   (userId/stationId/workcellType/name/processPath/pickArea/location/batchId/earliestExSD/
+    //   status/lastActivityTime/lastContainerId/manager). Artık kolon açılsa da kapansa da,
+    //   sırası değişse de, Amazon yeni kolon eklese de doğru hücre okunur.
+    //   OFSET: Başlık satırında <th>'lerden ÖNCE seçim kutusu <td>'si var → +1 kayma. Sabit
+    //   yazmak yerine başlık satırındaki <th> öncesi hücreler sayılır (seçim kutusu kalkarsa da çalışır).
+    //   Başlık okunamazsa (beklenmedik DOM) ESKİ sabit index'lere düşer → hiçbir şey kötüleşmez.
+    // ═══════════════════════════════════════════════════════════════════
+    function _wfColMap(doc) {
+        const map = { _ok: false };
+        try {
+            const ths = (doc || document).querySelectorAll('table thead th[data-awsui-column-id]');
+            if (!ths.length) return map;
+            let offset = 0;
+            for (const c of ths[0].parentElement.children) {
+                if (c.tagName === 'TH') break;
+                offset++;                       // <th>'den önceki hücreler (seçim kutusu vb.)
+            }
+            ths.forEach((th, i) => { map[th.getAttribute('data-awsui-column-id')] = i + offset; });
+            map._ok = true;
+        } catch(e) {}
+        return map;
+    }
+
+    function parseRow(cells, now, cm) {
         if(cells.length < 9) return null;
-        const link = cells[1]?.querySelector('a');
+        // v12.70: başlıktan çözülen index; yoksa eski sabit değere düş (geriye uyumlu)
+        const ci = (key, fallback) => (cm && cm._ok && cm[key] != null) ? cm[key] : fallback;
+        const iUser = ci('userId', 1), iName = ci('name', 2), iPath = ci('processPath', 3);
+        const iArea = ci('pickArea', 4), iLoc = ci('location', 5), iBatch = ci('batchId', 6);
+        const iStat = ci('status', 8), iCont = ci('lastContainerId', 10);
+        const link = cells[iUser]?.querySelector('a');
         if(!link) return null;
         const lm = (link.getAttribute('href')||'').match(/\/picker\/([^/?]+)/);
         if(!lm) return null;
@@ -1829,21 +1929,21 @@ if (IS_WORKFORCE && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (so
             pName = linkTxtClean;
         }
         if (!pName) {
-            const c2 = (cells[2]?.textContent || '').trim();
+            const c2 = (cells[iName]?.textContent || '').trim();
             if (c2 && c2.toLowerCase() !== login && /[a-zA-Z]/.test(c2)) pName = c2;
         }
 
         return {
             login,
             name:      pName,
-            location:  cells[5]?.textContent.trim()||'',
-            pickArea:  cells[4]?.textContent.trim()||'',
-            batchId:   cells[6]?.querySelector('a')?.textContent.trim()||'',
-            status:    cells[8]?.textContent.trim()||'',
+            location:  cells[iLoc]?.textContent.trim()||'',
+            pickArea:  cells[iArea]?.textContent.trim()||'',
+            batchId:   cells[iBatch]?.querySelector('a')?.textContent.trim()||'',
+            status:    cells[iStat]?.textContent.trim()||'',
             cptTime,
             cptTs,
-            path:      (cells[3]?.querySelector('a')||cells[3])?.textContent.trim()||'',
-            lastContainer: cells[10]?.textContent.trim()||''
+            path:      (cells[iPath]?.querySelector('a')||cells[iPath])?.textContent.trim()||'',
+            lastContainer: cells[iCont]?.textContent.trim()||''
         };
     }
 
@@ -1854,9 +1954,10 @@ if (IS_WORKFORCE && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (so
         const now = Date.now();
         const wfData={}, cptGroups={}, seen=new Set();
         let omniscanSkipped = 0;
+        const cm = _wfColMap(document);   // v12.70: canlı DOM'un kolon haritası (satır başına değil, bir kez)
 
         rows.forEach(row => {
-            const r = parseRow(row.querySelectorAll('td'), now);
+            const r = parseRow(row.querySelectorAll('td'), now, cm);
             if(!r || seen.has(r.login)) return;
             seen.add(r.login);
             // v10.45: Şu path'lerdeki picker'ları tamamen atla:
@@ -1950,8 +2051,12 @@ if (IS_WORKFORCE && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (so
 
         const doc = parseHTML(r.responseText);
         const now = Date.now();
+        // v12.70: Bu SAYFA'nın kendi kolon haritası — çekilen dokümanın kolon dizilimi canlı
+        //   DOM'unkinden farklı olabilir (tercih sunucu tarafında değilse). Her doküman kendi
+        //   başlığından çözülür, ikisi de doğru okunur.
+        const cm = _wfColMap(doc);
         doc.querySelectorAll('tr.awsui-table-row').forEach(row => {
-            const parsed = parseRow(row.querySelectorAll('td'), now);
+            const parsed = parseRow(row.querySelectorAll('td'), now, cm);
             if (!parsed || acc[parsed.login]) return;
             // v10.45: Omniscan/CFP/Cubiscan/QA path filtrele
             if (parsed.path && /omniscan|cfp|consolidationflow|cubiscan|^ppqa$|\bppqa\b/i.test(parsed.path)) return;
@@ -6024,6 +6129,14 @@ if (IS_EXSD) {
                                                 //   Rodeo doğruluk kaynağı), sadece lokasyon/picker
                                                 //   güncellemesi 5dk gecikme — kabul edilebilir.
         const TR_EMP_NEG_TTL      = 120 * 1000; // v12.04: 30sn → 120sn — boş yanıt cache'i
+        // v12.68 TOTE ID YENİDEN-KULLANIM FİXİ: Amazon tote ID'leri geri dönüşümlü — Eray bir
+        //   tote'u boşaltır, aynı ID günler/saatler sonra Fatma'ya atanır. Eski kod dolu FC
+        //   kaydını "kat/lokasyon değişmez" varsayımıyla TTL'SİZ kullanıyordu → tote yeniden
+        //   kullanılınca ESKİ kişinin (Eray) lokasyonu/katı gösteriliyordu. Çözüm: MUTLAK yaş
+        //   sınırı. Dolu kayıt bu süreden eskiyse, tote hâlâ transit'te görünse bile ARKA
+        //   PLANDA yeniden fetch edilir (eski veri gösterilmeye devam eder, taze gelince güncellenir).
+        //   Not: normal transit süresi bunun altında; sınırı aşan = büyük ihtimalle yeniden-kullanım.
+        const TR_EMP_STALE_CAP    = 20 * 60 * 1000; // 20 dk — dolu FC kaydının mutlak tazeleme sınırı
 
         const tClean = s => (s == null ? '' : String(s)).replace(/\s+/g, ' ').trim();
         const tAbs   = (b, h) => { try { return new URL(h, b).href; } catch { return h; } };
@@ -7451,6 +7564,12 @@ if (IS_EXSD) {
                     const _hasFull = (em && (em.employee || em.lastPick || em.recentLoc || em.fcFloor))
                                   || (ce && (ce.employee || ce.lastPick || ce.recentLoc || ce.fcFloor));
                     const _dwell = _dwellByTote[tid] || 0;
+                    // v12.68: MUTLAK YAŞ SINIRI — dolu kayıt TR_EMP_STALE_CAP'ten eskiyse tote
+                    //   yeniden kullanılmış olabilir (ID geri dönüşümlü) → arka planda yeniden fetch.
+                    //   Eski veri gösterilmeye devam eder (empMap seed'i durur), taze gelince değişir.
+                    const _ceTs = (ce && ce.ts) || 0;
+                    const _ceStale = _hasFull && _ceTs && (_nowMs - _ceTs) >= TR_EMP_STALE_CAP;
+                    if (_ceStale) { toFetch.push(tid); continue; }
                     // v12.24: Dolu tote + orta/yüksek dwell + son kontrolden 90sn geçti → hybrid recheck
                     const _lastChk = (ce && ce._contChk) || 0;
                     const _needRecheck = _hasFull && _dwell >= HYBRID_RECHECK_DWELL && (_nowMs - _lastChk) >= HYBRID_RECHECK_INTERVAL;
@@ -7660,11 +7779,27 @@ if (IS_EXSD) {
                 const cur = read('cpt_transit_batches_v9');
                 if (!cur) return;
                 if (!cur.totes || Object.keys(cur.totes).length === 0) return;   // boş cache → yazma
+                // v12.69 [TS BUMP FİKSİ — transit önceliği]: Eskiden cptTotals DEĞİŞMESE bile
+                //   cur.ts = Date.now() yazılıp push ediliyordu. Tek satır, iki korumayı deviriyordu:
+                //     (1) KÖPRÜ DEDUP (_bridgeLastSent, JSON.stringify karşılaştırması): ts hep yeni
+                //         → imza hep farklı → ~500KB'lık transit payload'ı HER 8sn CustomEvent ile
+                //         siteye yeniden gönderiliyordu.
+                //     (2) PANO REV GUARD (_transitLastRev = ts|toteSayısı|cptToplam): ts hep yeni
+                //         → rev hep farklı → tam renderTransit() HER 8sn. Anti-titreme koruması
+                //         hiç çalışmıyordu; 10. nesil i5'te panonun ağırlaşmasının ana sebebi buydu.
+                //   ÇÖZÜM: İÇERİK imzası karşılaştır — cptTotals/grandTotal gerçekten değiştiyse yaz,
+                //   değişmediyse HİÇ DOKUNMA (ts dahil). Böylece iki koruma da amacına döner.
+                //   Anahtar sırası kararlı: tParseCptTotalsFromDom her turda DOM'u aynı sırada gezer.
+                //   Not: ts artık "en son ne zaman GERÇEKTEN değişti" anlamına gelir — daha doğru.
+                const _sigNew = JSON.stringify(tot.cptTotals) + '|' + tot.grandTotal;
+                const _sigOld = JSON.stringify(cur.cptTotals || {}) + '|' + (cur.grandTotal || 0);
+                if (_sigNew === _sigOld) return;   // içerik aynı → yazma, ts'e dokunma
                 cur.cptTotals = tot.cptTotals;
                 cur.cptTs     = tot.cptTs;
                 cur.grandTotal = tot.grandTotal;
                 cur.ts = Date.now();
                 push('cpt_transit_batches_v9', cur);
+                dlog('🔁 cptTotals değişti → hafif refresh yazıldı (özet ' + tot.grandTotal + ')');
             } catch (e) { /* sessizce */ }
         }, 8 * 1000);
 
@@ -7744,6 +7879,9 @@ if (IS_EXSD) {
         // Kullanıcı sayfada aktif veri yazıyorsa (input focus) ertelenir.
         // ═══════════════════════════════════════════════════════════════
         const AUTO_RELOAD_MS = 60 * 1000;  // 1 dakika
+        // v12.69: Sürmekte olan taramayı kesmemek için reload en fazla bu kadar ertelenir.
+        //   Tipik tarama 10-40sn; 45sn pay yeterli. Sınır dolarsa yine de yenilenir (açlık koruması).
+        const _RELOAD_DEFER_CAP = 45 * 1000;
         let _lastReload = Date.now();
         setInterval(() => {
             try {
@@ -7763,6 +7901,21 @@ if (IS_EXSD) {
                     return;
                 }
 
+                // v12.69 [TARAMAYI KESME FİKSİ — transit önceliği]: Eskiden reload SADECE input
+                //   kontrolü yapıyordu. Sürmekte olan transit taraması (wide sorgu + FC enrichment
+                //   10-40sn, üstüne 15sn bilinmeyen-retry) reload'a denk gelirse ORTADAN KESİLİYOR,
+                //   o turun işi çöpe gidiyor, pano bir tur daha eski veriyle kalıyordu. Artık tarama
+                //   bitene kadar beklenir.
+                //   Reload'un kendisi ŞART: ExSD özet tablosu sunucudan render ediliyor, cptLinks ve
+                //   cptTotals SADECE reload ile tazeleniyor — bu yüzden kaldırılamaz, ertelenir.
+                if (_trRunning) {
+                    if (Date.now() - _lastReload < AUTO_RELOAD_MS + _RELOAD_DEFER_CAP) {
+                        dlog('⏸ Otomatik yenileme ertelendi — transit taraması sürüyor (kesilmesin)');
+                        return;
+                    }
+                    dlog('⚠ Tarama sürüyor ama erteleme sınırı (' + Math.round(_RELOAD_DEFER_CAP/1000) + 'sn) doldu → yine de yenileniyor');
+                }
+
                 _lastReload = Date.now();
                 dlog('🔄 Rodeo ExSD otomatik yenileme — 1 dakika doldu');
                 location.reload();
@@ -7771,7 +7924,7 @@ if (IS_EXSD) {
             }
         }, 10 * 1000);  // her 10sn kontrol et (1dk tamamlandı mı?)
 
-        dlog('🚚 Transit fetcher hazır — 200ms içinde ilk fetch (öncelikli), sonra 25sn tam + 8sn hafif refresh, 1dk\'da bir otomatik sayfa yenileme');
+        dlog('🚚 Transit fetcher hazır — 100ms\'de ilk fetch, 60sn tam tarama + 8sn hafif refresh (yalnız cptTotals değişince), 1dk\'da bir sayfa yenileme (tarama sürerken ertelenir)');
     })();
 }
 
