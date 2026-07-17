@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CPT Manager v11 — by altuerao
 // @namespace    altuerao.cpt.v11
-// @version      12.72
+// @version      12.81
 // @description  CPT takibi — Rodeo öncelikli, optimize edilmiş canlı veri | crafted by altuerao
 // @author       altuerao
 // @copyright    2026, altuerao — Tüm hakları saklıdır
@@ -437,7 +437,7 @@ try {
 } catch(e) {}
 
 // Boot log — script bu sayfaya yüklendi
-dlog('🟢 SCRIPT LOADED [v12.72] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
+dlog('🟢 SCRIPT LOADED [v12.81] · crafted by ' + _AUTHOR_ID + ' · ' + location.href.substring(0, 120));
 // Çalışırlık kontrolü — _AUTHOR_ID değiştirilmişse uyarı (silinmesi zorlaştırır)
 if (_AUTHOR_ID !== 'altuerao') {
     console.warn('[CPT] Author signature mismatch — script integrity warning');
@@ -526,7 +526,7 @@ function read(key) {
 //   her modda güvenle geçer (obje cloneInto gerektirebilir, string gerektirmez).
 // ═══════════════════════════════════════════════════════════════════════════
 if (IS_CPT_SITE) {
-    const BRIDGE_VERSION = '12.72';
+    const BRIDGE_VERSION = '12.81';
     // Siteye aktarılacak GM anahtarları — cpt_ ile başlayan her şey.
     // v12.32: cpt_perm_* HARİÇ — eğitim verisi kişisel, köprüden gitmez; site tarafında
     //   kullanıcı kendi "Yedek Yükle"siyle getirir.
@@ -1868,6 +1868,12 @@ if (IS_WORKFORCE && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (so
         const iUser = ci('userId', 1), iName = ci('name', 2), iPath = ci('processPath', 3);
         const iArea = ci('pickArea', 4), iLoc = ci('location', 5), iBatch = ci('batchId', 6);
         const iStat = ci('status', 8), iCont = ci('lastContainerId', 10);
+        // v12.74: Pano Tracker'ı "birebir Pick Console" gösterecek → eksik kolonlar da okunur.
+        //   Bunların SABİT fallback'i YOK (-1): eski düzende bu kolonlar zaten okunmuyordu,
+        //   başlık çözülemezse boş string döner — yanlış hücreden veri okumaktansa boş bırak.
+        const iStn = ci('stationId', -1), iWc = ci('workcellType', -1);
+        const iExsd = ci('earliestExSD', -1), iAct = ci('lastActivityTime', -1), iMgr = ci('manager', -1);
+        const cell = (i) => (i >= 0 && cells[i]) ? (cells[i].textContent || '').trim() : '';
         const link = cells[iUser]?.querySelector('a');
         if(!link) return null;
         const lm = (link.getAttribute('href')||'').match(/\/picker\/([^/?]+)/);
@@ -1943,7 +1949,15 @@ if (IS_WORKFORCE && !IS_IFRAME) {   // v12.47: iframe'de bu blok çalışmaz (so
             cptTime,
             cptTs,
             path:      (cells[iPath]?.querySelector('a')||cells[iPath])?.textContent.trim()||'',
-            lastContainer: cells[iCont]?.textContent.trim()||''
+            lastContainer: cells[iCont]?.textContent.trim()||'',
+            // v12.74 [BİREBİR PICK CONSOLE] — Tracker tablosu Pick Console'un aynısını gösterir.
+            //   stationId/workcellType Amazon'un yeni eklediği kolonlar; şu an IST2'de BOŞ geliyor
+            //   ("-" görünüyor). Yine de okunuyorlar: dolmaya başlarlarsa pano kendiliğinden gösterir.
+            stationId:    cell(iStn),
+            workcellType: cell(iWc),
+            exsd:         cell(iExsd),
+            lastActivity: cell(iAct),
+            manager:      cell(iMgr)
         };
     }
 

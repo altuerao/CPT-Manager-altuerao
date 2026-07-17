@@ -1178,15 +1178,158 @@ body {
 #page-transit.visible { display: flex !important; overflow: hidden; flex-direction: column; }
 
 /* ── TRACKER ── */
+/* v12.74: Tracker tek sütun — aktif liste tüm genişliği kullanır. */
 #tracker-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  display: flex;
   padding: 16px;
   flex: 1;
   overflow: hidden;
   min-height: 0;
 }
+#tracker-layout > .tracker-col { flex: 1; min-width: 0; }
+
+/* ── v12.75 Üst düzen: sol (kat/CPT/istatistik) + sağ (dikey yığın) ── */
+#tk-head-grid { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px; }
+#tk-head-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+#tk-head-right { width: 208px; flex-shrink: 0; display: flex; flex-direction: column; gap: 7px; }
+
+/* Kat kutucukları: TAM HİZALI, baştan sona eşit genişlik */
+#floor-action-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+#floor-action-bar > * { min-width: 0; }
+/* CPT kartları da aynı hizada, satıra sığdıkça eşit dağılır */
+#cpt-action-bar { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+#cpt-action-bar > * { min-width: 0; }
+
+/* İstatistik: ORTADA ve BÜYÜK — aynı zamanda Aktif/Inactive filtresi */
+#tracker-stats { display: flex; gap: 10px; justify-content: center; margin-top: 3px; }
+.tk-stat {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 34px; text-align: center; cursor: pointer; font-family: inherit;
+  transition: transform .1s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.tk-stat:hover { transform: translateY(-1px); }
+.tk-stat-val { font-size: 34px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text); line-height: 1.05; }
+.tk-stat-lbl { font-size: 11px; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .09em; margin-top: 3px; }
+.tk-stat-green .tk-stat-val, .tk-stat-green .tk-stat-lbl { color: var(--green); }
+.tk-stat-red   .tk-stat-val, .tk-stat-red   .tk-stat-lbl { color: var(--red); }
+/* Seçili filtre: kart YANAR */
+.tk-stat-green.on { background: var(--green); border-color: var(--green); box-shadow: 0 4px 16px rgba(22,163,74,.4); }
+.tk-stat-red.on   { background: var(--red);   border-color: var(--red);   box-shadow: 0 4px 16px rgba(220,38,38,.4); }
+.tk-stat-green.on .tk-stat-val, .tk-stat-green.on .tk-stat-lbl,
+.tk-stat-red.on   .tk-stat-val, .tk-stat-red.on   .tk-stat-lbl { color: #fff; }
+
+/* Sağ dikey yığın — hepsi AYNI boyut */
+.tk-side-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; height: 38px; padding: 0 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  font-size: 12.5px; font-weight: 800; cursor: pointer; white-space: nowrap; font-family: inherit;
+}
+.tk-side-btn:hover { filter: brightness(1.1); border-color: var(--text3); }
+#tk-done-btn { border-color: rgba(22,163,74,.45); background: var(--green-bg); color: var(--green); }
+#tk-done-btn:hover { background: var(--green); color: #fff; }
+#tk-done-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 800;
+  padding: 1px 7px; border-radius: 9px; background: var(--green); color: #fff; min-width: 20px; text-align: center;
+}
+#tk-done-btn:hover #tk-done-count { background: rgba(255,255,255,.25); }
+.tk-act-red   { background: var(--red);   border-color: var(--red);   color: #fff; }
+.tk-act-blue  { background: var(--blue);  border-color: var(--blue);  color: #fff; }
+.tk-act-green { background: var(--green); border-color: var(--green); color: #fff; }
+#tk-head-right .filter-dropdown { width: 100%; }
+#tk-head-right .filter-dropdown-btn { justify-content: center; }
+
+/* ── v12.75 Seçim çubuğu ── */
+#tk-selbar {
+  display: none; align-items: center; gap: 9px; margin-top: 9px;
+  padding: 8px 10px; border-radius: 8px;
+  background: var(--blue-bg, rgba(37,99,235,.10)); border: 1px solid rgba(37,99,235,.35);
+}
+#tk-selbar.on { display: flex; }
+#tk-sel-count { font-size: 12px; font-weight: 800; color: var(--blue); white-space: nowrap; }
+#tk-sel-msg {
+  flex: 1; min-width: 0; height: 32px; padding: 0 10px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  font-size: 12.5px; font-family: inherit;
+}
+#tk-sel-msg:focus { outline: none; border-color: var(--blue); }
+#tk-sel-send {
+  height: 32px; padding: 0 16px; border-radius: 6px; border: none;
+  background: var(--blue); color: #fff; font-size: 12.5px; font-weight: 800; cursor: pointer; white-space: nowrap;
+}
+#tk-sel-send:hover { filter: brightness(1.1); }
+#tk-sel-clear {
+  height: 32px; width: 32px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text3); cursor: pointer; flex-shrink: 0;
+}
+#tk-sel-clear:hover { color: var(--text); }
+/* v12.81: Eğitim tablosu sıralanabilir başlıkları */
+.tr-sortable:hover { color: var(--text) !important; }
+.tr-sort-ar { opacity: .35; margin-left: 4px; font-size: 9px; }
+.tr-sortable.on { color: var(--text) !important; }
+.tr-sortable.on .tr-sort-ar { opacity: 1; color: var(--blue); }
+.tk-check { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue); vertical-align: middle; }
+/* v12.78: Uyarı butonu — eskiden tablonun EN SAĞINDA soluk .small-btn idi, gözden kaçıyordu.
+   Artık picker'ın hemen SOLUNDA ve dolu kırmızı. Sadece inactive satırlarda çıkıyor;
+   satır soluklaştırmasından (.tk-inactive td { opacity:.62 }) muaf → belirgin kalsın. */
+.tk-warn-btn {
+  width: 24px; height: 24px; border-radius: 6px; border: none;
+  background: var(--red); color: #fff; font-size: 12px; font-weight: 800;
+  cursor: pointer; padding: 0; line-height: 1; display: block;
+  box-shadow: 0 1px 5px rgba(220,38,38,.4);
+}
+.tk-warn-btn:hover { filter: brightness(1.15); transform: scale(1.08); }
+.tk-table tbody tr.tk-inactive td:has(.tk-warn-btn) { opacity: 1; }
+
+/* ── Pick Console tarzı tablo ── */
+#col-active { padding: 0; overflow: auto; }
+.tk-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+.tk-table thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 8px 9px; text-align: left; white-space: nowrap;
+  font-size: 10.5px; font-weight: 800; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .05em; cursor: pointer; user-select: none;
+}
+.tk-table thead th:hover { color: var(--text); }
+.tk-table thead th .tk-sort { opacity: .35; margin-left: 3px; }
+.tk-table thead th.sorted .tk-sort { opacity: 1; color: var(--blue); }
+.tk-table tbody td { padding: 6px 9px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+.tk-table tbody tr:hover td { background: var(--bg2, rgba(127,127,127,.06)); }
+.tk-table tbody tr.tk-inactive td { opacity: .62; }
+.tk-cpt-cell { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12.5px; letter-spacing: .4px; }
+.tk-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); }
+.tk-tr-cell { white-space: normal; min-width: 150px; }
+.tk-empty { text-align: center; padding: 40px; color: var(--text3); }
+
+/* ── Toplaması Biten çekmecesi ── */
+#done-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 60;
+  opacity: 0; pointer-events: none; transition: opacity .18s ease;
+}
+#done-backdrop.open { opacity: 1; pointer-events: auto; }
+#done-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 94vw); z-index: 61;
+  background: var(--surface); border-left: 1px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0,0,0,.28);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform .2s ease;
+}
+#done-drawer.open { transform: translateX(0); }
+#done-drawer-head {
+  display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+#done-drawer-head .dd-title {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  text-transform: uppercase; letter-spacing: .08em; margin-right: auto;
+}
+#done-drawer-close {
+  background: none; border: 1px solid var(--border); color: var(--text3);
+  border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 12px; flex-shrink: 0;
+}
+#done-drawer-close:hover { color: var(--text); border-color: var(--text3); }
+#done-drawer #col-done { flex: 1; overflow-y: auto; }
 .tracker-col {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -3021,7 +3164,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   <div id="topbar-logo">
     <span>📦</span>
     CPT Manager
-    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.72</span>
+    <span onclick="_hdrRefresh(this)" title="Tıkla: tüm verileri yenile (workforce + pick areas + batches)" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:8px;letter-spacing:.02em;vertical-align:middle">v12.81</span>
     <span id="cpt-bridge-chip" class="bridge-chip" style="display:none"></span>
   </div>
   <div class="status-pill ok" id="btn-autorefresh"
@@ -3153,69 +3296,88 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 
 <!-- TRACKER -->
 <div class="page" id="page-tracker">
+  <!-- v12.74 [TRACKER YENİDEN TASARIMI]
+       ESKİ: 50/50 iki sütun — solda AKTİF CPT (kart yığını), sağda Toplaması Biten.
+             Aktif liste ekranın yarısına sıkışıyordu; her CPT ayrı kart, 8 kart alt alta.
+       YENİ: · Aktif liste TÜM genişliği kullanır, tek TABLO (Pick Console düzeni).
+             · CPT artık kart başlığı değil, tablo KOLONU → 8 kart yerine 1 liste.
+             · CPT/kat kutucukları FİLTRE olarak kaldı (tıkla → tabloyu daralt).
+             · Toplaması Biten sağdaki butonla açılan ÇEKMECEYE taşındı (içeriği aynı).
+       Filtre mantığı (_activeCptTimes/_activeFloors/_activePaths/statusFilter) DEĞİŞMEDİ. -->
   <div id="tracker-layout">
-
-    <!-- Aktif CPT sütunu -->
     <div class="tracker-col">
       <div class="tracker-col-header">
-        <div class="tracker-col-title">
-          <span data-i18n="AKTİF CPT">AKTİF CPT</span>
-        </div>
-        <!-- Picker Özet İstatistikleri -->
-        <div id="tracker-stats" style="display:flex;gap:8px;margin-bottom:10px">
-          <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center">
-            <div style="font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--text)" id="stat-total">—</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px" data-i18n="Toplam">Toplam</div>
-          </div>
-          <div style="flex:1;background:var(--green-bg);border:1px solid rgba(22,163,74,.2);border-radius:8px;padding:10px 14px;text-align:center">
-            <div style="font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--green)" id="stat-active">—</div>
-            <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;opacity:.7" data-i18n="Aktif">Aktif</div>
-          </div>
-          <div style="flex:1;background:var(--red-bg);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:10px 14px;text-align:center">
-            <div style="font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--red)" id="stat-inactive">—</div>
-            <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;opacity:.7" data-i18n="Inactive">Inactive</div>
-          </div>
-        </div>
-        <!-- 3 Büyük Genel Buton -->
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <button onclick="sendAllInactiveMsg()" style="flex:1;padding:11px 0;border-radius:8px;border:none;background:var(--red);color:#fff;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.02em;box-shadow:0 2px 8px rgba(220,38,38,.25)">⚑ <span data-i18n="UYAR">UYAR</span></button>
-          <button onclick="sendAllNewCptMsg()" style="flex:1;padding:11px 0;border-radius:8px;border:none;background:var(--blue);color:#fff;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.02em;box-shadow:0 2px 8px rgba(37,99,235,.25)">🔔 <span data-i18n="YENİ CPT">YENİ CPT</span></button>
-          <button onclick="sendAllDoneMsg2()" style="flex:1;padding:11px 0;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.02em;box-shadow:0 2px 8px rgba(22,163,74,.25)">✅ <span data-i18n="BİTTİ MSG">BİTTİ MSG</span></button>
-        </div>
-        <!-- Kat (Floor) Kutucukları — sabit P1-P6, çoklu seçim -->
-        <div id="floor-action-bar" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
-        <!-- CPT Saat Kartları -->
-        <div id="cpt-action-bar" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
-        <!-- Filtreler -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          <div class="filter-dropdown" id="dd-path">
-            <button class="filter-dropdown-btn" onclick="toggleDropdown('dd-path', event)">
-              🛤 <span data-i18n="Process Path">Process Path</span> <span class="dd-arrow">▾</span>
-              <span class="dd-active-count" id="dd-path-count"></span>
-            </button>
-            <div class="filter-dropdown-panel" id="dd-path-panel">
-              <div class="filter-row" id="path-filters"></div>
+
+        <!-- v12.75 ÜST DÜZEN
+               SOL : kat kutucukları (tam hizalı, baştan sona) → CPT kartları → ORTADA büyük istatistik
+               SAĞ : dikey yığın — Toplaması Biten / Uyar Msg / Yeni CPT Msg / CPT Bitti Msg / Process Path
+             Aktif/Inactive filtre BUTONLARI kaldırıldı; işlevleri istatistik kartlarına taşındı
+             (Aktif'e basınca yeşil yanar, Inactive'e basınca kırmızı, Toplam'a basınca filtre kalkar). -->
+        <div id="tk-head-grid">
+          <div id="tk-head-left">
+            <div id="floor-action-bar"></div>
+            <div id="cpt-action-bar"></div>
+            <div id="tracker-stats">
+              <button class="tk-stat" id="tk-stat-total" onclick="tkStatFilter('')" title="Filtreyi kaldır">
+                <div class="tk-stat-val" id="stat-total">—</div>
+                <div class="tk-stat-lbl" data-i18n="Toplam">Toplam</div>
+              </button>
+              <button class="tk-stat tk-stat-green" id="tk-stat-active" onclick="tkStatFilter('active')" title="Sadece aktifleri göster">
+                <div class="tk-stat-val" id="stat-active">—</div>
+                <div class="tk-stat-lbl" data-i18n="Aktif">Aktif</div>
+              </button>
+              <button class="tk-stat tk-stat-red" id="tk-stat-inactive" onclick="tkStatFilter('inactive')" title="Sadece inactive'leri göster">
+                <div class="tk-stat-val" id="stat-inactive">—</div>
+                <div class="tk-stat-lbl" data-i18n="Inactive">Inactive</div>
+              </button>
             </div>
           </div>
-          <button id="btn-filter-active" class="filter-btn" onclick="toggleStatusFilter('active')">● <span data-i18n="Aktif">Aktif</span></button>
-          <button id="btn-filter-inactive" class="filter-btn" onclick="toggleStatusFilter('inactive')">● <span data-i18n="Inactive">Inactive</span></button>
+
+          <div id="tk-head-right">
+            <button id="tk-done-btn" class="tk-side-btn" onclick="toggleDoneDrawer()">
+              ✓ <span data-i18n="Toplaması Biten">Toplaması Biten</span>
+              <span id="tk-done-count">0</span>
+            </button>
+            <button class="tk-side-btn tk-act-red"   onclick="sendAllInactiveMsg()">⚑ <span data-i18n="Uyar Msg">Uyar Msg</span></button>
+            <button class="tk-side-btn tk-act-blue"  onclick="sendAllNewCptMsg()">🔔 <span data-i18n="Yeni CPT Msg">Yeni CPT Msg</span></button>
+            <button class="tk-side-btn tk-act-green" onclick="sendAllDoneMsg2()">✅ <span data-i18n="CPT Bitti Msg">CPT Bitti Msg</span></button>
+            <div class="filter-dropdown" id="dd-path">
+              <button class="filter-dropdown-btn tk-side-btn" onclick="toggleDropdown('dd-path', event)">
+                🛤 <span data-i18n="Process Path">Process Path</span> <span class="dd-arrow">▾</span>
+                <span class="dd-active-count" id="dd-path-count"></span>
+              </button>
+              <div class="filter-dropdown-panel" id="dd-path-panel">
+                <div class="filter-row" id="path-filters"></div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- v12.75: Seçim çubuğu — en az bir picker seçilince görünür. Yazılan mesaj
+             AYNEN FANS'a gider (openFans → cpt_msg), sadece seçili pickerlara. -->
+        <div id="tk-selbar">
+          <span id="tk-sel-count">0 seçili</span>
+          <input id="tk-sel-msg" type="text" placeholder="Mesajını yaz — seçili pickerlara aynen gidecek…"
+                 onkeydown="if(event.key==='Enter')tkSendSelected()">
+          <button id="tk-sel-send" onclick="tkSendSelected()">📨 <span data-i18n="Gönder">Gönder</span></button>
+          <button id="tk-sel-clear" onclick="tkSelectNone()" title="Seçimi temizle">✕</button>
+        </div>
+
       </div>
       <div class="tracker-col-body" id="col-active"></div>
     </div>
-
-    <!-- CPT Bitti sütunu -->
-    <div class="tracker-col">
-      <div class="tracker-col-header">
-        <div class="tracker-col-title">
-          <span data-i18n="Toplaması Biten Picker ✓">Toplaması Biten Picker ✓</span>
-          <button class="small-btn warn" onclick="clearDonePickers()">✕ <span data-i18n="Temizle">Temizle</span></button>
-        </div>
-      </div>
-      <div class="tracker-col-body" id="col-done"></div>
-    </div>
-
   </div>
+
+  <!-- Toplaması Biten — sağdan açılan çekmece (eski sağ sütunun içeriği aynen burada) -->
+  <div id="done-backdrop" onclick="closeDoneDrawer()"></div>
+  <aside id="done-drawer" aria-hidden="true">
+    <div id="done-drawer-head">
+      <span class="dd-title" data-i18n="Toplaması Biten Picker ✓">Toplaması Biten Picker ✓</span>
+      <button class="small-btn warn" onclick="clearDonePickers()">✕ <span data-i18n="Temizle">Temizle</span></button>
+      <button id="done-drawer-close" onclick="closeDoneDrawer()" title="Kapat">✕</button>
+    </div>
+    <div class="tracker-col-body" id="col-done"></div>
+  </aside>
 </div>
 
 <!-- DASHBOARD -->
@@ -3409,10 +3571,11 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
         <thead>
           <tr style="background:var(--bg);border-bottom:1px solid var(--border)">
             <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;width:40px">#</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em" data-i18n="PICKER">PICKER</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em">LOGIN</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em">BARKOD</th>
-            <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em" data-i18n="EĞİTİMLER">EĞİTİMLER</th>
+            <th id="tr-th-name"  class="tr-sortable" onclick="trSort('name')"  style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;white-space:nowrap;cursor:pointer;user-select:none"><span data-i18n="PICKER">PICKER</span><span class="tr-sort-ar">↕</span></th>
+            <th id="tr-th-login" class="tr-sortable" onclick="trSort('login')" style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;white-space:nowrap;cursor:pointer;user-select:none">LOGIN<span class="tr-sort-ar">↕</span></th>
+            <th id="tr-th-cpt"   class="tr-sortable" onclick="trSort('cpt')"   style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;white-space:nowrap;cursor:pointer;user-select:none"><span data-i18n="CPT SAATİ">CPT SAATİ</span><span class="tr-sort-ar">↕</span></th>
+            <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em" style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;white-space:nowrap">BARKOD</th>
+            <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.05em;width:100%" data-i18n="EĞİTİMLER">EĞİTİMLER</th>
           </tr>
         </thead>
         <tbody id="tr-body"></tbody>
@@ -3500,7 +3663,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)">
       <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:700;color:var(--text)" data-i18n="PP Bazında Plan">PP Bazında Plan</span>
-        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.72</span>
+        <span style="font-size:9px;font-weight:700;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:.02em">v12.81</span>
         <span style="font-size:11px;color:var(--text3)" data-i18n="Foot Picking sayısını yuvarla → gir">Foot Picking sayısını yuvarla → gir</span>
       </div>
       <table style="width:100%;border-collapse:collapse">
@@ -3858,7 +4021,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
       _chip('warn', '⚠ Userscript yok');
       _step('us', 'fail', '✗', 'Userscript bulunamadı');
       for (var si = 0; si < SOURCES.length; si++) _step(SOURCES[si].id, '', '·', SOURCES[si].label + ' — userscript gerekli');
-      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.72.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
+      _help('Bu site veriyi <b>Tampermonkey userscript</b>\'inden alır. Kurulum: <b>1)</b> Tarayıcıya Tampermonkey eklentisini kurun. <b>2)</b> "CPT Manager v12.81.user.js" dosyasını Tampermonkey\'e ekleyin. <b>3)</b> Bu sayfayı yenileyin.');
       try { $('gate-retry').style.display = ''; } catch(e) {}
       return;
     }
@@ -7109,34 +7272,37 @@ function _isPlanningHiddenPP(pp) {
       || /^trans/i.test(s);            // TransXSA7/8/9(Reactive), TransXTRA, TransXTRD
 }
 
+// v12.75: HER process path AYRI renk. Kullanıcı: "SingleMedium ve SingleNoSLAM renkleri
+//   farklı olacak, farklı process pathler." Eskiden SingleMedium/SingleNoSLAM/SingleWrap
+//   üçü de kırmızı, MultiMediumZone/MultiWrap ikisi de amber idi → bir bakışta ayırt
+//   edilemiyordu. Artık 12 ayrı ton; komşu path'ler farklı renk ailelerinden seçildi.
+//   SIRA ÖNEMLİ: özelden genele. 'SingleMedium' 'Single'dan ÖNCE eşleşmeli.
 function pathColor(p) {
+  p = p || '';
   if(p === 'PPGecmisVardiya')       return 'var(--text3)';
-  if(p.includes('MultiMediumZone')) return 'var(--amber)';
-  if(p.includes('MultiWrap'))       return 'var(--amber)';
-  if(p.includes('SingleMedium'))    return 'var(--red)';
-  if(p.includes('SingleNoSLAM'))    return 'var(--red)';
-  if(p.includes('SingleWrap'))      return 'var(--red)';
-  if(p.includes('HOV'))             return 'var(--cyan)';
-  if(p.includes('Rebin'))           return 'var(--text2)';
-  if(p.includes('Fracs'))           return 'var(--text2)';
-  if(p.includes('TransXSA9'))       return 'var(--blue)';
-  if(p.includes('TransXTRD'))       return 'var(--purple)';
-  if(p.includes('Omniscan'))        return 'var(--cyan)';
-  if(p.includes('Quality'))         return 'var(--green)';
+  if(p.includes('MultiMediumZone')) return '#f59e0b';   // amber
+  if(p.includes('MultiWrap'))       return '#ea580c';   // turuncu  (≠ MultiMZ)
+  if(p.includes('SingleMedium'))    return '#dc2626';   // kırmızı
+  if(p.includes('SingleNoSLAM'))    return '#db2777';   // pembe    (≠ SingleMedium)
+  if(p.includes('SingleWrap'))      return '#a21caf';   // fuşya    (≠ diğer Single'lar)
+  if(p.includes('HOV'))             return '#06b6d4';   // camgöbeği
+  if(p.includes('TransXSA9'))       return '#2563eb';   // mavi
+  if(p.includes('TransXTRD'))       return '#7c3aed';   // menekşe  (≠ TransXSA9)
+  if(p.includes('Omniscan'))        return '#0d9488';   // teal
+  if(p.includes('Quality'))         return '#16a34a';   // yeşil
+  if(p.includes('Rebin'))           return '#64748b';   // arduvaz
+  if(p.includes('Fracs'))           return '#78716c';   // taş      (≠ Rebin)
   return 'var(--text2)';
 }
 
+// v12.75: Artık KISALTMIYOR. Kullanıcı: "şu Single / MultiMZ yerine Pick Console'daki
+//   process path adının birebir aynısı yazılacak." Eskiden PPSingleNoSLAM → "Single" ve
+//   PPSingleMedium → "SingleMedium" oluyordu; ikisi de kırmızıydı → ayırt edilemiyordu.
+//   Artık ham değer gösteriliyor: PPSingleNoSLAM, PPMultiMediumZone, PPTransXSA9Reactive…
+//   TEK istisna: PPGecmisVardiya panonun kendi ürettiği sanal path, Pick Console'da yok.
 function pathShort(p) {
   if (p === 'PPGecmisVardiya') return '⏰ Sistemde Olmayan Pickerlar';
-  return (p||'')
-    .replace('PP','')
-    .replace('MediumZone','MZ')
-    .replace('NoSLAM','')
-    .replace('Reactive','React')
-    .replace('SLAPSmall','')
-    .replace('FracsDamageBooksMPPB','FracsDmg')
-    .replace('QualityAssurance','QA')
-    .trim();
+  return (p || '').trim();
 }
 
 // v10.28: Picker adını render eden helper. Body delegation ile FC Research linki + badge tooltip.
@@ -7944,7 +8110,7 @@ function _renderReadmeContent() {
         <button onclick="closeWelcome()" style="background:var(--accent-grad);color:#fff;border:none;padding:11px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.25)">${C.start}</button>
       </div>
 
-      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.72 · IST2</div>
+      <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:16px;font-family:'JetBrains Mono',monospace">© 2026 altuerao · CPT Manager v12.81 · IST2</div>
     </div>`;
 }
 
@@ -8506,11 +8672,135 @@ function _trTxt(hex){
 // ══════════════════════════════════════════════
 //  v10.79: EĞİTİM İZNİ — Vardiya bazlı kalıcı store + Excel içe aktarma
 // ══════════════════════════════════════════════
-// v12.72: SİTE SÜRÜMÜ — eğitim seed'i BİLEREK BOŞ. GitHub Pages herkese açık; gerçek
-//   çalışan adı + badge numarası buraya KONMAZ (kaynak görüntülenince okunur).
-//   Sitede eğitim verisi yalnızca kullanıcının kendi "Yedek Yükle"siyle gelir ve
-//   o tarayıcının localStorage'ında kalır. Lokal sürümde (CPT_Manager.html) seed doludur.
-const PERM_TROB2_SEED = {};
+// ╔═══ EĞİTİM SEED — BAŞLANGIÇ ═══════════════════════════════════════════════╗
+// ║ v12.72: Kullanıcının 16/07/2026 yedeği (cpt_egitim_yedek_20260716.json)   ║
+// ║   gömüldü. TROB2 store BOŞSA bir kez yüklenir (permLoadStore ~satır 8547);║
+// ║   doluysa DOKUNMAZ — mevcut düzenlemeler asla ezilmez.                    ║
+// ║ v12.79: 104 kişinin HEPSİNE PICK eğitimi eklendi (kullanıcı isteği).      ║
+// ║   DİKKAT: Seed yalnızca BOŞ store'a uygulanır. Mevcut kullanıcıda veri    ║
+// ║   zaten varsa bu değişiklik ETKİ ETMEZ — o yüzden aynı içerik ayrıca      ║
+// ║   cpt_egitim_yedek_PICK_20260717.json olarak verildi; "Yedek Yükle" ile   ║
+// ║   içe aktarılınca mevcut store güncellenir.                              ║
+// ║                                                                          ║
+// ║ v12.73 — KARAR DEĞİŞİKLİĞİ (bilerek, kullanıcı onayıyla):                 ║
+// ║   Bu blok 104 gerçek çalışanın ADI + BADGE numarasını içerir ve artık     ║
+// ║   SİTE (GitHub Pages) sürümünde de BULUNUR. v12.31'de "global sitede      ║
+// ║   kimse görünmesin" diye boşaltılmıştı; sahibi 16/07/2026'da sitenin      ║
+// ║   herkese açık olduğu kendisine bildirildikten sonra gömülmesini açıkça   ║
+// ║   onayladı.                                                              ║
+// ║   → BU BİR GÖZDEN KAÇMA DEĞİL. "Sitede isim var, düzelteyim" diye         ║
+// ║     boşaltma; önce sahibine sor.                                         ║
+// ║   → Fikir değişirse: `python3 make_site.py` seed'i boşaltılmış temiz bir  ║
+// ║     index.html üretir. Ama yayınlanmış commit'ler git geçmişinde kalır.   ║
+// ║   AYRAÇLARI SİLME — make_site.py bu iki satırı arıyor.                    ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+const PERM_TROB2_SEED = {
+  "ahakbasg":{"n":"AKBAŞ,AHMET","t":["REBIN","SHIP","RECEIVE","WRANGLE","PICK"],"login":"ahakbasg","bc":"0103362"},
+  "akbaoguz":{"n":"Akbaş,Oğuzhan","t":["PACK","REBIN","SHIP","WRANGLE","PICK","HRV"],"login":"akbaoguz","bc":"13687810"},
+  "akcaycem":{"n":"Akcay,Cem","t":["PACK","V-RETURNS PACK","PICK"],"login":"akcaycem","bc":"13209687"},
+  "melteakd":{"n":"Akdoğan,Meltem","t":["PACK","REBIN","SHIP","V-RETURNS PACK","WRANGLE","PICK"],"login":"melteakd","bc":"14324041"},
+  "ozancema":{"n":"Akyol,Ozan","t":["PACK","SHIP","V-RETURNS PACK","WRANGLE","PICK","HRV"],"login":"ozancema","bc":"13480402"},
+  "tulayaky":{"n":"Akyol,Tülay","t":["PACK","RECEIVE","WRANGLE","PICK"],"login":"tulayaky","bc":"14718874"},
+  "alayfatz":{"n":"Alay,Fatih","t":["REBIN","WRANGLE","PICK"],"login":"alayfatz","bc":"0198229"},
+  "cerenari":{"n":"Arikan,Ceren","t":["PACK","V-RETURNS PACK","WRANGLE","PICK"],"login":"cerenari","bc":"14863830"},
+  "arserayp":{"n":"Arslan,Eray","t":["PACK","SHIP","V-RETURNS PACK","PICK"],"login":"arserayp","bc":"13405063"},
+  "atmaydin":{"n":"Atmaca,Aydin","t":["PACK","STOW","V-RETURNS PACK","HRV","PICK"],"login":"atmaydin","bc":"11455061"},
+  "bohaumut":{"n":"Aydemir,Umut","t":["ICQA","VRETURNS RETURNS","PICK"],"login":"bohaumut","bc":"14964504"},
+  "eyuaynuk":{"n":"AYNUR,Eyüp","t":["PACK","REBIN","SHIP","WRANGLE","PICK"],"login":"eyuaynuk","bc":"13645010"},
+  "bebalkan":{"n":"Balkan,Berat","t":["PACK","RSR","V-RETURNS PACK","WRANGLE","PICK"],"login":"bebalkan","bc":"13340957"},
+  "ckadirba":{"n":"Baş,Kadir","t":["PACK","SHIP","STOW","HRV","PICK"],"login":"ckadirba","bc":"12428002"},
+  "vbedifat":{"n":"Bedir,Fatih","t":["PACK","SHIP","STOW","RECEIVE","ICQA","PICK"],"login":"vbedifat","bc":"12234980"},
+  "zeyberbc":{"n":"Berber,Zeynep","t":["STOW","WRANGLE","PICK"],"login":"zeyberbc","bc":"13194343"},
+  "akiemrey":{"n":"Cakir,Emre","t":["STOW","WRANGLE","PICK"],"login":"akiemrey","bc":"13936979"},
+  "cagokmen":{"n":"can,gokmen","t":["PACK","STOW","V-RETURNS PACK","PICK"],"login":"cagokmen","bc":"12856176"},
+  "cengizhu":{"n":"Cengiz,Umut","t":["PACK","SHIP","WRANGLE","PICK"],"login":"cengizhu","bc":"12628234"},
+  "azramiic":{"n":"Cifci,Azra Miray","t":["PACK","SHIP","STOW","RSR","V-RETURNS PACK","WRANGLE","PICK"],"login":"azramiic","bc":"14029196"},
+  "emregyun":{"n":"COSKUN,Yunus Emre","t":["PACK","STOW","V-RETURNS PACK","PICK"],"login":"emregyun","bc":"12699273"},
+  "uhuseyde":{"n":"Demir,Hüseyin","t":["PACK","SHIP","ICQA","V-RETURNS PACK","PICK"],"login":"uhuseyde","bc":"14890549"},
+  "demirgmu":{"n":"Demir,Murat","t":["SHIP","STOW","PICK"],"login":"demirgmu","bc":"14037018"},
+  "deonurca":{"n":"Demir,Onurcan","t":["TSO","WRANGLE","STOW","PICK"],"login":"deonurca","bc":"12656515"},
+  "demircao":{"n":"Demircan,Omer","t":["SHIP","PICK"],"login":"demircao","bc":"11514737"},
+  "dersmail":{"n":"Derse,İsmail","t":["PACK","SHIP","RECEIVE","V-RETURNS PACK","WRANGLE","MANUEL SLAM","PICK"],"login":"dersmail","bc":"14010680"},
+  "tamedeyi":{"n":"Deyirmenci,Tamer","t":["REBIN","WRANGLE","PICK"],"login":"tamedeyi","bc":"14315635"},
+  "yarenebd":{"n":"doner,yaren ebru","t":["PACK","REBIN","V-RETURNS PACK","PICK"],"login":"yarenebd","bc":"11498087"},
+  "yagmurnd":{"n":"Donlu,Yagmur","t":["PACK","ICQA","RECEIVE","PICK"],"login":"yagmurnd","bc":"11757768"},
+  "omedogah":{"n":"Doğancı,Ömer","t":["PACK","REBIN","STOW","WRANGLE","PICK"],"login":"omedogah","bc":"13878614"},
+  "erisgerh":{"n":"Erisgin,Erhan","t":["PACK","V-RETURNS PACK","PICK"],"login":"erisgerh","bc":"13269131"},
+  "ahguneri":{"n":"Guneri,Ahmet","t":["STOW","PICK"],"login":"ahguneri","bc":"12517753"},
+  "yusguner":{"n":"guneri,yusuf","t":["PACK","REBIN","WRANGLE","PICK"],"login":"yusguner","bc":"12082685"},
+  "gonusemi":{"n":"Gönül,Semih","t":["PACK","REBIN","SHIP","STOW","RECEIVE","WRANGLE","PPPJ","HRV","PICK"],"login":"gonusemi","bc":"0057486"},
+  "aleynibi":{"n":"Ibis,Aleyna","t":["REBIN","ICQA","RSR","WRANGLE","PICK"],"login":"aleynibi","bc":"14691320"},
+  "ibisler":{"n":"ibisler,Mert","t":["PACK","REBIN","STOW","VRETURNS RETURNS","RECEIVE","WRANGLE","PICK"],"login":"ibisler","bc":"14691320"},
+  "isiulas":{"n":"Isik,Ulas","t":["REBIN","V-RETURNS PACK","WRANGLE","PICK"],"login":"isiulas","bc":"11301940"},
+  "elifisma":{"n":"ismarci,Elifnur","t":["PACK","REBIN","SHIP","STOW","V-RETURNS PACK","WRANGLE","PICK"],"login":"elifisma","bc":"13339713"},
+  "ukabahom":{"n":"Kabahor,Umut","t":["PACK","REBIN","SHIP","WRANGLE","HRV","PICK"],"login":"ukabahom","bc":"11699927"},
+  "aykaradu":{"n":"Karaduman,Aysenur","t":["STOW","PICK"],"login":"aykaradu","bc":"15095594"},
+  "karpinar":{"n":"Karayigit,Pinar Pinar","t":["REBIN","WRANGLE","PICK"],"login":"karpinar","bc":"13607657"},
+  "kidiselm":{"n":"Kidil,Selma Selma","t":["REBIN","WRANGLE","PICK"],"login":"kidiselm","bc":"13378581"},
+  "helikizi":{"n":"Kizilagac,Helin Helin kizilagac","t":["PACK","REBIN","WRANGLE","PICK"],"login":"helikizi","bc":"13772975"},
+  "yigitcki":{"n":"Kizilgedik,Yigit Yigit","t":["REBIN","SHIP","WRANGLE","PICK"],"login":"yigitcki","bc":"15131853"},
+  "yasdkose":{"n":"Kose,Yasar","t":["PACK","REBIN","VRETURNS RETURNS","PICK"],"login":"yasdkose","bc":"14751743"},
+  "zekkurda":{"n":"Kurdas,Zeki","t":["PACK","SHIP","RSR","WRANGLE","PICK"],"login":"zekkurda","bc":"0200134"},
+  "serdkuve":{"n":"Kuveloğlu,Serdar","t":["PACK","WRANGLE","HRV","PICK"],"login":"serdkuve","bc":"12718491"},
+  "arcak":{"n":"Köklü,Arca","t":["PACK","SHIP","STOW","WRANGLE","PICK"],"login":"arcak","bc":"12429421"},
+  "hkiranda":{"n":"Kırandaoğlu,Ali","t":["PACK","REBIN","SHIP","V-RETURNS PACK","WRANGLE","PICK","HRV"],"login":"hkiranda","bc":"13091281"},
+  "gokhamay":{"n":"May,Gokhan","t":["TSO","WRANGLE","PICK"],"login":"gokhamay","bc":"13173933"},
+  "smesutra":{"n":"Mesut,Raşit","t":["PACK","REBIN","V-RETURNS PACK","PICK"],"login":"smesutra","bc":"13055770"},
+  "lmetetug":{"n":"METE,Tugay Niyazi","t":["REBIN","SHIP","STOW","WRANGLE","PICK"],"login":"lmetetug","bc":"0179895"},
+  "lnamlsef":{"n":"Namli,Sefa","t":["PACK","PICK"],"login":"lnamlsef","bc":"14919274"},
+  "zdemirhu":{"n":"Ozdemir,Huseyin","t":["REBIN","SHIP","WRANGLE","PICK"],"login":"zdemirhu","bc":"13084029"},
+  "saqberna":{"n":"Sakal,Berna Nur","t":["PACK","STOW","WRANGLE","PICK"],"login":"saqberna","bc":"14436212"},
+  "solinfse":{"n":"Solin,Sezgin","t":["PACK","RSR","V-RETURNS PACK","PICK"],"login":"solinfse","bc":"12689459"},
+  "tasbasim":{"n":"taşbaşı,muhammed Abdullah","t":["PACK","STOW","RECEIVE","WRANGLE","PICK"],"login":"tasbasim","bc":"12315613"},
+  "tteberat":{"n":"tekin,berat","t":["REBIN","SHIP","WRANGLE","PICK"],"login":"tteberat","bc":"13756394"},
+  "teyasime":{"n":"Temizel,Yasime","t":["REBIN","STOW","PICK"],"login":"teyasime","bc":"11249734"},
+  "emirtirm":{"n":"TIRMIK,Emirhan","t":["REBIN","WRANGLE","PICK"],"login":"emirtirm","bc":"13208513"},
+  "todibrah":{"n":"Toksoy,Kemal","t":["PACK","SHIP","V-RETURNS PACK","WRANGLE","PICK"],"login":"todibrah","bc":"14064983"},
+  "taturkka":{"n":"Türkkan,Tahsin","t":["PACK","STOW","V-RETURNS PACK","PICK"],"login":"taturkka","bc":"0112860"},
+  "oguzhauz":{"n":"Uzun,Oğuzhan","t":["PACK","REBIN","SHIP","V-RETURNS PACK","WRANGLE","PICK"],"login":"oguzhauz","bc":"14292568"},
+  "msedyeni":{"n":"Yenigul,Sedanur","t":["PACK","REBIN","RSR","V-RETURNS PACK","WRANGLE","PICK"],"login":"msedyeni","bc":"14505254"},
+  "acihayil":{"n":"Yilmaz,Cihan","t":["PACK","WRANGLE","PICK"],"login":"acihayil","bc":"12859584"},
+  "yddevrim":{"n":"Yilmaz,Devrim","t":["PACK","SHIP","V-RETURNS PACK","PICK"],"login":"yddevrim","bc":"12022955"},
+  "zengines":{"n":"Zenginer,Sinan","t":["PACK","REBIN","STOW","V-RETURNS PACK","HRV","PICK"],"login":"zengines","bc":"11369384"},
+  "okcakmak":{"n":"Çakmak,Okan","t":["PACK","REBIN","STOW","WRANGLE","PICK"],"login":"okcakmak","bc":"11385572"},
+  "cevdscam":{"n":"Çam,Cevdet","t":["PACK","REBIN","WRANGLE","PICK"],"login":"cevdscam","bc":"0252446"},
+  "ferdiona":{"n":"Önal,Ferdi Engin","t":["PACK","REBIN","SHIP","V-RETURNS PACK","WRANGLE","PICK"],"login":"ferdiona","bc":"0038634"},
+  "isilozde":{"n":"Özdemir,Işıl","t":["PACK","REBIN","STOW","V-RETURNS PACK","RECEIVE","HRV","PICK"],"login":"isilozde","bc":"15084730"},
+  "saberkay":{"n":"şahin,berkay","t":["PACK","REBIN","V-RETURNS PACK","WRANGLE","SHIP","PICK"],"login":"saberkay","bc":"11405000"},
+  "lutfiyes":{"n":"Şahin,Lütfiye","t":["PACK","SHIP","V-RETURNS PACK","WRANGLE","PICK"],"login":"lutfiyes","bc":"14499891"},
+  "ehmehmet":{"n":"Şehoğlu,Mehmet","t":["REBIN","SHIP","WRANGLE","PICK"],"login":"ehmehmet","bc":"11249734"},
+  "ismaisir":{"n":"Şirin,İsmail","t":["REBIN","STOW","WRANGLE","PICK"],"login":"ismaisir","bc":"11612356"},
+  "x_akmese_cihan":{"n":"Akmese,Cihan","t":["PACK","REBIN","V-RETURNS PACK","WRANGLE","PICK"],"login":"akcihanz","bc":"11111664"},
+  "x_yildiz_erdem":{"n":"YILDIZ,ERDEM","t":["WRANGLE","PICK"],"login":"yildierd","bc":"15288370"},
+  "x_aycan_ferhat":{"n":"AYCAN,FERHAT","t":["WRANGLE","REBIN","PICK"],"login":"ferhataw","bc":"15339075"},
+  "x_g_ng_r_serkan":{"n":"Güngör,Serkan","t":["WRANGLE","PICK"],"login":"serkanyg","bc":"14786437"},
+  "x_zsoy_sevim":{"n":"Özsoy,Sevim","t":["WRANGLE","PICK"],"login":"sevvozso","bc":"11870242"},
+  "x_kartbo_a_beyza":{"n":"Kartboğa,Beyza","t":["PACK","REBIN","RECEIVE","V-RETURNS PACK","WRANGLE","MANUEL SLAM","PICK"],"login":"beyzkart","bc":"12578378"},
+  "x_s_l_k_berke":{"n":"Sülük,Berke","t":["PACK","WRANGLE","PICK"],"login":"sulberk","bc":"15286983"},
+  "x_acukcu_murat":{"n":"Acukcu,Murat","t":["WRANGLE","PICK"],"login":"wmuacukc","bc":"11334116"},
+  "x_saridag_enes_enes":{"n":"Saridag,Enes Enes","t":["REBIN","WRANGLE","PICK"],"login":"saridage","bc":"12871277"},
+  "x_odabasi_enes_enes":{"n":"Odabasi,ENES ENES","t":["REBIN","WRANGLE","PICK"],"login":"vodabase","bc":"14193741"},
+  "x_askin_efecan":{"n":"Askin,Efecan","t":["WRANGLE","PICK"],"login":"efecaski","bc":"11717803"},
+  "x_yildiz_salih_sezer":{"n":"Yildiz,Salih Sezer","t":["WRANGLE","PICK"],"login":"salihsyi","bc":"12892098"},
+  "x_aksu_sabiha":{"n":"Aksu,Sabiha","t":["PACK","RECEIVE","PICK"],"login":"asabihay","bc":"14945330"},
+  "x_cinar_emrah":{"n":"Cinar,Emrah","t":["REBIN","PICK"],"login":"cinemrah","bc":"15151034"},
+  "x_ergul_ender":{"n":"Ergul,Ender","t":["REBIN","PICK"],"login":"erguende","bc":"13999189"},
+  "x_yigit_ceren":{"n":"Yigit,Ceren","t":["REBIN","PICK"],"login":"yigceren","bc":"11130772"},
+  "yilemrem":{"n":"Emre Yilmaz","t":["WRANGLE","PICK"],"login":"yilemrem","bc":"15193977"},
+  "lkerkdin":{"n":"Ilker Dinc","t":["SHIP","PACK","WRANGLE","PPPJ","PICK"],"login":"lkerkdin","bc":"13292844"},
+  "atburcur":{"n":"Burcu Atalay","t":["REBIN","PACK","WRANGLE","PICK"],"login":"atburcur","bc":"12432941"},
+  "tahaialt":{"n":"Taha Altun","t":["WRANGLE","PICK"],"login":"tahaialt","bc":"14985829"},
+  "pomeozer":{"n":"Omer Ozer","t":["STOW","WRANGLE","PPPJ","PICK"],"login":"pomeozer","bc":"15252699"},
+  "sukrukar":{"n":"Sukru Karademir","t":["STOW","WRANGLE","PICK"],"login":"sukrukar","bc":"15234428"},
+  "omecagla":{"n":"Ömer Ömer Çağlar II","t":["WRANGLE","PICK"],"login":"omecagla","bc":"14675151"},
+  "dikmelki":{"n":"ilkin Dikmen","t":["SHIP","STOW","WRANGLE","PICK"],"login":"dikmelki","bc":"15156765"},
+  "oktedemi":{"n":"Oktay Demiroglu","t":["WRANGLE","PICK"],"login":"oktedemi","bc":"13556084"},
+  "dkarserh":{"n":"Serhan Karadag","t":["WRANGLE","PICK"],"login":"dkarserh","bc":"14709631"},
+  "aydogaem":{"n":"Emirhan AYDOGAN","t":["REBIN","PACK","WRANGLE","PICK"],"login":"aydogaem","bc":"13427346"},
+  "zardabah":{"n":"Arda Gulmez","t":["WRANGLE","PICK"],"login":"zardabah","bc":"14008350"},
+  "altuerao":{"n":"Eray Altun","t":["PACK","WRANGLE","PICK"],"login":"altuerao","bc":"11805530"},
+};
+// ╚═══ EĞİTİM SEED — SON ═════════════════════════════════════════════════════╝
 // ═══ v10.93: TROB2 PICK PERM (PDF NameTag) → pick yetkileri ═══════════════
 // Çift yazılan eğitimler tekilleştirildi. Yüklemede trob2 store'una BİR KEZ
 // birleştirilir (union; mevcutları BOZMAZ, sadece eksik/yeni olanı ekler).
@@ -9167,6 +9457,14 @@ function _renderSupportPanel(){
 window._renderSupportPanel=_renderSupportPanel;
 
 
+// v12.81: Eğitim tablosu sıralaması. Kalıcı değil — sekme değişince isme döner.
+let _trSort = { col: 'name', dir: 1 };
+function trSort(col) {
+  _trSort = (_trSort.col === col) ? { col, dir: -_trSort.dir } : { col, dir: 1 };
+  renderTraining();
+}
+window.trSort = trSort;
+
 function renderTraining() {
   permLoadStore();
   try{ _renderSupportPanel(); }catch(e){}
@@ -9261,7 +9559,8 @@ function renderTraining() {
     if (q) { const hay = (e.name + ' ' + e.login + ' ' + e.tr.join(' ')).toLowerCase(); if (!hay.includes(q)) return false; }
     return true;
   });
-  list.sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase(),'tr'));
+  // v12.81: Sıralama _cptOf tanımlandıktan SONRA yapılır (CPT'ye göre sıralayabilmek için) —
+  //   bkz. aşağıdaki "SIRALAMA" bloğu. Varsayılan yine isme göre.
 
   // v11.58: Bilgi metni — kaç kişi bulundu
   const _missInfo = document.getElementById('tr-missing-info');
@@ -9283,18 +9582,74 @@ function renderTraining() {
   const body = document.getElementById('tr-body');
   if (!body) return;
 
+  // ═══ v12.80 [CPT SAATİ] ═══
+  //   Kullanıcı: "sistemde olanlar hangi CPT'yi topluyor, ona göre desteğe göndeririz" +
+  //   "Pick Console'da önemli olan saat kırmızı gösteriliyor, aynısını burada yap."
+  //   ÖNEMLİ = EN YAKIN teslim saati. Kullanıcının iki Pick Console ekranı bu kuralı
+  //   doğruluyor: birinde 13:35 (o an en yakın) kırmızıydı, diğerinde 02:20 — ikisinde de
+  //   kırmızı olan en erken cptTs'li satırlardı, tek bir satır değil (aynı saatteki HERKES).
+  //   Bayatlık koruması renderTracker ile AYNI: 2 saatten eski cptTs yok sayılır, yoksa
+  //   dünkü bir CPT sonsuza dek "en acil" görünürdü.
   let activeLogins, activeNames;
+  const _cptByLogin = {}, _cptByName = {};
+  let _urgentTs = 0;
   try {
     activeLogins = new Set(); activeNames = new Set();
     const wf = readWorkforceFiltered();
+    const _now = Date.now();
+    const _tsList = [];
     Object.entries(wf).forEach(([lg,v]) => {
-      if (String(v?.status||'').trim().toLowerCase()==='active') {
+      const _act = String(v?.status||'').trim().toLowerCase()==='active';
+      const nm = _permNorm(v && (v.name||v.fullName));
+      if (_act) {
         activeLogins.add(lg.toLowerCase());
-        const nm=_permNorm(v && (v.name||v.fullName)); if(nm) activeNames.add(nm);
+        if(nm) activeNames.add(nm);
+      }
+      // CPT haritası — aktif/inactive fark etmez, kim ne topluyorsa görünsün
+      if (v && v.cptTime && /^\d{1,2}:\d{2}$/.test(v.cptTime)) {
+        const _ts = (v.cptTs && v.cptTs > _now - 2*3600000) ? v.cptTs : 0;
+        // v12.81: Pick Console formatı — "18:35 17/07/2026". cptTs yoksa tarih boş.
+        let _dt = '';
+        if (v.cptTs) {
+          const _d = new Date(v.cptTs);
+          _dt = String(_d.getDate()).padStart(2,'0') + '/' + String(_d.getMonth()+1).padStart(2,'0') + '/' + _d.getFullYear();
+        }
+        const _rec = { time: v.cptTime, ts: _ts, date: _dt };
+        _cptByLogin[lg.toLowerCase()] = _rec;
+        if (nm) _cptByName[nm] = _rec;
+        if (_ts && _act) _tsList.push(_ts);   // "en acil"i AKTİF pickerlara göre seç
       }
     });
+    _urgentTs = _tsList.length ? Math.min.apply(null, _tsList) : 0;
   } catch(e) { activeLogins=new Set(); activeNames=new Set(); }
   const isIn = e => (e.login && activeLogins.has(e.login.toLowerCase())) || activeNames.has(_permNorm(e.name));
+  const _cptOf = e => _cptByLogin[String(e.login||'').toLowerCase()] || _cptByName[_permNorm(e.name)] || null;
+
+  // ═══ v12.81 SIRALAMA — PICKER · LOGIN · CPT SAATİ (başlığa tıkla) ═══
+  //   CPT'ye göre sıralama _cptOf'a muhtaç, o yüzden eski satır 9549'daki sıralama buraya taşındı.
+  //   CPT'si olmayan HER ZAMAN sona düşer (yön fark etmez) — boş satırlar listeyi bölmesin.
+  const _trVal = (e) => {
+    if (_trSort.col === 'login') return (e.login || '').toLowerCase();
+    if (_trSort.col === 'cpt')   { const c = _cptOf(e); return (c && c.ts) ? c.ts : null; }
+    return (e.name || '').toLowerCase();
+  };
+  list.sort((a, b) => {
+    const x = _trVal(a), y = _trVal(b);
+    if (x === null && y === null) return (a.name||'').localeCompare(b.name||'', 'tr');
+    if (x === null) return 1;          // CPT'siz → hep sona
+    if (y === null) return -1;
+    const c = (typeof x === 'number' && typeof y === 'number') ? (x - y) : String(x).localeCompare(String(y), 'tr');
+    return c * _trSort.dir;
+  });
+  // Başlık oklarını durumla eşitle
+  ['name','login','cpt'].forEach(function(col){
+    const th = document.getElementById('tr-th-' + col);
+    if (!th) return;
+    const ar = th.querySelector('.tr-sort-ar');
+    const on = _trSort.col === col;
+    th.classList.toggle('on', on);
+    if (ar) ar.textContent = on ? (_trSort.dir > 0 ? '▲' : '▼') : '↕';
+  });
 
   const inSys  = list.filter(isIn);
   const outSys = list.filter(e => !isIn(e));
@@ -9306,14 +9661,23 @@ function renderTraining() {
         <td style="padding:9px 8px 9px 12px;white-space:nowrap"><span onclick="event.stopPropagation();permDeletePicker(&#39;${gsEsc(e.key)}&#39;)" title="${t('Listeden çıkar')}" style="cursor:pointer;color:#ef4444;font-weight:900;font-size:16px;line-height:1;opacity:.55;margin-right:9px">×</span><span style="color:var(--text3);font-size:12px">${i+1}</span></td>
         <td style="padding:7px 14px;color:var(--text);font-weight:600;white-space:nowrap">${e.login?`<span class="picker-name" data-login="${gsEsc(e.login)}">${pickerPhotoTag(e.login,36)}<span style="vertical-align:middle;margin-left:6px">${gsEsc(e.name)}</span></span>`:`${_phPlaceholder}<span style="vertical-align:middle;margin-left:6px">${gsEsc(e.name)}</span>`}</td>
         <td style="padding:9px 14px">${e.login?`<span class="picker-name" data-login="${gsEsc(e.login)}" style="font-family:'JetBrains Mono',monospace;color:var(--text2)">${gsEsc(e.login)}</span>`:'<span style="color:var(--text3);font-size:11px">—</span>'}</td>
+        <td style="padding:9px 14px;white-space:nowrap">${(() => {
+            const _c = _cptOf(e);
+            if (!_c) return '<span style="color:var(--text3);font-size:11px">—</span>';
+            const _hot = _urgentTs && _c.ts === _urgentTs;   // en yakın teslim → kırmızı
+            // v12.81: Pick Console'daki gibi tarih de yazılır → "18:35 17/07/2026".
+            //   Tarih cptTs'ten üretilir; cptTs yoksa (bayat/eksik) sadece saat gösterilir —
+            //   uydurma tarih yazmaktansa eksik bırak.
+            return `<span title="${_hot ? t('En yakın CPT — öncelikli') : ''}" style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:${_hot?800:600};color:${_hot?'#dc2626':'var(--text2)'}">${_hot?'⚑ ':''}${gsEsc(_c.time)}${_c.date?`<span style="opacity:.7;margin-left:5px">${gsEsc(_c.date)}</span>`:''}</span>`;
+          })()}</td>
         <td style="padding:6px 14px"><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start"><span class="bc-out" title="${_bc?('Batch: '+gsEsc(_bc)):''}" style="display:inline-block;line-height:0;${_bc?'background:#fff;padding:3px 6px;border-radius:5px':'padding:0'}">${_bc?barcodeSVG(_bc):''}</span><input value="${gsEsc(_bc)}" placeholder="batch id…" oninput="permBarcodeInput(&#39;${gsEsc(e.key)}&#39;,this)" onchange="permBarcodeSave(&#39;${gsEsc(e.key)}&#39;,this)" spellcheck="false" autocomplete="off" style="width:120px;font-size:11px;font-family:'JetBrains Mono',monospace;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--text2);outline:none"></div></td>
         <td style="padding:7px 14px">${e.tr.length?e.tr.map(p=>chipRemovable(e.key,p)).join(''):'<span style="color:var(--text3)">—</span>'}</td>
       </tr>`;
   };
-  const groupHdr = (label,n,col) => `<tr><td colspan="5" style="padding:12px 14px;text-align:center;background:${col}1f;border-top:2px solid ${col};border-bottom:1px solid var(--border);font-size:17px;font-weight:800;color:${col};letter-spacing:.01em">${label} <span style="opacity:.75;font-weight:700">(${n})</span></td></tr>`;
+  const groupHdr = (label,n,col) => `<tr><td colspan="6" style="padding:12px 14px;text-align:center;background:${col}1f;border-top:2px solid ${col};border-bottom:1px solid var(--border);font-size:17px;font-weight:800;color:${col};letter-spacing:.01em">${label} <span style="opacity:.75;font-weight:700">(${n})</span></td></tr>`;
 
   if (!list.length) {
-    body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:34px">${entries.length?t('Eşleşen picker yok'):t('Bu vardiyada henüz veri yok — yukarıdan Excel yükle.')}</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:34px">${entries.length?t('Eşleşen picker yok'):t('Bu vardiyada henüz veri yok — yukarıdan Excel yükle.')}</td></tr>`;
     return;
   }
   let h = '';
@@ -11754,6 +12118,16 @@ const PP_ELIG_MAP = {
   'PPMultiMediumZone': 'DefaultPicking',
   'PPSingleMedium':    'SingleMediumPicking'
 };
+// v12.77: Planlama vurgu renkleri — TEK KAYNAK. Değerler Tracker'ın pathColor()'ıyla
+//   BİREBİR aynı: MultiMediumZone amber, SingleNoSLAM pembe, SingleMedium kırmızı.
+//   Böylece aynı path pano genelinde (Tracker rozeti · Planlama kartı · kat dökümü)
+//   aynı renkte görünür. Renk değiştirmek gerekirse pathColor ile birlikte güncelle.
+const _ELIG_ACCENT = {
+  'DefaultPicking':      '#f59e0b',   // MultiMediumZone  → pathColor('PPMultiMediumZone')
+  'SingleNoSLAMPicking': '#db2777',   // SingleNoSlam     → pathColor('PPSingleNoSLAM')
+  'SingleMediumPicking': '#dc2626',   // SingleMedium     → pathColor('PPSingleMedium')
+};
+
 // v11.12: FC Eligibility — seçili kategoriye göre kat-çifti dökümü (kart tıklanınca değişir)
 function _selectEligCat(cat){ window._eligFloorCat = cat; _renderEligFloors(); }
 function _renderEligFloors(){
@@ -11765,20 +12139,26 @@ function _renderEligFloors(){
   var hasFb = full && full.floorBreak && Object.keys(full.floorBreak).length > 0;
   var cat = window._eligFloorCat || 'DefaultPicking';
   var META = {
-    'DefaultPicking':      { label:'MultiMediumZone', col:'#22d3ee', numCol:'#fbbf24', bg:'rgba(34,211,238,.12)', bd:'rgba(34,211,238,.40)' },
-    'SingleNoSLAMPicking': { label:'SingleNoSlam',    col:'#fb923c', numCol:'#60a5fa', bg:'rgba(251,146,60,.12)', bd:'rgba(251,146,60,.40)' },
-    'SingleMediumPicking': { label:'SingleMedium',    col:'#4ade80', numCol:'#f472b6', bg:'rgba(74,222,128,.12)', bd:'rgba(74,222,128,.40)' }
+    'DefaultPicking':      { label:'MultiMediumZone', col:_ELIG_ACCENT['DefaultPicking'] },
+    'SingleNoSLAMPicking': { label:'SingleNoSlam',    col:_ELIG_ACCENT['SingleNoSLAMPicking'] },
+    'SingleMediumPicking': { label:'SingleMedium',    col:_ELIG_ACCENT['SingleMediumPicking'] }
   };
   var meta = META[cat] || META['DefaultPicking'];
   var data = fb[cat] || { pairs:{}, singles:{} };
   ['DefaultPicking','SingleNoSLAMPicking','SingleMediumPicking'].forEach(function(c){
     var el = document.getElementById('elig-card-'+c);
-    if (el) el.style.boxShadow = (c===cat) ? ('0 0 0 2px '+META[c].col) : 'none';
+    if (!el) return;
+    // v12.77: Seçili kart — nötr zeminde vurgu rengiyle çerçeve (Tracker'daki .tk-stat.on gibi)
+    var on = (c === cat);
+    el.style.boxShadow  = on ? ('0 0 0 2px ' + META[c].col) : 'none';
+    el.style.borderColor = on ? META[c].col : 'var(--border)';
   });
+  // v12.77: Kat kutucukları da Tracker sadeliğinde — nötr zemin + ince kenarlık,
+  //   sayı seçili kategorinin vurgu renginde, 0 ise gri (dikkat çekmesin).
   var tile = function(title,val){
-    return '<div style="text-align:center;padding:10px 6px;background:'+meta.bg+';border:1px solid '+meta.bd+';border-radius:9px">'
-      + '<div style="font-size:11px;font-weight:800;color:'+meta.col+';letter-spacing:.03em">'+title+'</div>'
-      + '<div style="font-size:22px;font-weight:800;font-family:\'JetBrains Mono\',monospace;color:'+(val?(meta.numCol||meta.col):'var(--text3)')+';margin-top:2px">'+val+'</div></div>';
+    return '<div style="text-align:center;padding:10px 6px;background:var(--bg);border:1px solid var(--border);border-radius:9px">'
+      + '<div style="font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">'+title+'</div>'
+      + '<div style="font-size:22px;font-weight:800;font-family:\'JetBrains Mono\',monospace;color:'+(val?meta.col:'var(--text3)')+';margin-top:2px">'+val+'</div></div>';
   };
   // v11.21: Tüm kutucukları (çift + tek) kat numarasına göre TEK akışta P1→P6 sırala.
   // Çift "Px-y" → sıra anahtarı x+0.5 (iki katın ortası); tek "Px tek" → x.
@@ -12222,20 +12602,29 @@ function renderPlanning() {
     const _ns = (_ec['SingleNoSLAMPicking'] != null) ? _ec['SingleNoSLAMPicking'] : 0;
     const _sm = (_ec['SingleMediumPicking'] != null) ? _ec['SingleMediumPicking'] : 0;
     const _hasElig = Object.keys(_ec).length > 0;
-    const _cell = (val,label,sub,numCol,labelCol,bg,bd,cat) =>
-      '<div id="elig-card-'+cat+'" onclick="_selectEligCat(\''+cat+'\')" title="'+t('Tıkla: kat dökümünü bu kategoriye göre göster')+'" style="cursor:pointer;text-align:center;padding:12px 8px;background:'+bg+';border:1px solid '+bd+';border-radius:10px;transition:box-shadow .12s">'
-      + '<div style="font-size:30px;font-weight:800;font-family:\'JetBrains Mono\',monospace;color:'+numCol+'">'+val+'</div>'
-      + '<div style="font-size:13px;font-weight:800;color:'+labelCol+';margin-top:4px;letter-spacing:.02em">'+label+'</div>'
-      + '<div style="font-size:9.5px;color:var(--text3);margin-top:1px">'+sub+'</div></div>';
+    // v12.77 [RENK SADELEŞTİRME] — Kullanıcı: "planlama kısmındaki renk karmaşasını
+    //   Tracker sayfasındaki sadelik gibi yap."
+    //   ESKİ: her kartın zemini/kenarı/etiketi BİR renk, sayısı BAŞKA bir renkti
+    //     (camgöbeği kart + amber sayı · turuncu kart + mavi sayı · yeşil kart + pembe sayı)
+    //     → üç kartta altı renk, hiçbiri birbiriyle ilgili değil.
+    //   YENİ: Tracker istatistik kartlarının (.tk-stat) düzeni — nötr zemin, ince kenarlık,
+    //     kart başına TEK vurgu rengi (sayı + etiket aynı), alt etiket gri. Seçili kart
+    //     vurgu rengiyle çerçevelenir. Vurgu renkleri Tracker'daki path rozetleriyle
+    //     AYNI (pathColor) → aynı path pano genelinde aynı renk.
+    const _cell = (val,label,sub,accent,cat) =>
+      '<div id="elig-card-'+cat+'" onclick="_selectEligCat(\''+cat+'\')" title="'+t('Tıkla: kat dökümünü bu kategoriye göre göster')+'" style="cursor:pointer;text-align:center;padding:12px 8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;transition:box-shadow .12s,border-color .12s">'
+      + '<div style="font-size:30px;font-weight:800;font-family:\'JetBrains Mono\',monospace;color:'+accent+'">'+val+'</div>'
+      + '<div style="font-size:11px;font-weight:800;color:'+accent+';margin-top:4px;text-transform:uppercase;letter-spacing:.06em">'+label+'</div>'
+      + '<div style="font-size:9.5px;color:var(--text3);margin-top:2px">'+sub+'</div></div>';
 
     eligSummEl.innerHTML =
       '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-sm)">'
       + '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">📋 '+t('Yetkili Picker Sayısı')
       + '<span style="font-weight:600;text-transform:none;color:var(--text3);font-size:10.5px">· FC Eligibility'+(_hasElig?'':' — '+t('veri yok, o sayfayı bir kez aç'))+'</span></div>'
       + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'
-      + _cell(_m, 'MultiMediumZone', 'DefaultPicking',      '#fbbf24','#22d3ee','rgba(34,211,238,.14)','rgba(34,211,238,.45)','DefaultPicking')
-      + _cell(_ns,'SingleNoSlam',    'SingleNoSLAMPicking', '#60a5fa','#fb923c','rgba(251,146,60,.14)','rgba(251,146,60,.45)','SingleNoSLAMPicking')
-      + _cell(_sm,'SingleMedium',    'SingleMediumPicking', '#f472b6','#4ade80','rgba(74,222,128,.14)','rgba(74,222,128,.45)','SingleMediumPicking')
+      + _cell(_m, 'MultiMediumZone', 'DefaultPicking',      _ELIG_ACCENT['DefaultPicking'],      'DefaultPicking')
+      + _cell(_ns,'SingleNoSlam',    'SingleNoSLAMPicking', _ELIG_ACCENT['SingleNoSLAMPicking'], 'SingleNoSLAMPicking')
+      + _cell(_sm,'SingleMedium',    'SingleMediumPicking', _ELIG_ACCENT['SingleMediumPicking'], 'SingleMediumPicking')
       + '</div>'
       + '<div id="elig-floor-grid" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px"></div>'
       + '</div>';
@@ -14386,13 +14775,24 @@ function updateDropdownBadges() {
   if(pathBtn) pathBtn.classList.toggle('has-active', pathCount > 0);
 }
 
-function toggleStatusFilter(s) {
-  _statusFilter = _statusFilter === s ? '' : s;
-  document.getElementById('btn-filter-active').classList.toggle('on', _statusFilter === 'active');
-  document.getElementById('btn-filter-inactive').classList.toggle('on', _statusFilter === 'inactive');
+// v12.75: Aktif/Inactive filtre butonları KALDIRILDI — işlev istatistik kartlarına taşındı.
+//   Aktif'e bas → kart yeşil yanar + sadece aktifler. Inactive'e bas → kırmızı yanar.
+//   Toplam'a bas → filtre kalkar. Aynı karta tekrar basmak da filtreyi kaldırır.
+function tkStatFilter(s) {
+  _statusFilter = (s && _statusFilter === s) ? '' : s;
+  _tkSyncStatBtns();
   if (typeof _lastRenderRev !== 'undefined') _lastRenderRev = '';
   render();
 }
+function _tkSyncStatBtns() {
+  const a = document.getElementById('tk-stat-active');
+  const i = document.getElementById('tk-stat-inactive');
+  if (a) a.classList.toggle('on', _statusFilter === 'active');
+  if (i) i.classList.toggle('on', _statusFilter === 'inactive');
+}
+window.tkStatFilter = tkStatFilter;
+// Eski ad — dışarıdan (arama/kısayol) çağrılıyor olabilir, kırılmasın.
+function toggleStatusFilter(s) { tkStatFilter(s); }
 
 function togglePathFilter(path, btn) {
   if(_activePaths.has(path)) { _activePaths.delete(path); }
@@ -14877,7 +15277,10 @@ function gsRender(q) {
 }
 
 // v11.62: Genel arama YALNIZCA bu 3 sekmede çalışır. Diğerlerinde arama kutusu pasif.
-const _SEARCH_ALLOWED_TABS = ['tracker', 'analyzer', 'training'];
+// v12.76: Arama artık HER sekmede çalışıyor (kullanıcı: "tüm sekmelerimizde çalışsın").
+//   Eskiden sadece tracker/analyzer/training vardı; diğerlerinde kutu "Arama bu sekmede yok"
+//   deyip pasif kalıyordu.
+const _SEARCH_ALLOWED_TABS = ['tracker', 'transit', 'planning', 'assignment', 'analyzer', 'barcode', 'training'];
 function _searchAllowedHere() {
   const tab = (typeof _activeTab !== 'undefined') ? _activeTab : 'tracker';
   return _SEARCH_ALLOWED_TABS.indexOf(tab) >= 0;
@@ -15060,19 +15463,11 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Legacy Tracker filtreleme — geriye uyumlu
-function legacyApplySearch(q) {
-  _searchQuery = (q||'').trim().toLowerCase();
-  document.querySelectorAll('.picker-row').forEach(row => {
-    if(!_searchQuery) { row.style.display = ''; return; }
-    row.style.display = row.textContent.toLowerCase().includes(_searchQuery) ? '' : 'none';
-  });
-  document.querySelectorAll('.cpt-card').forEach(card => {
-    if(!_searchQuery) { card.style.display = ''; return; }
-    const vis = [...card.querySelectorAll('.picker-row')].some(r => r.style.display !== 'none');
-    card.style.display = vis ? '' : 'none';
-  });
-}
+// v12.76 [ARAMA REGRESYON FİKSİ]: Bu fonksiyon .picker-row / .cpt-card hedefliyordu.
+//   v12.74'te Tracker kart yığınından TABLOYA çevrildi → ikisi de kalmadı, tracker araması
+//   sessizce ÖLDÜ (kutuya yazınca hiçbir şey olmuyordu). Artık applyTabSearch sayfadaki
+//   gerçek yapıyı (tbody) bulup süzüyor. Bu ad geriye uyumluluk için duruyor.
+function legacyApplySearch(q) { applyTabSearch(q); }
 
 // v11.23: Genel arama artık AKTİF sekmenin içeriğini de süzer — kutuya ne yazılırsa
 // o sekmenin tablosunda eşleşmeyen satırlar gizlenir. Tracker (kart+satır) özel; Picker
@@ -15095,21 +15490,45 @@ function _searchFilterRows(tbody, q) {
   flush();
 }
 
+// v12.76: Sekmelerin yapısı iki türlü — kimi TABLO (tbody > tr), kimi KART+SATIR
+//   (Transit: .tr-tote-row satırları .tr-floor-card kartlarının içinde). Eskiden her sekme
+//   için ayrı id listesi vardı; yeni sekme/tablo eklenince unutuluyordu. Artık sayfanın
+//   İÇİNDEKİ ne varsa ona göre süzülüyor → yeni tablo eklense kendiliğinden aranabilir olur.
+const _SEARCH_CARD_ROWS = {
+  transit: [['.tr-tote-row', '.tr-floor-card']],
+};
+// Kart+satır süzgeci (eski legacyApplySearch'ün genelleştirilmiş hâli): satırı süz,
+//   altında görünen satır kalmayan kartı gizle.
+function _searchFilterCardRows(page, rowSel, cardSel, q) {
+  page.querySelectorAll(rowSel).forEach(function(r){
+    r.style.display = (!q || r.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+  page.querySelectorAll(cardSel).forEach(function(c){
+    if (!q) { c.style.display = ''; return; }
+    const vis = Array.prototype.some.call(c.querySelectorAll(rowSel), function(r){ return r.style.display !== 'none'; });
+    c.style.display = vis ? '' : 'none';
+  });
+}
+
 function applyTabSearch(q) {
   q = (q||'').trim().toLowerCase();
   _searchQuery = q;
   const tab = (typeof _activeTab !== 'undefined') ? _activeTab : 'tracker';
 
-  // v11.62: Arama YALNIZCA tracker, analyzer, training'de çalışır.
-  // v11.63: Ama BOŞ q (temizlik) her sekmede çalışabilir — eski filtreden kalan gizli satırları geri getirir.
+  // v11.63: BOŞ q (temizlik) her sekmede çalışır — eski filtreden kalan gizli satırları geri getirir.
   if (q && _SEARCH_ALLOWED_TABS.indexOf(tab) < 0) return;
 
-  // Tracker — kart + picker-row
-  if (tab === 'tracker') { legacyApplySearch(q); return; }
+  const page = document.getElementById('page-' + tab);
+  if (!page) return;
 
-  // Picker Analizi / Eğitim — tbody satırlarını filtrele (eşleşmeyeni gizle)
-  const TBODY = { analyzer:['az-body','az-best-body'], training:['tr-body'] };
-  (TBODY[tab] || []).forEach(function(id){ _searchFilterRows(document.getElementById(id), q); });
+  // a) Sayfadaki TÜM tablolar (tracker/analyzer/training/planning/assignment…)
+  //    _searchFilterRows bölüm başlıklarını (tek colspan'lı tr) da doğru yönetir.
+  page.querySelectorAll('tbody').forEach(function(tb){ _searchFilterRows(tb, q); });
+
+  // b) Kart+satır yapıları (Transit)
+  (_SEARCH_CARD_ROWS[tab] || []).forEach(function(pair){
+    _searchFilterCardRows(page, pair[0], pair[1], q);
+  });
 }
 
 // Backward-compat
@@ -16594,6 +17013,95 @@ function sendDoneCptBulk(cpt) {
   toast('📨 ' + logins.length + ' picker\'a mesaj gönderildi');
 }
 
+// ═══ v12.74: Toplaması Biten çekmecesi ═══
+//   Eski sağ sütun buraya taşındı. İçerik (#col-done) aynı fonksiyonla doluyor — çekmece
+//   KAPALIYKEN de doluyor, çünkü buton üzerindeki sayaç güncel kalmalı.
+function openDoneDrawer(){
+  const d = document.getElementById('done-drawer'), b = document.getElementById('done-backdrop');
+  if(!d) return;
+  d.classList.add('open'); d.setAttribute('aria-hidden','false');
+  if(b) b.classList.add('open');
+}
+function closeDoneDrawer(){
+  const d = document.getElementById('done-drawer'), b = document.getElementById('done-backdrop');
+  if(!d) return;
+  d.classList.remove('open'); d.setAttribute('aria-hidden','true');
+  if(b) b.classList.remove('open');
+}
+function toggleDoneDrawer(){
+  const d = document.getElementById('done-drawer');
+  if(!d) return;
+  d.classList.contains('open') ? closeDoneDrawer() : openDoneDrawer();
+}
+window.openDoneDrawer = openDoneDrawer;
+window.closeDoneDrawer = closeDoneDrawer;
+window.toggleDoneDrawer = toggleDoneDrawer;
+// ESC ile kapat (modal alışkanlığı)
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDoneDrawer(); });
+
+// ═══ v12.75 [SEÇİM + ÖZEL MESAJ] ═══
+//   Kullanıcı: "picker adlarının yanına seçme kutucukları, en üste hepsini seçen bir kutucuk,
+//   seçilenlere mesaj gönder butonu — yazdığım şeyin aynısını FANS'a yazıp göndersin."
+//   Seçim login bazlı bir Set'te tutulur (satır index'i DEĞİL): tablo her render'da
+//   yeniden çiziliyor ve sıralama değişebiliyor; login sabit tek anahtar.
+const _tkSel = new Set();
+
+function tkToggleSel(login, on) {
+  on ? _tkSel.add(login) : _tkSel.delete(login);
+  _tkSyncSelBar();
+}
+// "Hepsini seç" — sadece EKRANDA GÖRÜNEN (filtrelenmiş) satırları kapsar; gizli
+//   pickerları sessizce seçip yanlış kişiye mesaj atmasın.
+function tkSelectAll(on) {
+  document.querySelectorAll('#col-active .tk-check[data-login]').forEach(cb => {
+    cb.checked = on;
+    on ? _tkSel.add(cb.dataset.login) : _tkSel.delete(cb.dataset.login);
+  });
+  _tkSyncSelBar();
+}
+function tkSelectNone() {
+  _tkSel.clear();
+  document.querySelectorAll('#col-active .tk-check').forEach(cb => { cb.checked = false; cb.indeterminate = false; });
+  _tkSyncSelBar();
+}
+// Seçim çubuğunu + baştaki "hepsini seç" kutusunu durumla eşitle
+function _tkSyncSelBar() {
+  const bar = document.getElementById('tk-selbar');
+  const cnt = document.getElementById('tk-sel-count');
+  const n = _tkSel.size;
+  if (bar) bar.classList.toggle('on', n > 0);
+  if (cnt) cnt.textContent = n + ' ' + t('seçili');
+  const all = document.getElementById('tk-check-all');
+  if (all) {
+    const boxes = document.querySelectorAll('#col-active .tk-check[data-login]');
+    const sel = [...boxes].filter(b => b.checked).length;
+    all.checked = boxes.length > 0 && sel === boxes.length;
+    all.indeterminate = sel > 0 && sel < boxes.length;   // kısmi seçim
+  }
+}
+// Yazılan mesajı AYNEN seçili pickerlara gönder (openFans → FANS'ın cpt_msg alanı).
+function tkSendSelected() {
+  const inp = document.getElementById('tk-sel-msg');
+  const msg = (inp?.value || '').trim();
+  if (!_tkSel.size) return toast('⚠️ Önce picker seç');
+  if (!msg)         { toast('⚠️ Mesaj boş'); inp?.focus(); return; }
+  const logins = [..._tkSel];
+  openFans(logins, msg);                       // metni DEĞİŞTİRMEDEN gönder
+  toast('📨 ' + logins.length + ' picker\'a mesaj gönderildi');
+}
+window.tkToggleSel = tkToggleSel;
+window.tkSelectAll = tkSelectAll;
+window.tkSelectNone = tkSelectNone;
+window.tkSendSelected = tkSendSelected;
+
+// v12.74: Tablo sıralaması — başlığa tıkla. Kalıcı değil (yenilemede CPT sırasına döner).
+let _tkSort = { col: '', dir: 1 };
+function tkSort(col){
+  _tkSort = (_tkSort.col === col) ? { col, dir: -_tkSort.dir } : { col, dir: 1 };
+  if (typeof render === 'function') render();
+}
+window.tkSort = tkSort;
+
 function renderTracker(keys, sData, bData, wfData, pickerCounts, transitBatches, scData, notYetPicked, notYetPickedByHHMM, now) {
   const colActive = document.getElementById('col-active');
   const colDone   = document.getElementById('col-done');
@@ -16717,120 +17225,124 @@ function renderTracker(keys, sData, bData, wfData, pickerCounts, transitBatches,
   });
   renderFloorChips(floorCounts);
 
-  let activeHTML = '';
   let doneHTML = '';
   // CPT bazlı done grupları: { cpt → { pgLabel, pickers[] } }
   const doneGroups = {};
 
+  // ═══ v12.74: TEK TABLO ═══
+  //   Eskiden her CPT ayrı bir kart, kartın içinde satırlar vardı (8 kart alt alta).
+  //   Artık tüm pickerlar TEK tabloda, CPT bir KOLON. Filtreler aynı; CPT/kat kutucukları
+  //   seçilince tablo daralır. Sıralama varsayılan: CPT → aktif önce → login.
+  const rows = [];
   sortedCpts.forEach(key => {
     const group = groups[key];
     const cpt = group.cpt;
-    const pgLabel = group.pgLabel;
     let pickers = group.pickers;
 
-    // CPT kart filtresi — bir/birden çok CPT seçiliyse SADECE o CPT'lerin gruplarını göster
-    // (İşsiz dahil; cpt değeri "HH:MM" ya da "İşsiz"). Seçim yoksa hepsi gösterilir.
+    // CPT kart filtresi — seçim varsa sadece o CPT'ler (İşsiz dahil)
     if(_activeCptTimes.size > 0 && !_activeCptTimes.has(cpt)) return;
-
-    // Filtreler
+    // Filtreler (değişmedi)
     if(pathFilter) pickers = pickers.filter(({v}) => _activePaths.has(v.path));
     if(statusFilter === 'active')   pickers = pickers.filter(({v}) => v.status?.toLowerCase() === 'active');
     if(statusFilter === 'inactive') pickers = pickers.filter(({v}) => v.status?.toLowerCase() !== 'active');
-    if(_activeFloors.size > 0) pickers = pickers.filter(({v}) => _activeFloors.has(pickerFloor(v)));  // v11.20: kat filtresi
+    if(_activeFloors.size > 0) pickers = pickers.filter(({v}) => _activeFloors.has(pickerFloor(v)));
     if(!pickers.length) return;
 
-    // Aktif/inactive sırala
-    pickers.sort((a, b) => {
-      const aActive = a.v.status?.toLowerCase() === 'active';
-      const bActive = b.v.status?.toLowerCase() === 'active';
-      if(aActive && !bActive) return -1;
-      if(!aActive && bActive) return 1;
-      return a.login.localeCompare(b.login);
-    });
-
-    const activeCount   = pickers.filter(({v}) => v.status?.toLowerCase() === 'active').length;
-    const inactiveCount = pickers.length - activeCount;
-
-    // Toplam kalan ürün (batch'ten)
-    let totalRemaining = 0;
-    pickers.forEach(({v}) => {
-      const b = bData[v.batchId];
-      if(b) totalRemaining += b.remaining||0;
-    });
-
-    const pickerRows = pickers.map(({login, v}) => {
-      const isActive = v.status?.toLowerCase() === 'active';
-      const dotClass = isActive ? 'active' : 'inactive';
-      const b = bData[v.batchId];
-      const scanCount = pickerCounts[login] || 0;
-
-      // (Done tespiti artık batch yerine CPT geçişine göre — döngüden sonra doldurulur.)
-
-      let remHTML = '';
-      if(b && b.remaining > 0) {
-        const remCol = b.remaining > 50 ? 'var(--red)' : b.remaining > 10 ? 'var(--amber)' : 'var(--green)';
-        remHTML = `<span class="picker-remaining" style="color:${remCol}">${b.remaining} kaldı</span>`;
-      } else if(b && b.remaining === 0 && b.total > 0) {
-        remHTML = `<span class="picker-remaining" style="color:var(--green)">✓ Bitti</span>`;
-      } else if(scanCount > 0) {
-        remHTML = `<span class="picker-remaining" style="color:var(--text2)">${scanCount} ürün</span>`;
-      }
-      const warnBtn = !isActive
-        ? `<button class="small-btn warn" onclick="sendInactiveMsg('${login}')" style="margin-left:6px">📨</button>`
-        : '';
-      const loc = v.location ? `<span class="picker-location" title="${v.location}">📍 ${v.location}</span>` : '';
-      const pathShortStr = pathShort(v.path||'');
-      const col = pathColor(v.path||'');
-
-      return `<div class="picker-row${isActive?'':' inactive'}">
-        <span class="status-dot ${dotClass}"></span>
-        <span class="picker-login picker-name${isActive?'':' inactive'}" data-login="${login}">${login}</span>
-        <span class="pp-cell">${pathShortStr ? `<span class="picker-badge badge-path" style="color:${col};border-color:${col}30;background:${col}12">${pathShortStr}</span>` : ''}</span>
-        ${trTrackerChips(login)}
-        ${loc}
-        ${remHTML ? `<span class="picker-row-divider"></span>${remHTML}` : ''}
-        ${warnBtn}
-      </div>`;
-    }).join('');
-
-    const cptTs = group.ts;
-    const dateStr = cptTs ? (new Date(cptTs).getDate() + ' ' + MONTHS_TR[new Date(cptTs).getMonth()]) : '';
-    // v11.29: Path grubu rengi + "İşsiz" özel renk (turuncu uyarı). Dolu/canlı rozetler.
-    const _isIssiz = (cpt === 'İşsiz');
-    const _pgC    = _PG_COL[pgLabel] || _PG_COL['Diğer'];
-    const _pgTxtC = _pgTxt(_pgC);
-    const _hdrAccent = _isIssiz ? '#ea580c' : 'var(--amber)';
-    const _hdrBg     = _isIssiz ? 'rgba(234,88,12,.10)' : 'var(--surface)';
-    const _hdrBd     = _isIssiz ? 'rgba(234,88,12,.35)' : 'var(--border)';
-
-    activeHTML += `
-      <div class="cpt-card" style="border-color:${_hdrBd}">
-        <div class="cpt-card-header" style="background:${_hdrBg};border-bottom-color:${_hdrBd}">
-          <div>
-            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
-              <span class="cpt-time" style="color:${_hdrAccent}">${_isIssiz ? '⚠ ' + t('İşsiz') : cpt}</span>
-              <span class="cpt-badge" style="background:${_hdrAccent};color:#fff;border-color:${_hdrAccent}">CPT</span>
-              ${dateStr ? `<span style="font-size:12px;font-weight:700;color:var(--text2);font-family:'JetBrains Mono',monospace">${dateStr}</span>` : ''}
-              <span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;background:${_pgC};color:${_pgTxtC};border:1px solid ${_pgC};letter-spacing:.02em">${pgLabel}</span>
-            </div>
-          </div>
-          <div class="cpt-stats-row">
-            <div class="cpt-stat"><div class="cpt-stat-val" style="color:var(--green)">${activeCount}</div><div class="cpt-stat-lbl">Aktif</div></div>
-            <div class="cpt-stat"><div class="cpt-stat-val" style="color:var(--red)">${inactiveCount}</div><div class="cpt-stat-lbl">Inactive</div></div>
-            ${totalRemaining > 0 ? `<div class="cpt-stat"><div class="cpt-stat-val" style="color:var(--amber)">${totalRemaining}</div><div class="cpt-stat-lbl">Kalan</div></div>` : ''}
-          </div>
-        </div>
-        <div class="col-header" style="gap:9px;padding:8px 16px 6px">
-          <span style="width:8px;flex-shrink:0"></span>
-          <span style="width:90px;flex-shrink:0;font-size:11.5px">Login</span>
-          <span style="width:120px;flex-shrink:0;font-size:11.5px">Process Path</span>
-          <span style="flex:1 1 auto;font-size:13px;text-align:left">Eğitimi Olanlar</span>
-        </div>
-        ${pickerRows}
-      </div>`;
+    pickers.forEach(({login, v}) => rows.push({ login, v, cpt, cptTs: group.ts || 0, pgLabel: group.pgLabel }));
   });
 
-  colActive.innerHTML = activeHTML || '<div style="text-align:center;padding:40px;color:var(--text3)">' + t('Aktif picker yok') + '</div>';
+  // Varsayılan sıra: CPT zamanı → aktif önce → login
+  const _act = (r) => r.v.status?.toLowerCase() === 'active' ? 0 : 1;
+  rows.sort((a, b) => (a.cptTs - b.cptTs) || (_act(a) - _act(b)) || a.login.localeCompare(b.login));
+
+  // Kullanıcı bir başlığa tıkladıysa ona göre sırala
+  if (_tkSort.col) {
+    const val = (r) => {
+      switch (_tkSort.col) {
+        case 'login':   return r.login;
+        case 'cpt':     return r.cptTs || 0;
+        case 'name':    return r.v.name || '';
+        case 'path':    return r.v.path || '';
+        case 'area':    return r.v.pickArea || '';
+        case 'loc':     return r.v.location || '';
+        case 'batch':   return r.v.batchId || '';
+        case 'exsd':    return r.v.exsd || '';
+        case 'status':  return r.v.status || '';
+        case 'act':     return r.v.lastActivity || '';
+        case 'cont':    return r.v.lastContainer || '';
+        default:        return '';
+      }
+    };
+    rows.sort((a, b) => {
+      const x = val(a), y = val(b);
+      const c = (typeof x === 'number' && typeof y === 'number') ? (x - y) : String(x).localeCompare(String(y), 'tr');
+      return c * _tkSort.dir;
+    });
+  }
+
+  const _th = (col, label, extra) => {
+    const on = _tkSort.col === col;
+    return `<th class="${on ? 'sorted' : ''}" ${extra || ''} onclick="tkSort('${col}')">${label}<span class="tk-sort">${on ? (_tkSort.dir > 0 ? '▲' : '▼') : '↕'}</span></th>`;
+  };
+
+  // v12.78: b/scanCount/pgLabel kaldırıldı — yalnızca silinen "Kalan" kolonu kullanıyordu.
+  const bodyHTML = rows.map(({login, v, cpt}) => {
+    const isActive = v.status?.toLowerCase() === 'active';
+    const _isIssiz = (cpt === 'İşsiz');
+    const cptCol = _isIssiz ? '#ea580c' : 'var(--amber)';
+
+    // v12.78: "Kalan" kolonu KALDIRILDI. bData[batchId] yalnızca batch taraması yapılmış
+    //   pickerlarda doluyordu → kolon çoğu satırda boştu, tablo genişliğini boşuna yiyordu.
+    const col = pathColor(v.path || '');
+    const ps  = pathShort(v.path || '');
+
+    return `<tr class="${isActive ? '' : 'tk-inactive'}">
+      <td><input type="checkbox" class="tk-check" data-login="${login}" ${_tkSel.has(login) ? 'checked' : ''} onchange="tkToggleSel('${login}', this.checked)"></td>
+      <td>${!isActive ? `<button class="tk-warn-btn" onclick="sendInactiveMsg('${login}')" title="${t('Uyarı mesajı gönder')}">⚑</button>` : ''}</td>
+      <td><span class="status-dot ${isActive ? 'active' : 'inactive'}"></span></td>
+      <td><span class="picker-login picker-name${isActive ? '' : ' inactive'}" data-login="${login}">${login}</span>${notInSystemBadge(login)}</td>
+      <td class="tk-cpt-cell" style="color:${cptCol}">${_isIssiz ? '⚠ ' + t('İşsiz') : cpt}</td>
+      <td style="color:var(--text2)">${v.name || ''}</td>
+      <td>${ps ? `<span class="picker-badge badge-path" style="color:${col};border-color:${col}30;background:${col}12">${ps}</span>` : ''}</td>
+      <td class="tk-mono">${v.pickArea || ''}</td>
+      <td class="tk-mono">${v.location || ''}</td>
+      <td class="tk-mono">${v.batchId || ''}</td>
+      <td class="tk-mono">${v.exsd || ''}</td>
+      <td><span style="color:${isActive ? 'var(--green)' : 'var(--red)'};font-weight:700">${v.status || ''}</span></td>
+      <td class="tk-mono">${v.lastActivity || ''}</td>
+      <td class="tk-mono">${v.lastContainer || ''}</td>
+      <td class="tk-tr-cell">${trTrackerChips(login)}</td>
+    </tr>`;
+  }).join('');
+
+  const activeHTML = rows.length ? `<table class="tk-table"><thead><tr>
+      <th style="width:26px"><input type="checkbox" id="tk-check-all" class="tk-check" onchange="tkSelectAll(this.checked)" title="Görünen hepsini seç / bırak"></th>
+      <th style="width:30px"></th>
+      <th style="width:8px"></th>
+      ${_th('login',  'Login')}
+      ${_th('cpt',    'CPT')}
+      ${_th('name',   'Name')}
+      ${_th('path',   'Process Path')}
+      ${_th('area',   'Pick Area')}
+      ${_th('loc',    'Location')}
+      ${_th('batch',  'Batch')}
+      ${_th('exsd',   'Earliest ExSD')}
+      ${_th('status', 'Status')}
+      ${_th('act',    'Last Activity')}
+      ${_th('cont',   'Last Container')}
+      <th>Eğitimi Olanlar</th>
+    </tr></thead><tbody id="tk-tbody">${bodyHTML}</tbody></table>` : '';
+
+  colActive.innerHTML = activeHTML || '<div class="tk-empty">' + t('Aktif picker yok') + '</div>';
+
+  // v12.75: Tablo yeniden çizildi → artık görünmeyen pickerları seçimden düş, sonra
+  //   çubuğu/başlık kutusunu eşitle. Yoksa filtre değişince "3 seçili" der ama ekranda
+  //   o kişiler yoktur; Gönder'e basınca görünmeyen kişiye mesaj giderdi.
+  if (_tkSel.size) {
+    const gorunen = new Set(rows.map(r => r.login));
+    [..._tkSel].forEach(l => { if (!gorunen.has(l)) _tkSel.delete(l); });
+  }
+  _tkSyncSelBar();
 
   // Done sütunu: CPT geçişinden "toplaması biten" pickerları doldur (batch yerine geçiş bazlı)
   const _doneList = _trackCptTransitions(wfData, now);
@@ -16878,8 +17390,17 @@ function renderTracker(keys, sData, bData, wfData, pickerCounts, transitBatches,
       </div>`;
     });
 
-  colDone.innerHTML = doneHTML || '';
+  colDone.innerHTML = doneHTML || '<div class="tk-empty">' + t('Toplaması biten picker yok') + '</div>';
+  // v12.74: Çekmece butonundaki sayaç — çekmece kapalıyken de güncel kalmalı.
+  const _dcEl = document.getElementById('tk-done-count');
+  if (_dcEl) {
+    const _dc = Object.values(doneGroups).reduce((n, g) => n + g.pickers.length, 0);
+    _dcEl.textContent = _dc;
+    const _btn = document.getElementById('tk-done-btn');
+    if (_btn) _btn.style.opacity = _dc ? '1' : '.55';
+  }
 
+  _tkSyncStatBtns();   // v12.75: filtre kartlarının yanık/sönük durumu render ile eşitlensin
   if(_searchQuery) applyTabSearch(_searchQuery);  // v11.23: dropdown'ı tekrar açmadan filtreyi koru
 }
 
